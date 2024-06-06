@@ -1,0 +1,13 @@
+@import 'tailwindcss/base';
+@import '/fonts/iransans.css';
+@import '/abstracts';
+
+@import 'tailwindcss/components';
+@import 'components.css';
+
+@import 'tailwindcss/utilities';
+
+
+.shadow-item {
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
