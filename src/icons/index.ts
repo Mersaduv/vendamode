@@ -120,3 +120,7 @@ export { default as Support } from './svgs/support.svg'
 export { default as CashOnDelivery } from './svgs/cash-on-delivery.svg'
 export { default as Daysreturn } from './svgs/days-return.svg'
 export { default as OriginalProducts } from './svgs/original-products.svg'
+import user2 from './svgs/user-2.png';
+import user3 from './svgs/user-3.png';
+
+export { user2, user3 };

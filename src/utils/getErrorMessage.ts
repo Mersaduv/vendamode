@@ -3,10 +3,17 @@ import type { SerializedError } from '@reduxjs/toolkit'
 
 interface CustomError {
   status: number
-  data: string
+  data: {
+    message: string
+  }
 }
 
-const getErrorMessage = (error: FetchBaseQueryError | SerializedError): string =>
-  error && 'status' in error && 'data' in error ? (error as CustomError).data : ''
+const getErrorMessage = (error: FetchBaseQueryError | SerializedError): string => {
+  if (error && 'status' in error && 'data' in error) {
+    const customError = error as CustomError
+    return customError.data?.message || 'متاسفانه خطایی رخ داده است'
+  }
+  return 'متاسفانه خطایی رخ داده است'
+}
 
 export default getErrorMessage

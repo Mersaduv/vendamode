@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 
 import { ArrowLeft } from '@/icons'
 import { IconType } from 'react-icons'
+import { BsTriangleFill } from 'react-icons/bs'
 
 interface Props {
   children: React.ReactNode
@@ -13,20 +14,38 @@ interface Props {
 
 const BoxLink: React.FC<Props> = (props) => {
   // ? Props
-  const { path, name, icon } = props
+  const {path, name } = props
 
   // ? Assets
   const router = useRouter()
 
   // ? Render(s)
   return (
-    <Link
-      href={path}
-      className={`flex-center mx-4 text-gray-700 gap-x-1 py-4 text-xs font-medium md:text-sm}`}
-    >
-      <props.icon className={`icon ${router.pathname === path ? 'text-[#e90089] ' : ' text-gray-700'}`} />
-      <span className={`ml-auto mr-3 ${router.pathname === path ? 'text-[#e90089] ' : ' text-gray-700'}`}>{name}</span>
-    </Link>
+    <>
+      <Link
+        href={path}
+        className={`hidden md:flex-center mx-4 text-gray-700 gap-x-1 py-4 text-xs font-medium md:text-sm}`}
+      >
+        <props.icon className={`icon ${router.pathname === path ? 'text-[#e90089] ' : ' text-gray-700'}`} />
+        <span className={`ml-auto mr-3 ${router.pathname === path ? 'text-[#e90089] ' : ' text-gray-700'}`}>
+          {name}
+        </span>
+      </Link>
+      <Link
+        href={path}
+        className={`md:hidden relative py-1.5 w-[1100px] border rounded-lg flex items-center flex-col ${
+          router.pathname === path ? 'bg-[#e90089]' : ' text-gray-700'
+        }  gap-x-1  text-xs font-medium md:text-sm}`}
+      >
+        <props.icon className={`icon ${router.pathname === path ? 'text-white ' : ' text-gray-700'}`} />
+        <span className={`whitespace-nowrap ${router.pathname === path ? 'text-white ' : ' text-gray-700'}`}>
+          {name}
+        </span>
+        {router.pathname == path ? (
+          <BsTriangleFill className="rotate-180 text-[#e90089]  absolute -bottom-2.5" />
+        ) : null}
+      </Link>
+    </>
   )
 }
 

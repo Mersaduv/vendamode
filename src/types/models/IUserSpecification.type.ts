@@ -3,8 +3,9 @@ import { UserTypes, IRole } from '@/types'
 export interface IUserSpecification {
   userId: string
   userType: UserTypes
-  roles: IRole[] | null
+  roles: string[] | null
   isActive: boolean
+  gender: 'آقا' | 'بانو'
   imageScr: {
     id: string
     imageUrl: string
@@ -31,6 +32,7 @@ export interface IUserSpecification {
   nationalCode: string
   bankAccountNumber: string
   shabaNumber: string
+  email: string
   note: string
   created: string | null
   lastUpdated: string | null

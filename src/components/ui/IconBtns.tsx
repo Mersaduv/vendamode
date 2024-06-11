@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 
-import { ArrowRight, Delete, Edit, Plus } from '@/icons'
+import { ArrowRight, Close, Delete, Edit, Plus } from '@/icons'
 
 interface IconButtonType extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
 
@@ -34,6 +34,20 @@ export const BackIconButton: React.FC<IconButtonType> = (props) => {
         <ArrowRight className="h-8 w-8 rounded-2xl bg-gray-50 p-1 text-gray-500 active:scale-95 lg:h-9 lg:w-9 lg:p-1.5" />
       }
       onClick={() => back()}
+      {...props}
+    />
+  )
+}
+
+export const CloseIconButton: React.FC<IconButtonType> = (props) => {
+  // ? Render(s)
+  return (
+    <IconButton
+      title="برگشت"
+      icon={
+        <Close className="h-8 w-8 rounded-2xl bg-gray-50 p-1 text-gray-500 active:scale-95 lg:h-9 lg:w-9 lg:p-1.5" />
+      }
+      onClick={() => close()}
       {...props}
     />
   )

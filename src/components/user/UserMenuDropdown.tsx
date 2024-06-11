@@ -37,7 +37,7 @@ const UserMenuDropdown: React.FC<Props> = (props) => {
           <Menu.Item>
             <div className="transition-colors">
               <Link
-                href="/profile"
+                href="/admin"
                 className="flex-center justify-start gap-x-1 py-2.5 text-xs xl:text-sm ml-auto pr-4 text-gray-700 hover:text-[#e90089] font-medium hover:bg-gray-50"
               >
                 <div>
@@ -87,7 +87,7 @@ const UserMenuDropdown: React.FC<Props> = (props) => {
             </div>
           </Menu.Item>
 
-          <LogoutButton isShowText/>
+          <LogoutButton isShowDropDown/>
         </Menu.Items>
       </Transition>
     </Menu>

@@ -8,11 +8,15 @@ export const registerSchema = Yup.object().shape({
   password: Yup.string().required('رمز عبور لازم است ثبت شود').min(6, 'رمز عبور باید بیشتر از 5 کارکتر باشد'),
   confirmPassword: Yup.string()
     .required('تکرار کلمه عبور الزامی می باشد')
-    .oneOf([Yup.ref('password'),], 'تکرار کلمه عبور صحیح نیست'),
+    .oneOf([Yup.ref('password')], 'تکرار کلمه عبور صحیح نیست'),
 })
 
 export const logInSchema = Yup.object().shape({
-  mobileNumber: Yup.string().required('شماره موبایل لازم است وارد شود').min(11, 'شماره موبایل وارد شده باید 11 رقم باشد').max(11, 'شماره موبایل وارد شده باید 11 رقم باشد').matches(/^[0-9]+$/, 'شماره وارد شده معتبر نیست'),
+  mobileNumber: Yup.string()
+    .required('شماره موبایل لازم است وارد شود')
+    .min(11, 'شماره موبایل وارد شده باید 11 رقم باشد')
+    .max(11, 'شماره موبایل وارد شده باید 11 رقم باشد')
+    .matches(/^[0-9]+$/, 'شماره وارد شده معتبر نیست'),
   password: Yup.string().required('رمز عبور لازم است وارد شود').min(4, 'رمز عبور نباید کمتر از 4 کارکتر باشد!'),
 })
 
@@ -64,15 +68,25 @@ export const bannerSchema = Yup.object().shape({
 })
 
 export const addressSchema = Yup.object().shape({
-  province: Yup.object().shape({
-    name: Yup.string().required('لطفا استان محل زندگی خود را انتخاب کنید'),
-  }),
+  fullName: Yup.string().required('نام و نام خانوادگی الزامی است'),
+  mobileNumber: Yup.string()
+  .required('شماره موبایل الزامی است')
+  .matches(/^[0-9]{11}$/, 'شماره موبایل باید 11 رقم باشد'),
   city: Yup.object().shape({
-    name: Yup.string().required('لطفا شهرستان محل زندگی خود را انتخاب کنید'),
+  id: Yup.number().optional(),
+  name: Yup.string().required('نام شهر الزامی است'),
+  slug: Yup.string().optional(),
+  province_id: Yup.number().optional(),
   }),
-  street: Yup.string().required('نام خیابان نباید خالی باشد'),
-  postalCode: Yup.string().required('لطفا کد پستی خود را وارد کنید'),
-})
+  province: Yup.object().shape({
+  id: Yup.number().optional(),
+  name: Yup.string().required('نام استان الزامی است'),
+  slug: Yup.string().optional(),
+  }),
+  fullAddress: Yup.string().required('آدرس کامل الزامی است'),
+  postalCode: Yup.string()
+  .required('کد پستی الزامی است'),
+  });
 
 export const reviewSchema = Yup.object().shape({
   title: Yup.string().required('عنوان نظر نباید خالی باشد').min(4, 'عنوان نظر نباید کمتر از 4 حرف باشد'),
@@ -124,4 +138,15 @@ export const detailsSchema = Yup.object().shape({
     })
   ),
   optionsType: Yup.string().required('نوع انتخاب را مشخص کنید'),
+})
+
+export const profileFormSchema = Yup.object().shape({
+  mobileNumber: Yup.string().optional(),
+  gender: Yup.string().oneOf(['آقا', 'بانو']).required('جنسیت لازم است'),
+  firstName: Yup.string().required('نام لازم است'),
+  familyName: Yup.string().required('نام خانوادگی لازم است'),
+  nationalCode: Yup.string().optional(),
+  bankAccountNumber: Yup.string().optional(),
+  shabaNumber: Yup.string().optional(),
+  email: Yup.string().email('پست الکترونیک وارد شده معتبر نیست').optional(),
 })

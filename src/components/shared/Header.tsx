@@ -9,18 +9,18 @@ import { Sidebar,Navbar } from '@/components/shared'
 const Header = () => {
   return (
     <>
-      <header className="bg-white px-4 lg:shadow xl:fixed xl:inset-x-0 xl:top-0  xl:z-20">
+      <header className="bg-white px-4 shadow xl:inset-x-0 xl:top-0  xl:z-20 fixed w-full z-50">
       {/* <TextMarquee /> */}
-        <div className="container max-w-[1700px] lg:flex lg:py-2">
+        <div className="container items-center max-w-[1700px] lg:flex lg:py-2">
           <div className="inline-flex w-full items-center justify-between border-b lg:ml-8 lg:max-w-min lg:border-b-0">
             <Sidebar />
-            <Link passHref href="/">
-              VENDAMODE
+            <Link className='w-52' passHref href="/">
+               <img width={250} src={'/logo/Logo.png'} alt="Venda Mode" />
             </Link>
             <Question className="icon lg:hidden" />
           </div>
           <div className="inline-flex w-full items-center justify-between gap-x-10 border-b py-2 lg:border-b-0">
-            <div className="flex grow gap-x-7">
+            <div className="flex grow gap-x-7 lg:mr-8">
               <SearchModal />
             </div>
             <div className="inline-flex items-center gap-x-4">

@@ -37,8 +37,9 @@ function LoginPage() {
           isError={isError}
           isSuccess={isSuccess}
           error={error}
-          message={data?.message}
+          message={data?.data?.fullName}
           onSuccess={onSuccess}
+          isLogin
         />
       )}
       <main className="grid min-h-screen items-center">

@@ -1,4 +1,4 @@
-import { IUserSpecification } from '@/types'
+import { IAddress, IUserSpecification } from '@/types'
 
 export interface IUser {
   id: string
@@ -16,6 +16,7 @@ export interface IUser {
   wallet: boolean
   isActive: boolean
   userSpecification: IUserSpecification
+  addresses: IAddress[]
   created: string | null
   lastUpdated: string | null
 }

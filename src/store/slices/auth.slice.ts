@@ -17,7 +17,9 @@ const getToken = () => (typeof window !== 'undefined' && localStorage.getItem('t
 const getRefreshToken = () => (typeof window !== 'undefined' && localStorage.getItem('refreshToken')) || null
 const getUserInfo = () => {
   if (typeof window !== 'undefined' && localStorage.getItem('userInfo')) {
-    return JSON.parse(localStorage.getItem('userInfo') as string)
+   var data =JSON.parse(localStorage.getItem('userInfo') as string)
+   console.log(data , 'slice ------------')
+    return data
   }
   return null
 }

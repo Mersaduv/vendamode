@@ -16,12 +16,13 @@ interface Props {
   message?: string
   onSuccess?: () => void
   onError?: () => void
+  isLogin?: boolean
 }
 
 const HandleResponse: React.FC<Props> = (props) => {
   // ? Porps
-  const { isSuccess, isError, error, message, onSuccess, onError } = props
-
+  const { isSuccess, isError, error, message, onSuccess, onError, isLogin } = props
+  console.log(message)
   // ? Assets
   const dispatch = useAppDispatch()
 
@@ -33,7 +34,7 @@ const HandleResponse: React.FC<Props> = (props) => {
       dispatch(
         showAlert({
           status: 'success',
-          title: message || 'عملیات با موفقیت انجام شد',
+          title: isLogin ? `خوش آمدی ${message}` : message || 'عملیات با موفقیت انجام شد',
         })
       )
     }

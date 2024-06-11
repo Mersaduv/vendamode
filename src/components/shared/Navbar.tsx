@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useGetCategoriesQuery } from '@/services'
 import { BiCategory } from "react-icons/bi";
 
-import { ArrowLeft, Bars } from '@/icons'
+import { ArrowDown, ArrowLeft, Bars } from '@/icons'
 import { NavbarSkeleton } from '@/components/skeleton'
 import { ResponsiveImage } from '@/components/ui'
 
@@ -28,19 +28,19 @@ export default function Navbar() {
     setActiveMinCat(cat)
   }
   const hanldeDeactive = () => {
-    if (categories) setActiveMinCat(categories.filter((category) => category.level === 1)[0])
+    if (categories) setActiveMinCat(categories.filter((category) => category.level === 0)[0])
   }
 
   // ? Re-Renders
   useEffect(() => {
-    if (categories) setActiveMinCat(categories?.filter((category) => category.level === 1)[0])
+    if (categories) setActiveMinCat(categories?.filter((category) => category.level === 0)[0])
   }, [categories])
   if (categories) {
-    // console.log(categories?.filter((category) => category.level === 0))
+    // console.log(categories)
   }
   // ? Render
   return (
-    <div className="group hidden lg:block ">
+    <div className="group hidden lg:block">
       <button
         className="flex-center gap-x-1 px-2 text-sm"
         onMouseOver={() => setHover(true)}
@@ -49,7 +49,7 @@ export default function Navbar() {
         <BiCategory className="icon" />
         دسته‌بندی کالاها
       </button>
-      <div className={`fixed left-0 top-28 z-20 h-screen w-full bg-gray-400/50 ${hover ? 'block' : 'hidden'}`} />
+      <div className={`fixed left-0 z-20 h-screen w-full bg-gray-400/50 ${hover ? 'block' : 'hidden'}`} />
 
       <div
         className="absolute top-8 z-40 hidden w-full rounded-md border border-gray-100 bg-white shadow-lg group-hover:block"
@@ -65,7 +65,7 @@ export default function Navbar() {
               <NavbarSkeleton />
             ) : categories ? (
               categories
-                .filter((category) => category.level === 1)
+                .filter((category) => category.level === 0)
                 .map((levelOneCategory) => (
                   <li
                     key={levelOneCategory.id}
@@ -87,29 +87,29 @@ export default function Navbar() {
                 ))
             ) : null}
           </ul>
-          <ul className="flex w-full flex-wrap gap-10 px-2 py-4">
+          <ul className="flex w-full flex-wrap gap-10  py-4 bg-gray-100">
             {isLoading
               ? null
               : activeMinCat
               ? categories?.map((levelTwoCategory) => {
                   if (levelTwoCategory.parentCategoryId === activeMinCat.id) {
                     return (
-                      <li key={levelTwoCategory.id} className="h-fit">
+                      <li key={levelTwoCategory.id} className="h-fit ">
                         <Link
                           href={`/products?category=${levelTwoCategory.slug}`}
-                          className="flex-center mb-1 border-r-2 border-red-500 px-2 text-sm font-semibold tracking-wider text-gray-700"
+                          className="flex items-center justify-start mb-1 border-r-2 hover:text-[#e90089] border-[#e90089] px-1 text-sm font-semibold tracking-wider text-gray-700"
                         >
+                          <ArrowDown className="text-3xl -ml-1" />
                           {levelTwoCategory.name}
-                          <ArrowLeft className="icon" />
                         </Link>
                         <ul className="space-y-1">
                           {categories
                             .filter((category) => category.parentCategoryId === levelTwoCategory.id)
                             .map((levelThreeCategory) => (
-                              <li key={levelThreeCategory.id}>
+                              <li className='w-full' key={levelThreeCategory.id}>
                                 <Link
                                   href={`/products?category=${levelThreeCategory.slug}`}
-                                  className="px-3 text-xs font-medium text-gray-700"
+                                  className="w-full px-4 hover:text-[#e90089] text-xs font-medium text-gray-700"
                                 >
                                   {levelThreeCategory.name}
                                 </Link>

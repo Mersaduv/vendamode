@@ -12,20 +12,9 @@ import type {
   UserResult,
 } from './types'
 
-interface ApiError {
-  error: {
-    status: number
-    data: any
-  }
-  isUnhandledError: boolean
-  meta: {
-    request: any
-    response: any
-  }
-}
-
 import { setCredentials, clearCredentials, setCredentialsToken } from '@/store'
 import { getToken } from '@/utils'
+import { ApiError } from '@/types'
 
 export const authApiSlice = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -44,6 +33,7 @@ export const authApiSlice = baseApi.injectEndpoints({
                 token: data.data!.token,
                 refreshToken: data.data!.refreshToken,
                 userInfo: {
+                  roles: data.data?.roles,
                   mobileNumber: data.data!.mobileNumber,
                   fullName: data.data!.fullName,
                   expireTime: data.data!.expireTime,
@@ -68,12 +58,14 @@ export const authApiSlice = baseApi.injectEndpoints({
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled
+          console.log(data)
           if (data && data.data!.token && data.data!.refreshToken) {
             dispatch(
               setCredentials({
                 token: data.data!.token,
                 refreshToken: data.data!.refreshToken,
                 userInfo: {
+                  roles: data.data?.roles,
                   mobileNumber: data.data!.mobileNumber,
                   fullName: data.data!.fullName,
                   expireTime: data.data!.expireTime,
@@ -88,13 +80,21 @@ export const authApiSlice = baseApi.injectEndpoints({
         }
       },
     }),
-
-    logout: builder.query<MsgResult, undefined>({
+    logout: builder.mutation<MsgResult, void>({
       query: () => ({
         url: '/api/auth/logout',
         method: 'GET',
-        credentials: 'include',
       }),
+      async onQueryStarted(args, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled
+          // Clear credentials in redux store
+          dispatch(clearCredentials())
+          console.log("success" , (await queryFulfilled).data)
+        } catch (error) {
+          console.error('Failed to logout:', error)
+        }
+      },
     }),
 
     generateNewToken: builder.mutation<GenerateNewTokeResult, GenerateNewToken>({
@@ -135,7 +135,6 @@ export const authApiSlice = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled
           // save new data localStorage
-          console.log('getUserInfo ------------', data)
           window.localStorage.setItem('userInfo', JSON.stringify(data.data))
         } catch (error) {
           const err = error as ApiError
@@ -186,8 +185,7 @@ export const authApiSlice = baseApi.injectEndpoints({
           const { data } = await queryFulfilled
           // save new data localStorage
           console.log('getUserInfo ------------', data)
-          window.localStorage.setItem('userInfo', JSON.stringify(data.data))
-        } catch (error) {
+          window.localStorage.setItem('userInfo', JSON.stringify(data.data))    } catch (error) {
           const err = error as ApiError
           if (err.error.status === 401) {
             console.log('try to getting new token ------------', err.error.status)
@@ -227,7 +225,7 @@ export const authApiSlice = baseApi.injectEndpoints({
 
 export const {
   useLoginMutation,
-  useLogoutQuery,
+  useLogoutMutation,
   useRegisterMutation,
   useGenerateNewTokenMutation,
   useGetUserInfoQuery,

@@ -15,6 +15,7 @@ export type RegisterUserQuery = {
 }
 
 interface ResultBody {
+  roles: string[]
   mobileNumber: string
   fullName: string
   token: string

@@ -13,7 +13,7 @@ const DisplayError: React.FC<Props> = (props) => {
 
   // ? Render(s)
   return (
-    <div className="min-h-[29px] my-2">
+    <div className="min-h-[10px] my-2">
       <Transition
         show={!!errors}
         enter="transition-opacity duration-150"

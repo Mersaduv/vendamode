@@ -39,7 +39,7 @@ const Modal: React.FC<ModalProps> = (props) => {
   const effectClasses =
     effect === 'bottom-to-top'
       ? `
-  ${isShow ? 'bottom-0 lg:top-20' : '-bottom-full lg:top-60'} w-full h-full lg:h-fit lg:max-w-3xl 
+  ${isShow ? 'bottom-0 md:top-20' : '-bottom-full md:top-60'} w-full h-full md:h-fit md:max-w-3xl 
    fixed transition-all duration-700 left-0 right-0 mx-auto`
       : effect === 'ease-out'
         ? `
@@ -107,10 +107,10 @@ const Header: React.FC<HeaderProps> = (props) => {
 
   // ? Render(s)
   return (
-    <div className="flex items-center justify-between border-b-2 border-gray-200 pb-2">
-      <span className="text-sm">{children}</span>
-      <button onClick={onClose} className="p-1">
-        <Close className="icon" />
+    <div className="flex items-center justify-between border bg-[#fdebf6]  border-[#e90089] py-3.5 px-3 rounded-md">
+      <span className="text-sm font-normal text-[#e90089]">{children}</span>
+      <button onClick={onClose} className="">
+        <Close className="icon text-[#e90089]" />
       </button>
     </div>
   )

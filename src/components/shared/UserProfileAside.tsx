@@ -1,13 +1,15 @@
 import Link from 'next/link'
 
 import { Bag, Clock, Comment, Edit, Heart, Home, Location, Person, User } from '@/icons'
+import { HiChatAlt2 } from "react-icons/hi";
+
 import { BoxLink } from '@/components/ui'
 import { LogoutButton } from '@/components/user'
 import { useGetUserInfoMeQuery, useGetUserInfoQuery } from '@/services'
 
-const profilePaths = [
+export const profilePaths = [
   {
-    name: 'اطلاعات حساب کاربری',
+    name: 'حساب کاربری',
     Icon: User,
     path: '/profile',
   },
@@ -19,7 +21,7 @@ const profilePaths = [
   {
     name: 'آدرس‌ها',
     Icon: Location,
-    path: '/profile/addresses',
+    path: '/profile/address',
   },
   {
     name: 'علاقه مندی ها',
@@ -28,8 +30,8 @@ const profilePaths = [
   },
   {
     name: 'تیکت های پشتیبانی',
-    Icon: Heart,
-    path: '/profile/lists',
+    Icon: HiChatAlt2,
+    path: '/profile/tickets',
   },
   {
     name: 'دیدگاه‌ها',
@@ -49,7 +51,7 @@ function UserProfileAside() {
   const { data, isLoading } = useGetUserInfoMeQuery()
   // ? Render(s)
   return (
-    <aside className="sticky mt-6 lg:top-6 lg:rounded-md lg:border-gray-200 lg:pt-4 xl:top-[136px]">
+    <aside className="sticky mt-6 md:rounded-md md:pt-4 md:top-[136px]">
       <div className="flex items-center rounded-lg shadow-item justify-between px-5 py-2 ">
         <Person className="h-12 w-12" />
         <div className="ml-auto mr-3 flex flex-col gap-y-1">

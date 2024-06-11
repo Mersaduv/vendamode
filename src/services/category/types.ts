@@ -8,6 +8,8 @@ export type CategoriesResult = {
 }
 export type GetCategoriesResult = ServiceResponse<CategoriesResult>
 
+export type GetCategoriesTreeResult = ServiceResponse<ICategory[]>
+
 export type GetSingleCategoryResult = ServiceResponse<ICategory>
 export type UpdateCategoryQuery = ICategoryForm
 export type CreateCategoryQuery = ICategoryForm

@@ -40,7 +40,7 @@ const AppContent: FC<AppContentProps> = ({ Component, pageProps }) => {
     <>
       <Component {...pageProps} />
       {!asPath.includes('/products?category') ? <PageTransitionLoading /> : null}
-      {/* <Alert /> */}
+      <Alert />
     </>
   )
 }

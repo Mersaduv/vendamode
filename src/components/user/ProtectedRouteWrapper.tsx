@@ -1,8 +1,8 @@
 import { useRouter } from 'next/router'
-
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import { useAppSelector } from '@/hooks'
+import { useEffect } from 'react'
 
 interface Props {
   children: React.ReactNode
@@ -18,19 +18,28 @@ const ProtectedRouteWrapper: React.FC<Props> = (props) => {
 
   // ? Get UserInfo
   const { userInfo } = useAppSelector((state) => state.auth)
-  console.log(userInfo, '---------------')
-  if (userInfo) {
-    // Check if any of the user's roles are in the allowedRoles array
-    const hasAccess = userInfo.roles?.some((role: string) => allowedRoles.includes(role))
+  // console.log(userInfo, '---------------')
 
-    if (hasAccess) {
-      return <>{children}</>
+  useEffect(() => {
+    if (userInfo) {
+      // Check if any of the user's roles are in the allowedRoles array
+      const hasAccess = userInfo.roles?.some((role: string) => allowedRoles.includes(role))
+
+      if (!hasAccess) {
+        asPath.includes('/admin')
+          ? push(`/admin/authentication/login?redirectTo=${asPath}`)
+          : push(`/authentication/login?redirectTo=${asPath}`)
+      }
+    } else {
+      asPath.includes('/admin')
+        ? push(`/admin/authentication/login?redirectTo=${asPath}`)
+        : push(`/authentication/login?redirectTo=${asPath}`)
     }
-  }
+  }, [userInfo, allowedRoles, asPath, push])
 
-  asPath.includes('/admin')
-    ? push(`/admin/authentication/login?redirectTo=${asPath}`)
-    : push(`/authentication/login?redirectTo=${asPath}`)
+  if (userInfo && userInfo.roles?.some((role: string) => allowedRoles.includes(role))) {
+    return <>{children}</>
+  }
 
   return null
 }

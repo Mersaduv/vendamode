@@ -1,7 +1,6 @@
 import { roles } from '@/utils'
-
 import { ProtectedRouteWrapper } from '@/components/user'
-import { Header, UserProfileAside } from '@/components/shared'
+import { UserProfileAside } from '@/components/shared'
 
 interface Props {
   children: React.ReactNode
@@ -9,14 +8,18 @@ interface Props {
 
 const ProfileLayout: React.FC<Props> = ({ children }) => {
   return (
+    <>
     <ProtectedRouteWrapper allowedRoles={[roles.ADMIN, roles.SUPERADMIN, roles.USER]}>
-      <div className="lg:container lg:flex lg:max-w-7xl lg:gap-x-4 lg:px-3 xl:mt-28">
-        <div className="hidden lg:block">
+      <div className="lg:container md:flex md:max-w-7xl md:gap-x-4 md:px-3 pt-40 md:pt-32">
+        <div className="hidden md:block">
           <UserProfileAside />
         </div>
-        <div className="h-fit flex-1 py-4 lg:mt-6 lg:rounded-md lg:border lg:border-gray-200 lg:py-8">{children}</div>
+        <div className="h-fit flex-1 md:mt-10 rounded-md shadow-item ">
+          {children}
+        </div>
       </div>
     </ProtectedRouteWrapper>
+    </>
   )
 }
 export default ProfileLayout
