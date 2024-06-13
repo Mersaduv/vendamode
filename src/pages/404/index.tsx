@@ -10,7 +10,7 @@ function NotFoundPage() {
     <ClientLayout>
       <main className="flex flex-col items-center justify-center gap-y-6 py-8 xl:mt-28">
         <Head>
-          <title>دیجی‌کالا | 404</title>
+          <title>وندامد | 404</title>
         </Head>
         <p className="text-base font-semibold text-black">صفحه‌ای که دنبال آن بودید پیدا نشد!</p>
         <ArrowLink path="/">صفحه اصلی</ArrowLink>

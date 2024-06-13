@@ -1,5 +1,5 @@
 export interface ISlider {
-  _id: string
+  id: string
   categoryId: string
   image: {
     imageUrl: string

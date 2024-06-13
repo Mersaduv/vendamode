@@ -19,3 +19,4 @@ export { default as PageContainer } from './PageContainer'
 
 export * from './Buttons'
 export * from './IconBtns'
+export * from './Checkbox'

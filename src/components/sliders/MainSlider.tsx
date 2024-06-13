@@ -18,7 +18,7 @@ const MainSlider: React.FC<Props> = (props) => {
 
   const SliderImage = ({ item }: { item: ISlider }) => (
     <ResponsiveImage
-      dimensions="w-full h-64 md:h-72 lg:h-[400px]"
+      dimensions="w-full h-64 md:h-[480px] lg:h-[520px] xl:h-[560px]"
       imageStyles="object-cover object-[72%] lg:object-center "
       src={item.image.imageUrl}
       alt={item.title}
@@ -31,7 +31,7 @@ const MainSlider: React.FC<Props> = (props) => {
   if (data?.length === 0) return null
 
   return (
-    <section className="lg:mx-3">
+    <section className="">
       <Swiper
         pagination={{ clickable: true }}
         autoplay={{
@@ -39,7 +39,7 @@ const MainSlider: React.FC<Props> = (props) => {
           disableOnInteraction: false,
         }}
         modules={[Pagination, Autoplay]}
-        className="mySwiper overflow-hidden lg:rounded-2xl"
+        className="mySwiper overflow-hidden"
       >
         {data
           .filter((item) => item.isPublic)

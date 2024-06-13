@@ -11,3 +11,41 @@
 .shadow-item {
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
 }
+
+.line-through-a {
+    text-decoration-line: line-through; 
+}
+
+.shadow-product {
+    box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;
+}
+.shadow-product:hover {
+    box-shadow: rgba(233, 0, 137, 0.5) 0px 2px 4px 0px, rgba(233, 0, 137, 0.7) 0px 2px 16px 0px;
+}
+  
+.custom-next, .custom-prev {
+    background-color: #ff0000;
+}
+  
+.custom-next {
+    right: 10px;
+}
+  
+.custom-prev {
+    left: 10px;
+}
+.custom-next:hover, .custom-prev:hover {
+    background-color: #555;
+}
+  
+.swiper-button-next {
+    background-color: #ff0000;
+color: red;
+}
+
+@media (min-width: 320px) {
+    * {
+      scrollbar-width: thin; /* none | auto  */
+      scrollbar-color: #b7bdc2 transparent;
+    }
+}

@@ -1,3 +1,5 @@
 export { default as SidebarSkeleton } from './SidebarSkeleton'
 export { default as NavbarSkeleton } from './NavbarSkeleton'
 export { default as AddressSkeleton } from './AddressSkeleton'
+export { default as ProductSkeleton } from './ProductSkeleton'
+export { default as SubCategoriesSkeleton } from './SubCategoriesSkeleton'

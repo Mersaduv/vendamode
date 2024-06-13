@@ -30,3 +30,14 @@ export type AddressFormBody = {
   fullAddress: string
   postalCode: string
 }
+
+
+export interface IBrandForm {
+  id?: string;
+  name: string;
+  Thumbnail: FileList;
+  inSlider: boolean;
+  isActive: boolean;
+  Description: number;
+  description: string;
+}

@@ -44,7 +44,7 @@ function LoginPage() {
       )}
       <main className="grid min-h-screen items-center">
         <Head>
-          <title>وندامود | ورود</title>
+          <title>وندامد | ورود</title>
         </Head>
         <section className="container max-w-xl space-y-6 px-12 py-6 lg:rounded-lg lg:border-gray-100">
           <Link className="flex justify-center" passHref href="/">

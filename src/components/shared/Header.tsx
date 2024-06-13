@@ -9,9 +9,9 @@ import { Sidebar,Navbar } from '@/components/shared'
 const Header = () => {
   return (
     <>
-      <header className="bg-white px-4 shadow xl:inset-x-0 xl:top-0  xl:z-20 fixed w-full z-50">
+      <header className="bg-white px-4 shadow xl:inset-x-0 xl:top-0 fixed w-full z-[99]">
       {/* <TextMarquee /> */}
-        <div className="container items-center max-w-[1700px] lg:flex lg:py-2">
+        <div className="container z-[99] items-center max-w-[1700px] lg:flex lg:py-2">
           <div className="inline-flex w-full items-center justify-between border-b lg:ml-8 lg:max-w-min lg:border-b-0">
             <Sidebar />
             <Link className='w-52' passHref href="/">
@@ -30,7 +30,7 @@ const Header = () => {
             </div>
           </div>
         </div>
-        <div className="relative mx-auto flex max-w-[1700px] justify-between py-2">
+        <div className="relative mx-auto flex max-w-[1700px] justify-between py-4">
           <Navbar />
           {/* <AddressBar /> */}
         </div>

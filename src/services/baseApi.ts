@@ -7,7 +7,7 @@ const apiSlice = createApi({
     timeout: 60000,
   }),
 
-  tagTypes: ['User', 'Category'],
+  tagTypes: ['User', 'Category', 'Product','Brand'],
   endpoints: (builder) => ({}),
 })
 
@@ -16,7 +16,6 @@ export default apiSlice
 // import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/dist/query/react'
 // import { FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 // import type { BaseQueryFn, FetchArgs, FetchBaseQueryMeta } from '@reduxjs/toolkit/query';
-
 
 // const baseQuery = fetchBaseQuery({
 //   baseUrl: 'https://localhost:7004',
@@ -69,4 +68,3 @@ export default apiSlice
 // })
 
 // export default apiSlice
-
