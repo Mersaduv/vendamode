@@ -1,0 +1,24 @@
+.swiper-button-prev,
+.swiper-button-next {
+  color: #0ea5e9 !important;
+  background: #ffffff;
+  opacity: 50%;
+  border-radius: 5px;
+  width: 2rem !important;
+  height: 2rem !important;
+  z-index: 99;
+}
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  font-size: 20px !important;
+}
+
+
+.swiper-button-prev {
+  margin-right: 150px !important;
+  }
+@media (max-width: 450px) {
+  .swiper-button-prev {
+    margin-right: 10px !important;
+    }
+}
