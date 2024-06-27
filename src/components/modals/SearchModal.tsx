@@ -61,7 +61,7 @@ const SearchModal: React.FC<Props> = (props) => {
   // ? Render(s)
   return (
     <>
-      <button onClick={searchModalHanlders.open} className="flex max-w-lg grow rounded-md bg-zinc-200/80 items-center">
+      <button onClick={searchModalHanlders.open} className="flex max-w-lg grow rounded-md bg-zinc-200/80 items-center transition duration-700 ease-in-out">
         <Search className="icon m-2" />
         <span className='mr-'>جستجو</span>
       </button>
@@ -71,7 +71,7 @@ const SearchModal: React.FC<Props> = (props) => {
           onClose={searchModalHanlders.close}
           className="flex h-screen flex-col gap-y-3 bg-white py-3 pl-2 pr-4 md:rounded-lg lg:h-fit"
         >
-          <Modal.Header onClose={searchModalHanlders.close}>جستسجو</Modal.Header>
+          <Modal.Header notBar onClose={searchModalHanlders.close}>جستجو محصول</Modal.Header>
           <Modal.Body>
             <div className="my-3 flex flex-row-reverse rounded-md bg-zinc-200/80">
               <button type="button" className="p-2.5" onClick={handleRemoveSearch}>

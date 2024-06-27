@@ -8,23 +8,25 @@ import { ProtectedRouteWrapper } from '@/components/user'
 import { DashboardAdminAside } from '@/components/shared'
 
 import type { NextPage } from 'next'
+import Link from 'next/link'
+import { DashboardLayout } from '@/components/Layouts'
 
 const AdminPage: NextPage = () => {
   return (
     <ProtectedRouteWrapper allowedRoles={[roles.ADMIN, roles.SUPERADMIN]}>
-      <div className="lg:container lg:flex lg:max-w-7xl lg:gap-x-4 lg:px-3 ">
+      <div className="">
         <Head>
           <title>وندامد | مدیریت</title>
         </Head>
-
-        <div>
-          <DashboardAdminAside />
-        </div>
-        <div className="hidden h-fit py-6 lg:mt-6 lg:inline-block lg:flex-1 lg:rounded-md lg:border lg:border-gray-400">
-          <section className="py-20">
-      چارت و انالیز..
-          </section>
-        </div>
+        <DashboardLayout>
+          <div className=" flex">
+            <div>
+            </div>
+            <div className="">
+              <section className="py-20">چارت و انالیز..</section>
+            </div>
+          </div>
+        </DashboardLayout>
       </div>
     </ProtectedRouteWrapper>
   )

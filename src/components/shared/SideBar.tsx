@@ -7,13 +7,14 @@ import { Disclosure } from '@headlessui/react'
 import useDisclosure from '@/hooks/useDisclosure'
 import { SidebarSkeleton } from '@/components/skeleton'
 import { ArrowDown, ArrowLeft, Bars, LogoPersian } from '@/icons'
+import { BiCategory } from 'react-icons/bi'
 
 export default function Sidebar() {
   // ? Assets
   const [isSidebar, sidebarHandlers] = useDisclosure()
 
   // ? Get Categories Query
-  const { isLoading , data } = useGetCategoriesQuery(undefined, {
+  const { isLoading, data } = useGetCategoriesQuery(undefined, {
     selectFromResult: ({ data, isLoading }) => ({
       data,
       isLoading,
@@ -28,8 +29,6 @@ export default function Sidebar() {
   useEffect(() => {
     if (isSidebar) document.body.style.overflow = 'hidden'
     else document.body.style.overflow = 'unset'
-
-    
   }, [isSidebar])
 
   if (data != undefined) {
@@ -39,7 +38,7 @@ export default function Sidebar() {
   return (
     <>
       <button className="p-1 lg:hidden" type="button" onClick={sidebarHandlers.open}>
-        <Bars className="icon" />
+        <BiCategory className="text-2xl" />
       </button>
       <div
         className={`fixed top-0 z-10 h-screen w-full duration-200 lg:hidden ${isSidebar ? 'right-0' : '-right-full'} `}
@@ -47,7 +46,7 @@ export default function Sidebar() {
         <div
           className={`${
             isSidebar ? 'visible opacity-100 delay-200 duration-300' : 'invisible opacity-0 '
-          }  z-10  h-full w-full bg-gray-100/50`}
+          } z-10  h-full w-full bg-gray-100/50`}
           onClick={sidebarHandlers.close}
         />
 
@@ -78,7 +77,6 @@ export default function Sidebar() {
                           />
                         </Disclosure.Button>
                         <Disclosure.Panel className=" !mt-0 bg-gray-100 text-sm text-gray-500">
-
                           {category?.childCategories &&
                             category.childCategories.map((category) => (
                               <Disclosure key={category.id}>

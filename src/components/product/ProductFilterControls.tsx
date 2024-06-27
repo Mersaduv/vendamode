@@ -6,11 +6,12 @@ import { useChangeRoute, useDebounce, useDisclosure } from '@/hooks'
 import { ArrowDown, Close, Search, Toman } from '@/icons'
 import { CustomCheckbox } from '@/components/ui'
 
-import { QueryParams } from '@/types'
+import { IBrand, QueryParams } from '@/types'
 import PriceRange from './PriceRange'
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react'
 import { digitsEnToFa } from '@persian-tools/persian-tools'
 import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io'
+import { useGetBrandsQuery } from '@/services'
 
 interface Props {
   mainMaxPrice: number | undefined
@@ -103,48 +104,50 @@ const ProductFilterControls: React.FC<Props> = (props) => {
   }, [mainMinPrice, mainMaxPrice, minPriceQuery, maxPriceQuery])
 
   //search filter
-  const [search, setSearch] = useState('')
-  const searchRef = useRef<HTMLInputElement | null>(null)
-  const [isShowSearchModal, searchModalHanlders] = useDisclosure()
-  const debouncedSearch = useDebounce(search, 1200)
+  //..................
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filteredBrands, setFilteredBrands] = useState<IBrand[]>([])
+  // ? brand Query
+  const { data } = useGetBrandsQuery({
+    page: 1,
+    pageSize: 15,
+  })
 
-  // ? Search Products Query
-  // const { data, ...productQueryProps } = useGetBrandsQuery(
-  //   {
-  //     search,
-  //   },
-  //   { skip: !debouncedSearch }
-  // )
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([])
 
-  // ? Re-Renders
-  //* Reset Search
   useEffect(() => {
-    if (!isShowSearchModal) {
-      setSearch('')
+    if (data?.data?.data) {
+      setFilteredBrands(data.data.data)
     }
-  }, [isShowSearchModal])
+  }, [data])
 
-  //* Use useEffect to set focus after a delay when the modal is shown
   useEffect(() => {
-    if (isShowSearchModal) {
-      const timeoutId = setTimeout(() => {
-        searchRef.current?.focus()
-      }, 100)
-
-      return () => clearTimeout(timeoutId)
+    if (data?.data?.data) {
+      const filtered = data.data.data.filter((brand) => brand.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      setFilteredBrands(filtered)
     }
-  }, [isShowSearchModal])
+  }, [searchTerm, data])
 
-  // ? Handlers
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value)
+  const handleBrandChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value, checked } = e.target
+    if (checked) {
+      setSelectedBrands([...selectedBrands, value])
+    } else {
+      setSelectedBrands(selectedBrands.filter((brand) => brand !== value))
+    }
   }
 
-  const handleRemoveSearch = () => {
-    setSearch('')
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value)
   }
 
-
+  useEffect(() => {
+    if (selectedBrands.length > 0) {
+      handleChangeRoute({
+        brands: selectedBrands.length ? selectedBrands.join(',') : '',
+      })
+    }
+  }, [selectedBrands])
 
   // ? Render(s)
   return (
@@ -191,7 +194,7 @@ const ProductFilterControls: React.FC<Props> = (props) => {
                                   className="w-3/4 border-b border-gray-200 pt-3 text-xl outline-none rounded-md text-center"
                                   style={{ direction: 'ltr' }}
                                   name="minPrice"
-                                  value={price.minPrice}
+                                  value={digitsEnToFa(price.minPrice ?? 0)}
                                   onChange={handlefilter}
                                 />
                               </div>
@@ -202,7 +205,7 @@ const ProductFilterControls: React.FC<Props> = (props) => {
                                   className="w-3/4 border-b pt-3 border-gray-200 px-1 rounded-md text-center text-xl outline-none"
                                   style={{ direction: 'ltr' }}
                                   name="maxPrice"
-                                  value={price.maxPrice}
+                                  value={digitsEnToFa(price.maxPrice ?? 0)}
                                   onChange={handlefilter}
                                 />
                               </div>
@@ -213,8 +216,6 @@ const ProductFilterControls: React.FC<Props> = (props) => {
                               onPriceChange={(newPrice) => setPrice(newPrice)}
                             />
                           </div>
-
-                          {/* brand filter */}
                         </div>
                       )}
                     </Menu.Item>
@@ -253,17 +254,30 @@ const ProductFilterControls: React.FC<Props> = (props) => {
                       {({ active }) => (
                         <div>
                           <div className="my-3 flex flex-row-reverse rounded-xl border">
-                            <button type="button" className="p-2.5" onClick={handleRemoveSearch}>
+                            <button type="button" className="p-2.5" onClick={() => setSearchTerm('')}>
                               <Close className="h-4 w-4 text-gray-700 md:h-5 md:w-5" />
                             </button>
                             <input
                               type="text"
                               placeholder="جستجو در برند"
                               className="input grow bg-transparent p-1 text-right outline-none border-none placeholder:text-sm placeholder:font-light placeholder:pr-1.5"
-                              ref={searchRef}
-                              value={search}
-                              onChange={handleChange}
+                              value={searchTerm}
+                              onChange={handleSearchChange}
                             />
+                          </div>
+                          <div className="overflow-auto max-h-[105px]">
+                            {filteredBrands.map((brand) => (
+                              <div className="mb-1.5 flex justify-between px-4" key={brand.id}>
+                                <label className="ml-2">{brand.name}</label>
+                                <input
+                                  className="bg-gray-200 border-none rounded checked:bg-[#e90089]"
+                                  type="checkbox"
+                                  value={brand.id}
+                                  onChange={handleBrandChange}
+                                  checked={selectedBrands.includes(brand.id)}
+                                />
+                              </div>
+                            ))}
                           </div>
                         </div>
                       )}

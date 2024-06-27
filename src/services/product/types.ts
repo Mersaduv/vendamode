@@ -11,6 +11,9 @@ type ProductsResult = {
 
 export type GetProductsResult = ServiceResponse<ProductsResult>
 export type GetProductsQuery = QueryParams
+
+export type GetProductResult = ServiceResponse<IProduct>
+export type GetSimilarProductResult = ServiceResponse<IProduct[]>
 // export type GetSingleProductResult = IProduct
 // export type CreateProductQuery = { body: IProductForm }
 // export type UpdateProductQuery = { body: IProduct; id: string }

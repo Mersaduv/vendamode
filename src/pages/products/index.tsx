@@ -31,12 +31,12 @@ const ProductsHome: NextPage = () => {
       </Head>
 
       <ClientLayout>
-        <main className="lg:container lg:max-w-[1700px] lg:px-3 xl:mt-10">
+        <main className="lg:container overflow-y-auto lg:max-w-[1900px] lg:px-3 xl:mt-10">
           <ProductSubCategoriesList category={category} />
 
           <div className="px-1 lg:flex lg:gap-x-0 xl:gap-x-3">
             {!productsQueryProps.isLoading && (
-              <aside className="hidden lg:sticky lg:top-40 lg:mt-6 lg:block lg:h-fit lg:w-[400px] lg:rounded-md lg:border-gray-200 lg:px-3 lg:py-4 ">
+              <aside className="hidden lg:sticky lg:top-40 lg:mt-6 lg:block lg:h-fit max-w-md w-[40%] lg:rounded-md lg:border-gray-200 lg:px-3 lg:py-4 ">
                 <ProductFilterControls
                   mainMaxPrice={data?.data?.mainMaxPrice}
                   mainMinPrice={data?.data?.mainMinPrice}
@@ -46,7 +46,7 @@ const ProductsHome: NextPage = () => {
             <div id="_products" className="mt-3 w-full p-4 ">
               {/* Filters & Sort */}
               <div className=" divide-gray-300/90">
-                <div className="flex gap-x-3 py-2">
+                {/* <div className="flex gap-x-3 py-2">
                   <div className="block lg:hidden">
                     {!productsQueryProps.isLoading && (
                       <FilterModal mainMaxPrice={data?.data?.mainMaxPrice} mainMinPrice={data?.data?.mainMinPrice} />
@@ -57,6 +57,19 @@ const ProductsHome: NextPage = () => {
                   <ProductSort />
                   </div>
          
+                </div> */}
+                <div className="flex gap-x-3 py-2 flex-col">
+                <div className="w-full lg:flex flex-col hidden">
+                      <div className="mb-6 text-gray-400 text-sm -mt-2 md:-mt-0 md:text-lg md:text-gray-800">
+                        دسته بندی محصولات : <span className="text-[#00c3e1] md:font-bold">وندامد</span>
+                      </div>
+                      <ProductSort />
+                    </div>
+                  <div className="block lg:hidden">
+                    {!productsQueryProps.isLoading && (
+                      <FilterModal mainMaxPrice={data?.data?.mainMaxPrice} mainMinPrice={data?.data?.mainMinPrice} />
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex justify-end py-1 text-end">
@@ -71,7 +84,7 @@ const ProductsHome: NextPage = () => {
                 emptyComponent={<EmptyCustomList />}
               >
                 {data && data.data!.pagination.data!.length > 0 && (
-                  <section className="space-y-3 divide-y divide-gray-300 sm:grid sm:grid-cols-2 sm:space-y-0 sm:divide-y-0 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                  <section className="grid grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-8">
                     {data?.data?.pagination.data!.map((item) => (
                       <ProductCard product={item} key={item.id} />
                     ))}

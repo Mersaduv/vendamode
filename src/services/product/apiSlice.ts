@@ -9,7 +9,6 @@ export const productApiSlice = baseApi.injectEndpoints({
     getProducts: builder.query<GetProductsResult, GetProductsQuery>({
       query: ({ ...params }) => {
         const queryParams = generateQueryParams(params)
-        console.log(queryParams)
         return {
           url: `/api/product-list?${queryParams}`,
           method: 'GET',
@@ -43,14 +42,14 @@ export const productApiSlice = baseApi.injectEndpoints({
     //   invalidatesTags: ['Product'],
     // }),
 
-    // createProduct: builder.mutation<MsgResult, CreateProductQuery>({
-    //   query: ({ body }) => ({
-    //     url: `/api/products`,
-    //     method: 'POST',
-    //     body,
-    //   }),
-    //   invalidatesTags: ['Product'],
-    // }),
+    createProduct: builder.mutation<MsgResult, FormData>({
+      query: (body) => ({
+        url: `/api/products`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Product'],
+    }),
 
     // updateProduct: builder.mutation<MsgResult, UpdateProductQuery>({
     //   query: ({ id, body }) => ({
@@ -63,4 +62,4 @@ export const productApiSlice = baseApi.injectEndpoints({
   }),
 })
 
-export const { useGetProductsQuery } = productApiSlice
+export const { useGetProductsQuery , useCreateProductMutation } = productApiSlice

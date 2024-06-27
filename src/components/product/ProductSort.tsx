@@ -31,7 +31,7 @@ const ProductSort: React.FC<Props> = () => {
   // ? Render(s)
   return (
     <>
-      <div className="lg:hidden">
+      <div className="hidden">
         <button type="button" className="flex items-center gap-x-1" onClick={sortHandlers.open}>
           <SortIcon className="icon h-6 w-6" />
           <span>{sorts[sortQuery - 1].name}</span>
@@ -63,12 +63,12 @@ const ProductSort: React.FC<Props> = () => {
           </Modal.Content>
         </Modal>
       </div>
-      <div className="hidden lg:flex lg:items-center w-full lg:gap-x-4 bg-[#f7f5f8] py-3 border-2 rounded-lg px-2">
+      <div className="flex lg:items-center w-full lg:gap-x-4 bg-[#f7f5f8] py-2 sm:py-3 border-2 rounded-lg px-2 mb-3 gap-x-1">
 
         {sorts.map((item, i) => (
           <button
             key={i}
-            className={`p-3 rounded text-sm ${sortQuery === item.value ? 'text-white bg-[#3F3A42]' : 'text-gray-600'}`}
+            className={`text-xs whitespace-nowrap p-1 sm:p-2 md:p-3 rounded border border-transparent hover:border-gray-400 md:text-base ${sortQuery === item.value ? 'text-white bg-[#3F3A42]' : 'text-gray-600'}`}
             type="button"
             name="sort"
             onClick={() => handleSortChange(item)}

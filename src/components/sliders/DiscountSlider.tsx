@@ -37,9 +37,6 @@ const DiscountSlider: React.FC<Props> = (props) => {
   )
 
   // ? Render(s)
-  if (products) {
-    console.log(products)
-  }
   return (
     <>
       <section className="hidden sm:flex absolute w-full -top-24 py-2.5">

@@ -1,72 +1,350 @@
 import Link from 'next/link'
 
-import { Bag, Category, Comment, Image, Location, Logo, Plus, Save, Slider, Users } from '@/icons'
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight2,
+  ArrowUp,
+  Bag,
+  Category,
+  Comment,
+  Image,
+  Location,
+  Logo,
+  Plus,
+  Save,
+  Slider,
+  Users,
+} from '@/icons'
+import { LiaAdSolid } from 'react-icons/lia'
+import { MdOutlineAdsClick } from 'react-icons/md'
+import { GrGallery } from 'react-icons/gr'
+import { PiUserDuotone } from 'react-icons/pi'
+import { AiTwotoneMail } from 'react-icons/ai'
+import { FaCalculator } from 'react-icons/fa'
+import { IoSettings } from 'react-icons/io5'
+import { HiMail } from 'react-icons/hi'
+
 import { BoxLink } from '@/components/ui'
 import { LogoutButton } from '@/components/user'
+import { BiGrid, BiSolidGridAlt, BiWindow } from 'react-icons/bi'
+import { IoCart } from 'react-icons/io5'
+import { TbPointFilled } from 'react-icons/tb'
+import { RiShoppingBag2Fill } from 'react-icons/ri'
+import { IconType } from 'react-icons'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
+import { IoMdDocument } from 'react-icons/io'
 
-const profilePaths = [
+interface ProfilePath {
+  id: number
+  name: string
+  Icon: any
+  subItem?: {
+    id: number
+    name: string
+    Icon: any
+    path: string
+  }[]
+  path?: string
+  pathName?: string
+}
+
+const profilePaths: ProfilePath[] = [
+  { id: 1, name: 'پیشخوان', Icon: BiSolidGridAlt, path: '/admin' },
+  { id: 1, name: 'سفارشات', Icon: IoCart, path: '/admin/orders' },
   {
-    name: 'محصول جدید',
-    Icon: Plus,
-    path: '/admin/products/create',
-  },
-  {
+    id: 1,
     name: 'محصولات',
-    Icon: Save,
-    path: '/admin/products',
+    Icon: RiShoppingBag2Fill,
+    subItem: [
+      {
+        id: 1,
+        name: 'محصول جدید',
+        Icon: TbPointFilled,
+        path: '/admin/products/create',
+      },
+      {
+        id: 1,
+        name: 'همه محصولات',
+        Icon: TbPointFilled,
+        path: '/admin/products',
+      },
+    ],
+    pathName: '/admin/products/create' || '/admin/products',
   },
   {
-    name: 'سفارشات',
-    Icon: Bag,
-    path: '/admin/orders',
+    id: 2,
+    name: 'تبلیغات',
+    Icon: MdOutlineAdsClick,
+    subItem: [
+      {
+        id: 2,
+        name: 'صفحه اصلی',
+        Icon: TbPointFilled,
+        path: '/admin/sub',
+      },
+      {
+        id: 2,
+        name: 'پیشنهاد شگفت انگیز',
+        Icon: TbPointFilled,
+        path: '/admin/sub',
+      },
+      {
+        id: 2,
+        name: 'هدایا',
+        Icon: TbPointFilled,
+        path: '/admin/sub',
+      },
+      {
+        id: 2,
+        name: 'کوپن تخفیف',
+        Icon: TbPointFilled,
+        path: '/admin/sub',
+      },
+    ],
   },
   {
-    name: 'دسته بندی ها',
-    Icon: Category,
-    path: '/admin/categories',
+    id: 3,
+    name: 'مقالات',
+    Icon: IoMdDocument,
+    subItem: [
+      {
+        id: 3,
+        name: 'مقاله جدید',
+        Icon: TbPointFilled,
+        path: '/admin/article',
+      },
+      {
+        id: 3,
+        name: 'همه مقالات',
+        Icon: TbPointFilled,
+        path: '/admin/article',
+      },
+    ],
   },
+  { id: 4, name: 'گالری', Icon: GrGallery, path: '/admin/categories' },
   {
-    name: 'مشخصات دسته بندی ها',
-    Icon: Location,
-    path: '/admin/details/categories',
-  },
-  {
+    id: 5,
     name: 'کاربران',
-    Icon: Users,
-    path: '/admin/users',
+    Icon: PiUserDuotone,
+    subItem: [
+      {
+        id: 5,
+        name: 'کاربر جدید',
+        Icon: TbPointFilled,
+        path: '/admin/users',
+      },
+      {
+        id: 5,
+        name: 'همه کاربران',
+        Icon: TbPointFilled,
+        path: '/admin/users',
+      },
+      {
+        id: 5,
+        name: 'سمت ها',
+        Icon: TbPointFilled,
+        path: '/admin/users',
+      },
+    ],
   },
   {
-    name: 'دیدگاه‌ها',
-    Icon: Comment,
-    path: '/admin/reviews',
+    id: 6,
+    name: 'پشتیبانی',
+    Icon: HiMail,
+    subItem: [
+      {
+        id: 6,
+        name: 'پیام ها',
+        Icon: TbPointFilled,
+        path: '/admin/support',
+      },
+      {
+        id: 6,
+        name: 'دیدگاه',
+        Icon: TbPointFilled,
+        path: '/admin/support',
+      },
+    ],
   },
   {
-    name: 'اسلایدرها',
-    Icon: Slider,
-    path: '/admin/sliders/categories',
+    id: 7,
+    name: 'تجزیه تحلیل',
+    Icon: FaCalculator,
+    subItem: [
+      {
+        id: 7,
+        name: 'درآمد',
+        Icon: TbPointFilled,
+        path: '/admin/analyze',
+      },
+      {
+        id: 7,
+        name: 'مالیات',
+        Icon: TbPointFilled,
+        path: '/admin/analyze',
+      },
+      {
+        id: 7,
+        name: 'نمودار فروش',
+        Icon: TbPointFilled,
+        path: '/admin/analyze',
+      },
+    ],
   },
   {
-    name: 'بنرها',
-    Icon: Image,
-    path: '/admin/banners/categories',
+    id: 1,
+    name: 'تنظیمات',
+    Icon: IoSettings,
+    subItem: [
+      {
+        id: 1,
+        name: 'دیزاین',
+        Icon: TbPointFilled,
+        path: '/admin/setting',
+      },
+      {
+        id: 1,
+        name: 'پیکربندی محصول',
+        Icon: TbPointFilled,
+        path: '/admin/setting',
+      },
+      {
+        id: 1,
+        name: 'مبالغ و هزینه ها',
+        Icon: TbPointFilled,
+        path: '/admin/setting',
+      },
+      {
+        id: 1,
+        name: 'دپارتمان',
+        Icon: TbPointFilled,
+        path: '/admin/setting',
+      },
+    ],
   },
 ]
 
 export default function DashboardAdminAside() {
-  // ? Render(s)
-  return (
-    <aside className="sticky top-6 mt-6 min-w-max lg:rounded-md lg:border lg:border-gray-200 lg:pt-4">
-      <Link className="flex justify-center" passHref href="/">
-        <img width={180} src={'/logo/Logo.png'} alt="Venda Mode" />
-      </Link>
+  const router = useRouter()
 
-      <div className="mt-4">
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
+
+  useEffect(() => {
+    profilePaths.forEach((item, index) => {
+      if (item.subItem) {
+        item.subItem.forEach((subItem) => {
+          if (router.pathname === subItem.path) {
+            setOpenIndex(item.id)
+          }
+        })
+      }
+    })
+  }, [router.pathname])
+
+  const handleToggle = (index: number) => {
+    setOpenIndex(openIndex === index ? null : index)
+  }
+
+  const isPathActive = (path: string) => router.pathname === path
+
+  const isParentPathActive = (subItems?: { path: string }[]) => {
+    return subItems?.some((subItem) => isPathActive(subItem.path))
+  }
+
+  return (
+    <aside className="sticky top-6 w-[265px] bg-[#1e1e2d]">
+      <div className="py-5 pt-4.5">
         {profilePaths.map((item, index) => (
-          <BoxLink key={index} path={item.path} name={item.name} icon={item.Icon}>
-            <item.Icon className="icon text-black" />
-          </BoxLink>
+          <>
+            {item.path ? (
+              <Link href={item.path} key={item.id}>
+                <div
+                  className={`flex cursor-pointer hover:bg-[#1b1b28] justify-between items-center py-2.5 text-sm px-6 pl-4 w-full gap-3 text-[#9899ac] ${
+                    router.pathname === item.path ? 'text-[#e90089] bg-[#1b1b28]' : ' text-gray-700'
+                  }`}
+                  onClick={() => handleToggle(item.id)}
+                >
+                  <div className="flex gap-3 items-center">
+                    <item.Icon
+                      className={`text-xl ${router.pathname === item.path ? 'text-[#e90089]' : 'text-[#5a6080]'}`}
+                    />
+                    <span className={`ml-2 ${router.pathname === item.path ? 'text-white' : ' text-gray-400'}`}>
+                      {item.name}
+                    </span>
+                  </div>{' '}
+                  {item.subItem && (
+                    <span className="text-white">
+                      <ArrowLeft
+                        className={`transition-all ease-in-out duration-500 ${
+                          openIndex == item.id ? '-rotate-90' : ''
+                        } text-3xl hover:shadow-xl rounded-full text-[#e90089]`}
+                      />
+                    </span>
+                  )}
+                </div>
+              </Link>
+            ) : (
+              <div key={index}>
+                <div
+                  className={`flex cursor-pointer hover:bg-[#1b1b28] justify-between items-center py-2.5 text-sm px-6 pl-4 w-full gap-3 text-[#9899ac] ${
+                    router.pathname === item.pathName
+                      ? 'text-[#e90089] bg-[#1b1b28]'
+                      : openIndex === item.id
+                      ? 'bg-[#1b1b28]'
+                      : 'text-gray-700'
+                  }`}
+                  onClick={() => handleToggle(item.id)}
+                >
+                  <div className="flex gap-3 items-center">
+                    <item.Icon className="text-xl text-[#5a6080]" />
+                    <span
+                  className={`ml-2 ${
+                    isPathActive(item.pathName || '') || isParentPathActive(item.subItem)
+                      ? 'text-white'
+                      : 'text-gray-400'
+                  }`}
+                >
+                  {item.name}
+                </span>
+                  </div>{' '}
+                  {item.subItem && (
+                    <span className="text-white">
+                      <ArrowLeft
+                        className={`transition-all ease-in-out duration-500 ${
+                          openIndex == item.id ? '-rotate-90' : ''
+                        } text-3xl hover:shadow-xl rounded-full text-[#e90089]`}
+                      />
+                    </span>
+                  )}
+                </div>
+
+                <div
+                  className={`overflow-hidden w-full transition-all ease-in-out duration-500 ${
+                    item.subItem && openIndex === item.id ? 'max-h-screen' : 'max-h-0'
+                  }`}
+                >
+                  {item.subItem?.map((subItem, subIndex) => (
+                    <Link
+                      key={subIndex}
+                      href={subItem.path}
+                      className="flex items-center hover:bg-[#1b1b28] py-2.5 text-sm px-6 w-full gap-3 text-[#9899ac]"
+                    >
+                      <subItem.Icon
+                        className={`mr-4 text-sm ${isPathActive(subItem.path) ? 'text-[#e90089]' : 'text-[#5a6080]'}`}
+                      />
+                      <span className={`${isPathActive(subItem.path) ? 'text-white' : 'text-gray-400'}`}>
+                        {subItem.name}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         ))}
-        <LogoutButton />
+        <LogoutButton isShowDrawer />
       </div>
     </aside>
   )

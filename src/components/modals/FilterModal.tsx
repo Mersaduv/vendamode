@@ -2,8 +2,8 @@ import { Filter as FilterIcon } from '@/icons'
 
 import { useDisclosure } from '@/hooks'
 
-import { Modal } from '@/components/ui'
-import { ProductFilterControls } from '@/components/product'
+import { Button, Modal } from '@/components/ui'
+import { ProductFilterControls, ProductSort } from '@/components/product'
 
 interface Props {
   mainMaxPrice: number | undefined
@@ -20,18 +20,16 @@ const FilterModal: React.FC<Props> = (props) => {
   // ? Render(s)
   return (
     <>
-      <button type="button" className="flex items-center gap-x-1" onClick={filtersHandlers.open}>
-        <FilterIcon className="icon h-6 w-6" />
-        <span>فیلتر</span>
-      </button>
+      <Button onClick={filtersHandlers.open} className="w-full bg-[#3F3A42] py-2">فیلترها</Button>
 
       <Modal isShow={isFilters} onClose={filtersHandlers.close} effect="bottom-to-top">
         <Modal.Content
           onClose={filtersHandlers.close}
-          className="flex h-full flex-col gap-y-5 bg-white px-5 py-3 md:rounded-lg "
+          className="flex h-full overflow-y-auto flex-col gap-y-5 bg-white px-5 py-3 md:rounded-lg"
         >
           <Modal.Header onClose={filtersHandlers.close}>فیلترها</Modal.Header>
           <Modal.Body>
+          <ProductSort />
             <ProductFilterControls
               mainMinPrice={mainMinPrice}
               mainMaxPrice={mainMaxPrice}

@@ -17,6 +17,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
+    "typeRoots": ["./node_modules/@types", "./declarations.d.ts"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx",],
   "exclude": ["node_modules"]

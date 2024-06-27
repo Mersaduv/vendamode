@@ -19,16 +19,16 @@ const UserAuthLinks = () => {
   else if (!userInfo) {
     return (
       <Link href={`/authentication/login?redirectTo=${asPath}`} className="flex-center gap-x-1">
-        <div className="flex-center gap-x-2 text-sm lg:rounded-xl lg:border lg:border-[#e90089] lg:px-3 lg:py-2">
-          <Login className="icon" />
-          ورود
+        <div className="flex-center gap-x-2 lg:rounded-xl lg:border lg:border-[#e90089] lg:px-3 lg:py-2">
+          <Login className="text-2xl rotate-180" />
+          <span className='text-sm hidden sm:block font-medium'>ورود</span>
         </div>
       </Link>
     )
   } else if (userInfo) {
     return (
-      <div className="border rounded-lg">
-        <div className="lg:hidden px-3 py-1 hover:shadow rounded-lg">
+      <div className="sm:border rounded-lg">
+        <div className="lg:hidden sm:px-3 py-1 hover:shadow rounded-lg">
           <Link href="/profile">
             <User className="icon h-7 w-7" />
           </Link>

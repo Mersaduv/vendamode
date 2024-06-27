@@ -12,6 +12,7 @@
     "@headlessui/react": "^2.0.3",
     "@hookform/resolvers": "^3.4.2",
     "@persian-tools/persian-tools": "^3.5.2",
+    "@react-pdf/renderer": "^3.4.4",
     "@reduxjs/toolkit": "^2.2.5",
     "axios": "^1.7.2",
     "bcrypt": "^5.1.1",

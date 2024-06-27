@@ -1,10 +1,17 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-interface Product {
+export interface Product {
   productID: string
   slug: string
   title: string
-  image: { url: string; placeholder: string }
+  image: { 
+    id: string
+    imageUrl: string
+    placeholder: string
+   }
+  price: number
+  discount: number
+  inStock: number
 }
 
 interface UserState {
