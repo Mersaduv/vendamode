@@ -7,7 +7,7 @@ const apiSlice = createApi({
     timeout: 60000,
   }),
 
-  tagTypes: ['User', 'Category', 'Product', 'Brand', 'Review','Order','Canceled'],
+  tagTypes: ['User', 'Category', 'Product', 'Brand', 'Review','Order','Canceled','Features','FeatureValues','ProductSize','Size'],
   endpoints: (builder) => ({}),
 })
 

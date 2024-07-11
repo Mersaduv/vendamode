@@ -20,13 +20,18 @@ import type {
   IProductSizeInfo,
   IStockItem,
   IProductScaleCreate,
+  ISizeIds,
+  ISizeModel,
+  ISizeInfoModel,
 } from '@/types'
 import { CategorySelector } from '../categories'
 import {
   useGetBrandsQuery,
   useGetCategoriesTreeQuery,
+  useGetFeatureValuesQuery,
   useGetFeaturesByCategoryQuery,
   useGetFeaturesQuery,
+  useGetSingleCategoryQuery,
 } from '@/services'
 import TextEditor from './TextEditor'
 import { AddFeatureCombobox, BrandCombobox, CategoryCombobox, FeatureCombobox } from '../selectorCombobox'
@@ -44,25 +49,14 @@ const generateUniqueId = () => {
   })
 }
 
-interface CreateProductFormProps {
-  mode: 'create'
-  createHandler: (data: FormData) => void
-  updateHandler?: never
-  isLoadingCreate: boolean
-  selectedProduct?: never
-  isLoadingUpdate?: never
-}
-
 interface EditProductFormProps {
   mode: 'edit'
-  createHandler?: never
-  updateHandler: (data: FormData) => void
-  selectedProduct: IProduct
-  isLoadingCreate?: never
+  updateHandle: (data: FormData) => void
+  selectedProduct?: IProduct
   isLoadingUpdate: boolean
 }
 
-type Props = CreateProductFormProps | EditProductFormProps
+type Props = EditProductFormProps
 
 export interface SelectedCategories {
   categorySelected?: ICategory
@@ -80,6 +74,7 @@ interface PropTable {
   setStateStockItems: Dispatch<SetStateAction<IStockItem[]>>
   setProductSizeScale: Dispatch<SetStateAction<IProductSizeInfo>>
   selectedFiles: File[]
+  rowsData: CurrentRow[]
 }
 
 interface PropSetStockImage {
@@ -97,9 +92,9 @@ interface CurrentRow {
   featureValueIds?: string[]
 }
 
-const ProductForm: React.FC<Props> = (props) => {
+const ProductFormEdit: React.FC<Props> = (props) => {
   // ? Props
-  const { mode, createHandler, isLoadingCreate, isLoadingUpdate, updateHandler, selectedProduct } = props
+  const { mode, isLoadingUpdate, updateHandle, selectedProduct } = props
 
   // ? States
   const [isDetailsSkip, setIsDetailsSkip] = useState(true)
@@ -110,7 +105,7 @@ const ProductForm: React.FC<Props> = (props) => {
   const [selectedCategories, setSelectedCategories] = useState<SelectedCategories>(initialSelectedCategories)
   const [mainCategories, setMainCategories] = useState<ICategory[]>([])
   const [childCategories, setChildCategories] = useState<ICategory[]>([])
-  const [selectedMainFile, setMainSelectedFiles] = useState<any[]>([])
+  const [selectedMainFile, setMainSelectedFiles] = useState<File[]>([])
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [stateBrand, setStateBrand] = useState<IBrand | null>(null)
   const [stateStockItems, setStateStockItems] = useState<IStockItem[]>([])
@@ -127,9 +122,18 @@ const ProductForm: React.FC<Props> = (props) => {
     columns: null,
     imagesSrc: undefined,
   })
+
+  // edit state
+  const [singleCategoryId, setSingleCategoryId] = useState<string>()
   const [selectedMainCategory, setSelectedMainCategory] = useState<ICategory | null>(null)
   const [selectedBrand, setSelectedBrand] = useState<IBrand | null>(null)
+  const [stateColorData, setStateColorData] = useState<FeatureValue[]>()
+  const [stateFeatureValueData, setStateFeatureValueData] = useState<FeatureValue[]>()
+  const [stateSizeData, setStateSizeData] = useState<SizeDTO[]>()
+  const [productSizeScaleData, setProductSizeScaleData] = useState<ISizeInfoModel[]>()
   const [productScaleCreate, setProductScaleCreate] = useState<IProductScaleCreate>()
+
+  const [rowsData, setRowsData] = useState<CurrentRow[]>([])
 
   // ? Form Hook
   const {
@@ -171,12 +175,13 @@ const ProductForm: React.FC<Props> = (props) => {
           columns: [],
           imagesSrc: productScales.imagesSrc,
         })
+        // console.log(productSizeScale , "productSizeScale data");
       }
     }
   }, [productScales])
 
-  if (productSizeScale) {
-    // console.log(productSizeScale)
+  if (productSizeScale || productScales) {
+    // console.log(productSizeScale, 'productSizeScale', productScales, 'productScales')
   }
   //؟ all Features Query
   const { data: allFeatures } = useGetFeaturesQuery()
@@ -188,6 +193,14 @@ const ProductForm: React.FC<Props> = (props) => {
     }),
   })
 
+  const singleCategoryQueryEnabled = singleCategoryId !== undefined
+  const { data: singleCategoryData } = useGetSingleCategoryQuery(
+    { id: singleCategoryId! },
+    { skip: !singleCategoryQueryEnabled }
+  )
+  if (categoriesData) {
+    // console.log(categoriesData)
+  }
   useEffect(() => {
     if (categoriesData) {
       const mainCats = categoriesData.filter((category) => category.level === 0)
@@ -201,11 +214,11 @@ const ProductForm: React.FC<Props> = (props) => {
     skip: isDetailsSkip,
   })
 
-  useEffect(() => {
-    if (features?.data?.productFeatures) {
-      setStateFeatureDataByCategory(features.data.productFeatures)
-    }
-  }, [features])
+  // useEffect(() => {
+  //   if (features?.data?.productFeatures) {
+  //     setStateFeatureDataByCategory(features.data.productFeatures)
+  //   }
+  // }, [features])
 
   // if (stateFeatureDataByCategory) {
   //   console.log(stateFeatureDataByCategory)
@@ -215,6 +228,12 @@ const ProductForm: React.FC<Props> = (props) => {
   //*   Get Brands
   const { data: brandData } = useGetBrandsQuery({ page: 1, pageSize: 200 })
 
+  // Queries
+  //* Get Feature
+  const { data: featureData, isLoading: isLoadingFeature } = useGetFeaturesQuery()
+  // Queries
+  //* Get Feature Values
+  const { data: featureValueData, isLoading: isLoadingFeatureValue } = useGetFeatureValuesQuery()
   // ? Re-Renders
   //*   Select Category To Fetch Details
   useEffect(() => {
@@ -238,6 +257,201 @@ const ProductForm: React.FC<Props> = (props) => {
   //     setIsFeaturesSkip(true)
   //   }
   // }, [features, getValues('Title')])
+
+  //*   Set Product Details On Edit Mode
+
+  useEffect(() => {
+    const fetchImageAsFile = async (url: string): Promise<File> => {
+      const response = await fetch(url)
+      const blob = await response.blob()
+      const fileName = url.split('/').pop()
+      return new File([blob], fileName || 'image.jpg', { type: blob.type })
+    }
+
+    const loadImages = async () => {
+      if (selectedProduct && mode === 'edit') {
+        const {
+          title,
+          description,
+          imagesSrc,
+          mainImageSrc,
+          isActive,
+          categoryId,
+          brandId,
+          productFeatureInfo,
+          isFake,
+          productSizeInfo,
+          stockItems: stockItemsData,
+          brandData,
+        } = selectedProduct
+        // setProductSizeScaleData(productSizeInfo?.rows)
+        setProductSizeScaleData(
+          productSizeInfo?.rows?.map((row) => ({
+            id: row.idx,
+            scaleValues: row.scaleValues,
+            productSizeValue: row.productSizeValue,
+            productSizeValueId: row.idx,
+          }))
+        )
+
+        setSingleCategoryId(categoryId)
+        // console.log(stockItemsData, 'stockItemsData DATE 1')
+        setRowsData(
+          stockItemsData.map((stock) => {
+            // ویژگی‌های ثابت
+            const fixedProperties = {
+              sizeId: stock.sizeId,
+              featureValueIds: stock.featureValueId,
+              id: stock.stockId,
+              stockId: stock.stockId,
+              imagesSrc: stock.imagesSrc,
+              idx: stock.idx,
+              quantity: stock.quantity,
+              price: stock.price,
+              discount: stock.discount,
+            }
+            // console.log(fixedProperties, 'dynamicProperties dynamicProperties')
+
+            // ویژگی‌های پویا
+            const dynamicProperties = Object.keys(stock).reduce((acc, key) => {
+              if (!fixedProperties.hasOwnProperty(key)) {
+                acc[key] = stock[key]
+              }
+              return acc
+            }, {} as { [key: string]: any })
+
+            return {
+              ...fixedProperties,
+              ...dynamicProperties,
+            }
+          })
+        )
+
+        // const columnSizes: ISizeIds[] =
+        //   productSizeInfo?.columns?.map((column) => ({
+        //     id: column.id,
+        //     name: column.name,
+        //   })) || []
+
+        // const generateId = () => '_' + Math.random().toString(36).substr(2, 9)
+
+        // const rows: ISizeInfoModel[] =
+        //   productSizeInfo?.rows?.map((row) => ({
+        //     id: generateId(),
+        //     scaleValues: row.scaleValues,
+        //     productSizeValue: row.productSizeValue,
+        //     productSizeValueId: generateId(),
+        //   })) || []
+
+        // const ProductScale: IProductScaleCreate = {
+        //   columnSizes,
+        //   Rows : rows,
+        // }
+
+        const colorDTOsIds = productFeatureInfo?.colorDTOs?.map((color) => color.id) || []
+        const featureValueIds =
+          productFeatureInfo?.featureValueInfos?.flatMap((feature) => feature?.value?.map((val) => val.id)) || []
+        const featureValuesIds: any[] = [...colorDTOsIds, ...featureValueIds]
+        const filteredFeatureData: ProductFeature[] | undefined = featureData?.data
+          ?.map((featureItem) => {
+            const filteredValues = featureItem?.values?.filter((value) => featureValuesIds.includes(value.id))
+
+            if (filteredValues?.length === 0) {
+              return null
+            }
+
+            return {
+              ...featureItem,
+              // values: filteredValues,
+            }
+          })
+          .filter((feature): feature is ProductFeature => feature !== null && feature !== undefined)
+        if (filteredFeatureData != undefined) {
+          setStateFeatureDataByCategory(filteredFeatureData)
+        }
+        const filteredFeatureValueData = featureValueData?.data?.filter((featureValue) =>
+          featureValuesIds.includes(featureValue.id)
+        )
+        if (filteredFeatureValueData != undefined) {
+          setStateColorData(filteredFeatureValueData.filter((value) => value.hexCode !== null)) // color feature
+          setStateFeatureValueData(filteredFeatureValueData.filter((value) => value.hexCode == null)) // only feature
+          // console.log(
+          //   filteredFeatureValueData.filter((value) => value.hexCode !== null),
+          //   'color',
+          //   filteredFeatureValueData.filter((value) => value.hexCode == null),
+          //   'fff'
+          // )
+        }
+
+        const mainImageFile = await fetchImageAsFile(mainImageSrc.imageUrl)
+        setMainSelectedFiles([mainImageFile])
+
+        const imageFiles = await Promise.all(imagesSrc.map((image) => fetchImageAsFile(image.imageUrl)))
+        setSelectedFiles(imageFiles)
+
+        // const mappedStockItems: IStockItem[] = await Promise.all(
+        //   stockItems.map(async (stockItem) => {
+        //     const imagesStock = stockItem.imagesSrc
+        //       ? await Promise.all(stockItem.imagesSrc.map((image) => fetchImageAsFile(image.imageUrl)))
+        //       : null
+        //     return {
+        //       id: stockItem.id,
+        //       stockId: stockItem.stockId,
+        //       ImageStock: imagesStock,
+        //       featureValueId: stockItem.featureValueId,
+        //       sizeId: stockItem.sizeId,
+        //       quantity: stockItem.quantity,
+        //       price: stockItem.price,
+        //       discount: stockItem.discount,
+        //     }
+        //   })
+        // )
+        setSelectedBrand(brandData)
+        if (productSizeInfo?.columns != undefined) {
+          setStateSizeData(productSizeInfo?.columns)
+        }
+        reset({
+          Title: title,
+          Description: description,
+          IsActive: isActive,
+          CategoryId: categoryId,
+          BrandId: brandId,
+          FeatureValueIds: featureValuesIds,
+          IsFake: isFake,
+          // ProductScale: ProductScale,
+          MainThumbnail: mainImageFile,
+          Thumbnail: imageFiles,
+          // StockItems: mappedStockItems,
+        })
+      }
+    }
+
+    loadImages()
+    if (features) {
+      // console.log(features, 'sizeDto')
+    }
+  }, [
+    selectedProduct,
+    featureData,
+    // featureValueData
+  ])
+
+  useEffect(() => {
+    // Set selected category
+    if (singleCategoryData) {
+      const mainCategory: ICategory[] | undefined = singleCategoryData?.data?.parentCategories?.filter(
+        (c) => c.level == 0
+      )
+      setSelectedCategories({ categorySelected: singleCategoryData.data || ({} as ICategory) })
+      setChildCategories(singleCategoryData.data?.parentCategoriesTree || [])
+      setSelectedMainCategory(mainCategory![0])
+      // console.log(
+      //   childCategories,
+      //   'cccccccccccccccccccccccccccccccccccccccccccccccc',
+      //   singleCategoryData.data?.categories
+      // )
+    }
+  }, [singleCategoryData])
 
   // ? Handlers
   const editedCreateHandler: SubmitHandler<IProductForm> = (data) => {
@@ -277,17 +491,16 @@ const ProductForm: React.FC<Props> = (props) => {
 
       data.StockItems.forEach((item, index) => {
         if (item.imageStock) {
-          formData.append(`ImageStock_${item.stockId || index}`, item.imageStock)
+          formData.append(`ImageStock_${item.id || index}`, item.imageStock)
         }
       })
     }
     if (data.ProductScale) {
       formData.append('ProductScale', JSON.stringify(data.ProductScale))
-      console.log(data.ProductScale, 'data.ProductScale')
     }
 
-    if (mode == 'create') {
-      createHandler(formData)
+    if (mode == 'edit') {
+      updateHandle(formData)
     }
   }
 
@@ -328,7 +541,6 @@ const ProductForm: React.FC<Props> = (props) => {
 
   const handleFeatureSelect = (features: SizeDTO[] | ProductFeature) => {
     if (Array.isArray(features)) {
-      // console.log(features)
       setStateSizeFeature((prevState) => {
         const newState = prevState.filter((item) => features.some((feature) => feature.id === item.id))
         features.forEach((feature) => {
@@ -358,7 +570,7 @@ const ProductForm: React.FC<Props> = (props) => {
               }
               return item
             })
-            .filter((item) => item.values && item.values.length > 0) // حذف feature اگر values خالی باشد
+            .filter((item) => item.values && item.values.length > 0)
         }
       })
     }
@@ -378,12 +590,10 @@ const ProductForm: React.FC<Props> = (props) => {
     } else {
       setIsStock(false)
     }
-    console.log(stateFeature, stateSizeFeature)
+    // console.log(stateFeature, stateSizeFeature)
   }, [stateFeature])
 
   useEffect(() => {
-    // console.log(stateFeature)
-
     if (stateFeature) {
       const featureValueIds = stateFeature.flatMap((feature) => feature.values ?? []).map((value) => value.id)
       setValue('FeatureValueIds', featureValueIds)
@@ -437,29 +647,36 @@ const ProductForm: React.FC<Props> = (props) => {
   useEffect(() => {
     if (stateStockItems) {
       setValue('StockItems', stateStockItems)
-      console.log(stateStockItems , 'stateStockItems-2')
+      // console.log(stateStockItems)
     }
   }, [stateStockItems])
 
   useEffect(() => {
     if (productSizeScale) {
+      const sortedProductSizeScaleData = productSizeScaleData?.sort((a, b) => Number(a.id) - Number(b.id))
       setProductScaleCreate({
         columnSizes: productSizeScale?.columns?.map((col) => ({ id: col.id, name: col.name })),
-        Rows: productSizeScale?.rows?.map((row, rowIndex) => ({
-          id: rowIndex.toString(),
-          idx: rowIndex.toString(),
-          scaleValues: productSizeScale?.columns?.map(() => ''),
-          productSizeValue: row.productSizeValue,
-          productSizeValueId: rowIndex.toString(),
-        })) || [],
+        Rows: sortedProductSizeScaleData,
       })
+      if (productScaleCreate) {
+      }
     }
   }, [productSizeScale])
+  // useEffect(() => {
+  //   if (productSizeScaleData) {
+  //     setProductSizeScale({ ...productSizeScale, rows: productSizeScaleData })
+  //   }
+  //   console.log(productSizeScaleData, 'productSizeScaleData add')
+  //   console.log(productSizeScale, 'productSizeScale to settt')
+  // }, [productSizeScaleData])
   useEffect(() => {
-    console.log(productScaleCreate, 'productScaleCreatec')
+    // if (productScaleCreate.Rows && productScaleCreate.Rows.some(row => row.ScaleValues?.length! > 0)) {
+
     setValue('ProductScale', productScaleCreate)
+
+    // }
   }, [productScaleCreate])
-  console.log(formErrors)
+  // console.log(formErrors)
 
   // Function to handle input changes
   const handleChange = (rowIndex: number, colIndex: number, value: any) => {
@@ -473,7 +690,8 @@ const ProductForm: React.FC<Props> = (props) => {
       })
     }
   }
-  if (productScaleCreate) {
+  if (selectedProduct) {
+    // console.log(selectedProduct, 'sss ppp')
   }
   return (
     <section>
@@ -529,7 +747,7 @@ const ProductForm: React.FC<Props> = (props) => {
             <div className="bg-white w-full rounded-md shadow-item">
               <h3 className="border-b p-6 text-gray-600">دسته بندی محصول</h3>
               <div className="flex px-6 py-10 pt-6">
-                {mode === 'create' && (
+                {mode === 'edit' && (
                   <div className="w-full">
                     <CategoryCombobox
                       selectedMainCategory={selectedMainCategory}
@@ -633,7 +851,7 @@ const ProductForm: React.FC<Props> = (props) => {
                 </div>
               </div>
             </div>
-            {/* is show Product features,size */}
+            {/* is show Product features,size,brand */}
             <div className="flex flex-1">
               <div className="bg-white w-full rounded-md shadow-item">
                 <h3 className="border-b p-6 text-gray-600">ویژگی محصول</h3>
@@ -690,79 +908,88 @@ const ProductForm: React.FC<Props> = (props) => {
                   </div>
                 </div>
                 {/* feature */}
-                {stateFeatureDataByCategory.length > 0 &&
-                  features?.data?.sizeDTOs &&
-                  features.data.sizeDTOs.length > 0 && (
-                    <div
-                      style={{ background: 'rgba(169, 243, 252,0.2)' }}
-                      className="px-2 py-4 flex flex-col space-y-8 mb-6 mx-7 rounded-xl"
-                    >
-                      {stateFeatureDataByCategory &&
-                        stateFeatureDataByCategory
-                          ?.filter((feature) => feature.values?.some((value) => value.hexCode !== null))
-                          .map((feature) => {
-                            const filteredFeature = {
-                              ...feature,
-                              values: feature.values?.filter((value) => value.hexCode !== null) ?? [],
-                            }
-                            return (
-                              <div className="flex items-center w-full gap-5" key={feature.id}>
-                                <div className="text-gray-600 text-sm w-[250px] px-2"> {filteredFeature.name} </div>
-                                <div className="w-full">
-                                  <FeatureCombobox onFeatureSelect={handleFeatureSelect} features={filteredFeature} />
-                                </div>
-                                <Button
-                                  onClick={() => handleRemoveFeatureToAddOnStateFeatureData(feature)}
-                                  className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
-                                >
-                                  حذف
-                                </Button>
-                              </div>
-                            )
-                          })}
 
-                      {features?.data?.sizeDTOs && features.data.sizeDTOs.length > 0 && (
-                        <div className="flex items-center w-full gap-5">
-                          <div className="text-gray-600 text-sm w-[250px] px-2"> سایزبندی </div>
-                          <div className="w-full">
-                            <FeatureCombobox
-                              onFeatureSelect={handleFeatureSelect}
-                              sizeList={features.data.sizeDTOs ?? []}
-                            />
+                <div
+                  style={{ background: 'rgba(169, 243, 252,0.2)' }}
+                  className="px-2 py-4 flex flex-col space-y-8 mb-6 mx-7 rounded-xl"
+                >
+                  {stateFeatureDataByCategory &&
+                    stateFeatureDataByCategory
+                      ?.filter((feature) => feature.values?.some((value) => value.hexCode !== null))
+                      .map((feature) => {
+                        const filteredFeature = {
+                          ...feature,
+                          values: feature.values?.filter((value) => value.hexCode !== null) ?? [],
+                        }
+                        return (
+                          <div className="flex items-center w-full gap-5" key={feature.id}>
+                            <div className="text-gray-600 text-sm w-[250px] px-2"> {filteredFeature.name} </div>
+                            <div className="w-full">
+                              <FeatureCombobox
+                                stateColorData={stateColorData}
+                                onFeatureSelect={handleFeatureSelect}
+                                features={filteredFeature}
+                              />
+                            </div>
+                            <Button
+                              onClick={() => handleRemoveFeatureToAddOnStateFeatureData(feature)}
+                              className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
+                            >
+                              حذف
+                            </Button>
                           </div>
-                          <Button
-                            onClick={handleRemoveProductSize}
-                            className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
-                          >
-                            حذف
-                          </Button>
-                        </div>
-                      )}
-                      {stateFeatureDataByCategory &&
-                        stateFeatureDataByCategory
-                          ?.filter((feature) => feature.values?.some((value) => value.hexCode == null))
-                          .map((feature) => {
-                            const filteredFeature = {
-                              ...feature,
-                              values: feature.values?.filter((value) => value.hexCode == null) ?? [],
-                            }
-                            return (
-                              <div className="flex items-center w-full gap-5" key={feature.id}>
-                                <div className="text-gray-600 text-sm w-[250px] px-2"> {filteredFeature.name} </div>
-                                <div className="w-full">
-                                  <FeatureCombobox onFeatureSelect={handleFeatureSelect} features={filteredFeature} />
-                                </div>
-                                <Button
-                                  onClick={() => handleRemoveFeatureToAddOnStateFeatureData(feature)}
-                                  className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
-                                >
-                                  حذف
-                                </Button>
-                              </div>
-                            )
-                          })}
+                        )
+                      })}
+
+                  {features?.data?.sizeDTOs && features.data.sizeDTOs.length > 0 && (
+                    <div className="flex items-center w-full gap-5">
+                      <div className="text-gray-600 text-sm w-[250px] px-2"> سایزبندی </div>
+                      <div className="w-full">
+                        <FeatureCombobox
+                          onFeatureSelect={handleFeatureSelect}
+                          sizeList={features.data.sizeDTOs ?? []}
+                          stateSizeData={stateSizeData}
+                        />
+                      </div>
+                      <Button
+                        onClick={handleRemoveProductSize}
+                        className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
+                      >
+                        حذف
+                      </Button>
                     </div>
                   )}
+                  {stateFeatureDataByCategory &&
+                    stateFeatureDataByCategory
+                      ?.filter((feature) => feature.values?.some((value) => value.hexCode == null))
+                      .map((feature) => {
+                        const filteredFeature = {
+                          ...feature,
+                          values: feature.values?.filter((value) => value.hexCode == null) ?? [],
+                        }
+                        return (
+                          <div className="flex items-center w-full gap-5" key={feature.id}>
+                            <div className="text-gray-600 text-sm w-[250px] px-2"> {filteredFeature.name} </div>
+                            <div className="w-full">
+                              <FeatureCombobox
+                                stateFeatureValueData={stateFeatureValueData?.filter(
+                                  (value) => value.productFeatureId === feature.id
+                                )}
+                                onFeatureSelect={handleFeatureSelect}
+                                features={filteredFeature}
+                                setStateFeatureValueData={setStateFeatureValueData}
+                              />
+                            </div>
+                            <Button
+                              onClick={() => handleRemoveFeatureToAddOnStateFeatureData(feature)}
+                              className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
+                            >
+                              حذف
+                            </Button>
+                          </div>
+                        )
+                      })}
+                </div>
               </div>
             </div>
             {/* is show Product features, quantity, price , discount */}
@@ -777,6 +1004,7 @@ const ProductForm: React.FC<Props> = (props) => {
                   setStateFeature={setStateFeature}
                   setStateSizeFeature={setStateSizeFeature}
                   setProductSizeScale={setProductSizeScale}
+                  rowsData={rowsData}
                 />
               </div>
             </div>
@@ -798,7 +1026,7 @@ const ProductForm: React.FC<Props> = (props) => {
                             ))}
                           </tr>
                         </thead>
-                        <tbody className="">
+                        <tbody>
                           {productSizeScale?.rows?.map((row, rowIndex) => (
                             <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-gray-50' : ''}>
                               <td className="px-4 py-2 h-[60.5px] whitespace-nowrap">{row.productSizeValue}</td>
@@ -808,7 +1036,7 @@ const ProductForm: React.FC<Props> = (props) => {
                                     inputMode="numeric"
                                     dir="ltr"
                                     type="text"
-                                    className=" appearance-none border border-gray-200 rounded-lg"
+                                    className="appearance-none border border-gray-200 rounded-lg"
                                     value={digitsEnToFa(
                                       productScaleCreate?.Rows![rowIndex].scaleValues![colIndex] || ''
                                     )}
@@ -914,20 +1142,27 @@ const Table: React.FC<PropTable> = (props) => {
     setStateFeature,
     setStateSizeFeature,
     setProductSizeScale,
+    rowsData,
   } = props
   const [featuresAndSizeSelected, setFeaturesAndSizeSelected] = useState<ProductFeature[]>([])
   const [isShowSetImageStockModal, setImageStockModalHandlers] = useDisclosure()
   const [selectedStockFiles, setSelectedStockFiles] = useState<(File | null)[]>([])
   const [stockItems, setStockItems] = useState<IStockItem[]>([])
   const [currentRowIndex, setCurrentRowIndex] = useState<number | null>(null)
-  const [rows, setRows] = useState<CurrentRow[]>([])
   const [defaultRow, setDefaultRow] = useState<CurrentRow>({ id: 11 })
-
+  const [rows, setRows] = useState<CurrentRow[]>([])
   const dispatch = useAppDispatch()
 
   let combinedFeatures: ProductFeature[]
   const newRows: CurrentRow[] = []
   let idCounter = 10
+  useEffect(() => {
+    if (rowsData) {
+      // newRows.push(rowsData) 
+      console.log(newRows, 'newRows-rowsData')
+
+    }
+  }, [rowsData])
   useEffect(() => {
     if (features.length > 0 || sizeList.length > 0) {
       combinedFeatures =
@@ -983,11 +1218,18 @@ const Table: React.FC<PropTable> = (props) => {
       } else {
         newRows.push(defaultRow)
       }
+      console.log(newRows, 'inline new rows')
 
       setRows(newRows)
     } else {
       setFeaturesAndSizeSelected([])
       setRows([defaultRow])
+    }
+  }, [features, sizeList])
+
+  useEffect(() => {
+    if ((features.length, sizeList.length)) {
+      // console.log(rows, 'rowsss', newRows, 'newRows', features, 'features', sizeList, 'sizeList')
     }
   }, [features, sizeList])
 
@@ -1028,10 +1270,10 @@ const Table: React.FC<PropTable> = (props) => {
 
   useEffect(() => {
     const initialStockItems = rows.map((row) => {
-      const dynamicProperties :any = {};
+      const dynamicProperties: any = {}
       for (const key in row) {
         if (key !== 'id' && key !== 'featureValueIds' && key !== 'sizeId') {
-          dynamicProperties[key] = row[key];
+          dynamicProperties[key] = row[key]
         }
       }
       return {
@@ -1039,15 +1281,14 @@ const Table: React.FC<PropTable> = (props) => {
         featureValueId: row.featureValueIds || [],
         sizeId: row.sizeId || undefined,
         ...dynamicProperties,
-      };
-    });
-    setStockItems(initialStockItems);
-  }, [rows, featuresAndSizeSelected]);
+      }
+    })
+    setStockItems(initialStockItems)
+  }, [rows, featuresAndSizeSelected])
 
   useEffect(() => {
     if (stockItems) {
       setStateStockItems(stockItems)
-      console.log(stockItems, 'stockItems set')
     }
   }, [stockItems])
 
@@ -1074,7 +1315,7 @@ const Table: React.FC<PropTable> = (props) => {
   }
 
   if (selectedStockFiles) {
-    console.log(selectedStockFiles, 'selectedStockFiles')
+    // console.log(selectedStockFiles, 'selectedStockFiles')
   }
 
   const handleRemoveRow = (index: number) => {
@@ -1121,7 +1362,11 @@ const Table: React.FC<PropTable> = (props) => {
     // setProductSizeScale((prevScale) => {
     //   return prevScale.columns?.filter((size) => remainingSizeIds.includes(size.id))
     // })
-    console.log(updatedFeaturesAndSizeSelected, 'Updated features and sizes')
+    // console.log(updatedFeaturesAndSizeSelected, 'Updated features and sizes')
+  }
+
+  if (rows) {
+    // rows.map((row) => console.log(row, 'one by one'))
   }
 
   return (
@@ -1172,153 +1417,156 @@ const Table: React.FC<PropTable> = (props) => {
           </thead>
         )}
         <tbody>
-          {rows.map((row, idx) => (
-            <tr key={row.id} className={`border-b ${idx % 2 !== 0 ? 'bg-gray-50' : ''}`}>
-              {!shouldHideHeader && (
-                <Fragment>
-                  <td className="w-[50px] h-[50px] bg-center py-2 pr-2">
-                    {selectedStockFiles[idx] ? (
-                      <img
-                        onClick={() => handleImageClick(idx)}
-                        className="w-[50px] h-[50px] rounded-lg cursor-pointer bg-center"
-                        src={URL.createObjectURL(selectedStockFiles[idx]!)}
-                        alt={selectedStockFiles[idx]!.name}
-                      />
+          {rows.length > 0 &&
+            rows
+              .sort((a, b) => a.id - b.id)
+              .map((row, idx) => (
+                <tr key={row.id} className={`border-b ${idx % 2 !== 0 ? 'bg-gray-50' : ''}`}>
+                  {!shouldHideHeader && (
+                    <Fragment>
+                      <td className="w-[50px] h-[50px] bg-center py-2 pr-2">
+                        {selectedStockFiles[idx] ? (
+                          <img
+                            onClick={() => handleImageClick(idx)}
+                            className="w-[50px] h-[50px] rounded-lg cursor-pointer bg-center"
+                            src={URL.createObjectURL(selectedStockFiles[idx]!)}
+                            alt={selectedStockFiles[idx]!.name}
+                          />
+                        ) : (
+                          <img
+                            onClick={() => handleImageClick(idx)}
+                            className="w-[50px] h-[50px] rounded-lg cursor-pointer bg-center"
+                            src="/images/other/product-placeholder.png"
+                            alt="product-placeholder"
+                          />
+                        )}
+                        <DialogSetStockItemImage
+                          isShow={isShowSetImageStockModal}
+                          open={setImageStockModalHandlers.open}
+                          setSelectedStockFiles={handleImageSelect}
+                          selectedFiles={selectedFiles}
+                          selectedStockFiles={selectedStockFiles[idx] || null}
+                          onClose={setImageStockModalHandlers.close}
+                          index={idx}
+                        />
+                      </td>
+                      <td className="px-4 whitespace-nowrap text-center py-2">{digitsEnToFa(row.id.toString())}</td>
+                      {featuresAndSizeSelected.map(
+                        (feature) =>
+                          feature?.values?.length! > 1 && (
+                            <td key={feature.id} className="px-4 whitespace-nowrap text-center py-2">
+                              {digitsEnToFa(row[feature.name].toString())}
+                            </td>
+                          )
+                      )}
+                    </Fragment>
+                  )}
+                  <td className="px-4 whitespace-nowrap text-center py-2">
+                    {shouldHideHeader ? (
+                      <div className="relative mb-3">
+                        <input
+                          dir="ltr"
+                          type="text"
+                          className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
+                          id="floatingInput"
+                          placeholder="موجودی انبار"
+                          value={digitsEnToFa(stockItems[idx]?.quantity || 0)}
+                          onChange={(e) => handleInputChange(idx, 'quantity', digitsFaToEn(e.target.value))}
+                          onFocus={(e) => (e.target.value = digitsEnToFa(stockItems[idx]?.quantity || ''))}
+                          onBlur={(e) => (e.target.value = digitsEnToFa(stockItems[idx]?.quantity || 0))}
+                        />
+                        <label
+                          htmlFor="floatingInput"
+                          className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
+                        >
+                          موجودی انبار
+                        </label>
+                      </div>
                     ) : (
-                      <img
-                        onClick={() => handleImageClick(idx)}
-                        className="w-[50px] h-[50px] rounded-lg cursor-pointer bg-center"
-                        src="/images/other/product-placeholder.png"
-                        alt="product-placeholder"
+                      <input
+                        dir="ltr"
+                        type="text"
+                        placeholder=""
+                        value={digitsEnToFa(stockItems[idx]?.quantity || 0)}
+                        onChange={(e) => handleInputChange(idx, 'quantity', digitsFaToEn(e.target.value))}
+                        className="w-36 h-9 rounded-lg text-center border border-gray-300"
+                        onFocus={(e) => (e.target.value = digitsEnToFa(stockItems[idx]?.quantity || ''))}
+                        onBlur={(e) => (e.target.value = digitsEnToFa(stockItems[idx]?.quantity || 0))}
                       />
                     )}
-                    <DialogSetStockItemImage
-                      isShow={isShowSetImageStockModal}
-                      open={setImageStockModalHandlers.open}
-                      setSelectedStockFiles={handleImageSelect}
-                      selectedFiles={selectedFiles}
-                      selectedStockFiles={selectedStockFiles[idx] || null}
-                      onClose={setImageStockModalHandlers.close}
-                      index={idx}
-                    />
                   </td>
-                  <td className="px-4 whitespace-nowrap text-center py-2">{digitsEnToFa(row.id)}</td>
-                  {featuresAndSizeSelected.map(
-                    (feature) =>
-                      feature?.values?.length! > 1 && (
-                        <td key={feature.id} className="px-4 whitespace-nowrap text-center py-2">
-                          {digitsEnToFa(row[feature.name])}
-                        </td>
-                      )
+                  <td className="px-4 text-center py-2">
+                    {shouldHideHeader ? (
+                      <div className="relative mb-3">
+                        <input
+                          dir="ltr"
+                          type="text"
+                          className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
+                          id="floatingInput"
+                          placeholder="قیمت محصول"
+                          onChange={(e) => handleInputChange(idx, 'price', digitsFaToEn(e.target.value))}
+                          value={digitsEnToFa(stockItems[idx]?.price || '')}
+                        />
+                        <label
+                          htmlFor="floatingInput"
+                          className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
+                        >
+                          قیمت محصول
+                        </label>
+                      </div>
+                    ) : (
+                      <input
+                        dir="ltr"
+                        type="text"
+                        placeholder=""
+                        value={digitsEnToFa(stockItems[idx]?.price || '')}
+                        onChange={(e) => handleInputChange(idx, 'price', digitsFaToEn(e.target.value))}
+                        className="w-36 h-9 rounded-lg text-center border border-gray-300"
+                      />
+                    )}
+                  </td>
+                  <td className="px-4 text-center py-2">
+                    {shouldHideHeader ? (
+                      <div className="relative mb-3">
+                        <input
+                          dir="ltr"
+                          type="text"
+                          className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
+                          id="floatingInput"
+                          placeholder="فروش فوق العاده"
+                          onChange={(e) => handleInputChange(idx, 'discount', digitsFaToEn(e.target.value))}
+                          value={digitsEnToFa(stockItems[idx]?.discount || '')}
+                        />
+                        <label
+                          htmlFor="floatingInput"
+                          className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
+                        >
+                          فروش فوق العاده
+                        </label>
+                      </div>
+                    ) : (
+                      <input
+                        dir="ltr"
+                        type="text"
+                        placeholder=""
+                        value={digitsEnToFa(stockItems[idx]?.discount || '')}
+                        onChange={(e) => handleInputChange(idx, 'discount', digitsFaToEn(e.target.value))}
+                        className="w-36 h-9 rounded-lg text-center border border-gray-300"
+                      />
+                    )}
+                  </td>
+                  {!shouldHideHeader && (
+                    <td>
+                      <Button
+                        onClick={() => handleRemoveRow(idx)}
+                        className="bg-white ml-4 hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
+                      >
+                        حذف
+                      </Button>
+                    </td>
                   )}
-                </Fragment>
-              )}
-              <td className="px-4 whitespace-nowrap text-center py-2">
-                {shouldHideHeader ? (
-                  <div className="relative mb-3">
-                    <input
-                      dir="ltr"
-                      type="text"
-                      className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
-                      id="floatingInput"
-                      placeholder="موجودی انبار"
-                      value={digitsEnToFa(stockItems[idx]?.quantity || 0)}
-                      onChange={(e) => handleInputChange(idx, 'quantity', digitsFaToEn(e.target.value))}
-                      onFocus={(e) => (e.target.value = digitsEnToFa(stockItems[idx]?.quantity || ''))}
-                      onBlur={(e) => (e.target.value = digitsEnToFa(stockItems[idx]?.quantity || 0))}
-                    />
-                    <label
-                      htmlFor="floatingInput"
-                      className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
-                    >
-                      موجودی انبار
-                    </label>
-                  </div>
-                ) : (
-                  <input
-                    dir="ltr"
-                    type="text"
-                    placeholder=""
-                    value={digitsEnToFa(stockItems[idx]?.quantity || 0)}
-                    onChange={(e) => handleInputChange(idx, 'quantity', digitsFaToEn(e.target.value))}
-                    className="w-36 h-9 rounded-lg text-center border border-gray-300"
-                    onFocus={(e) => (e.target.value = digitsEnToFa(stockItems[idx]?.quantity || ''))}
-                    onBlur={(e) => (e.target.value = digitsEnToFa(stockItems[idx]?.quantity || 0))}
-                  />
-                )}
-              </td>
-              <td className="px-4 text-center py-2">
-                {shouldHideHeader ? (
-                  <div className="relative mb-3">
-                    <input
-                      dir="ltr"
-                      type="text"
-                      className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
-                      id="floatingInput"
-                      placeholder="قیمت محصول"
-                      onChange={(e) => handleInputChange(idx, 'price', digitsFaToEn(e.target.value))}
-                      value={digitsEnToFa(stockItems[idx]?.price || '')}
-                    />
-                    <label
-                      htmlFor="floatingInput"
-                      className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
-                    >
-                      قیمت محصول
-                    </label>
-                  </div>
-                ) : (
-                  <input
-                    dir="ltr"
-                    type="text"
-                    placeholder=""
-                    value={digitsEnToFa(stockItems[idx]?.price || '')}
-                    onChange={(e) => handleInputChange(idx, 'price', digitsFaToEn(e.target.value))}
-                    className="w-36 h-9 rounded-lg text-center border border-gray-300"
-                  />
-                )}
-              </td>
-              <td className="px-4 text-center py-2">
-                {shouldHideHeader ? (
-                  <div className="relative mb-3">
-                    <input
-                      dir="ltr"
-                      type="text"
-                      className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
-                      id="floatingInput"
-                      placeholder="فروش فوق العاده"
-                      onChange={(e) => handleInputChange(idx, 'discount', digitsFaToEn(e.target.value))}
-                      value={digitsEnToFa(stockItems[idx]?.discount || '')}
-                    />
-                    <label
-                      htmlFor="floatingInput"
-                      className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
-                    >
-                      فروش فوق العاده
-                    </label>
-                  </div>
-                ) : (
-                  <input
-                    dir="ltr"
-                    type="text"
-                    placeholder=""
-                    value={digitsEnToFa(stockItems[idx]?.discount || '')}
-                    onChange={(e) => handleInputChange(idx, 'discount', digitsFaToEn(e.target.value))}
-                    className="w-36 h-9 rounded-lg text-center border border-gray-300"
-                  />
-                )}
-              </td>
-              {!shouldHideHeader && (
-                <td>
-                  <Button
-                    onClick={() => handleRemoveRow(idx)}
-                    className="bg-white ml-4 hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
-                  >
-                    حذف
-                  </Button>
-                </td>
-              )}
-            </tr>
-          ))}
+                </tr>
+              ))}
         </tbody>
       </table>
     </div>
@@ -1386,4 +1634,4 @@ const DialogSetStockItemImage = (props: PropSetStockImage & { index: number }) =
   )
 }
 
-export default ProductForm
+export default ProductFormEdit

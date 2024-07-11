@@ -22,7 +22,7 @@ export default function LogoutButton(prop: Props) {
   return (
     <>
       {isShowDrawer ? (
-        <div className="px-4 mt-5">
+        <div className="px-4 mt-5 mb-20">
           <Button style={{background:"rgba(63, 66, 84, .35)"}} className="w-full text-[#b5b5c3] hover:text-white" onClick={handleLogout}>
             خروج
           </Button>

@@ -33,17 +33,17 @@ const Create: NextPage<Props> = () => {
           isError={isError}
           isSuccess={isSuccess}
           error={error}
-          message={data?.msg}
+          message={data?.message}
           onSuccess={onSuccess}
         />
       )}
 
       <main>
         <Head>
-          <title>مدیریت | ایجاد محصول</title>
+          <title>مدیریت | محصول</title>
         </Head>
         <DashboardLayout>
-          <section className="bg-[#f5f8fa] w-full h-screen px-8 lg:px-14">
+          <section className="bg-[#f5f8fa] w-full px-8 lg:px-14">
             <ProductForm mode="create" createHandler={createHandler} isLoadingCreate={isLoading} />
           </section>
         </DashboardLayout>

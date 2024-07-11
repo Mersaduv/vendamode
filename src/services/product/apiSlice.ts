@@ -1,8 +1,9 @@
 import baseApi from '@/services/baseApi'
 
-import { generateQueryParams } from '@/utils'
+import { generateQueryParams, getToken } from '@/utils'
 
-import type { GetProductsQuery, GetProductsResult, IdQuery, MsgResult } from './types'
+import type { GetProductResult, GetProductsQuery, GetProductsResult, IdQuery, MsgResult } from './types'
+import { ICategory } from '@/types'
 
 export const productApiSlice = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -26,13 +27,13 @@ export const productApiSlice = baseApi.injectEndpoints({
           : ['Product'],
     }),
 
-    // getSingleProduct: builder.query<GetSingleProductResult, IdQuery>({
-    //   query: ({ id }) => ({
-    //     url: `/api/products/${id}`,
-    //     method: 'GET',
-    //   }),
-    //   providesTags: (result, error, arg) => [{ type: 'Product', id: arg.id }],
-    // }),
+    getSingleProduct: builder.query<GetProductResult, IdQuery>({
+      query: ({ id }) => ({
+        url: `/api/product/${id}`,
+        method: 'GET',
+      }),
+      providesTags: (result, error, arg) => [{ type: 'Product', id: arg.id }],
+    }),
 
     // deleteProduct: builder.mutation<MsgResult, IdQuery>({
     //   query: ({ id }) => ({
@@ -44,22 +45,26 @@ export const productApiSlice = baseApi.injectEndpoints({
 
     createProduct: builder.mutation<MsgResult, FormData>({
       query: (body) => ({
-        url: `/api/products`,
+        url: `/api/product`,
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
         body,
       }),
       invalidatesTags: ['Product'],
     }),
 
-    // updateProduct: builder.mutation<MsgResult, UpdateProductQuery>({
-    //   query: ({ id, body }) => ({
-    //     url: `/api/products/${id}`,
-    //     method: 'PUT',
-    //     body,
-    //   }),
-    //   invalidatesTags: (result, error, arg) => [{ type: 'Product', id: arg.id }],
-    // }),
+    updateProduct: builder.mutation<MsgResult, FormData>({
+      query: (body) => ({
+        url: `/api/product/update`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: (result, error, arg) => [{ type: 'Product' }],
+    }),
   }),
 })
 
-export const { useGetProductsQuery , useCreateProductMutation } = productApiSlice
+export const { useGetProductsQuery, useCreateProductMutation, useUpdateProductMutation, useGetSingleProductQuery } =
+  productApiSlice

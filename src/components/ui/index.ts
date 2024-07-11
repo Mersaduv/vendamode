@@ -16,6 +16,7 @@ export { default as DisplayError } from './DisplayError'
 export { default as TextField } from './TextField'
 export { default as BoxLink } from './BoxLink'
 export { default as PageContainer } from './PageContainer'
+export { default as SelectBox } from './SelectBox'
 
 export * from './Buttons'
 export * from './IconBtns'

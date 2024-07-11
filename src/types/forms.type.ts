@@ -1,6 +1,5 @@
 import type { ICart, ICategory, IProduct, IReview, IUser } from '@/types'
 
-
 export interface ICategoryForm {
   id?: string
   name: string
@@ -42,45 +41,49 @@ export interface IBrandForm {
   description: string
 }
 
-
 export interface IProductForm {
-  Title: string;
-  IsActive: boolean;
-  Thumbnail: FileList;
-  CategoryId: string;
-  Description: string;
-  IsFake: boolean;
-  BrandId?: string;
-  FeatureValueIds?: string[];
-  InStock: number;
-  Price: number;
-  Discount?: number;
-  ProductScale?: IProductScale;
-  StockItems?: IStockItem[];
+  Title: string
+  IsActive: boolean
+  MainThumbnail?: File | null
+  Thumbnail?: File[] | null
+  CategoryId: string
+  Description: string
+  IsFake: boolean
+  BrandId?: string
+  FeatureValueIds?: string[]
+  StockItems?: IStockItem[]
+  ProductScale?: IProductScaleCreate
 }
 
 export interface IStockItem {
-  FeatureId?: string;
-  SizeId?: string;
-  Quantity: number;
+  id?: string
+  stockId?: string
+  ImageStock?: File | null
+  featureValueId?: string[]
+  sizeId?: string
+  quantity?: number
+  price?: number
+  discount?: number
+  [key: string]: any
 }
 
-export interface IProductScale {
-  Columns?: ISizeIds[];
-  Rows?: ISizeModel[];
-  ProductId: string;
+export interface IProductScaleCreate {
+  columnSizes?: ISizeIds[]
+  Rows: ISizeInfoModel[]
+  productId?: string
 }
 
 export interface ISizeIds {
-  Id: string;
-  Name: string;
+  id: string
+  name: string
 }
 
-export interface ISizeModel {
-  Id: string;
-  ScaleValues?: string[];
-  ProductSizeValueName: string;
-  ProductSizeValueId: string;
+export interface ISizeInfoModel {
+  id: string
+  idx : string
+  scaleValues?: any[]
+  productSizeValue: string
+  productSizeValueId: string
 }
 
 export type IReviewForm = {

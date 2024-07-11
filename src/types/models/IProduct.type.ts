@@ -1,6 +1,14 @@
+import { IBrand } from './IBrand.type'
+import { ICategory } from './ICategory.type'
+
 export interface IProduct {
   id: string
   title: string
+  mainImageSrc: {
+    id: string
+    imageUrl: string
+    placeholder: string
+  }
   imagesSrc: {
     id: string
     imageUrl: string
@@ -10,15 +18,20 @@ export interface IProduct {
   slug: string
   price: number
   isFake: boolean
+  isActive: boolean
   brandId?: string
   brandName?: string
+  brandData : IBrand
   inStock: number
   productSizeInfo?: IProductSizeInfo
   productFeatureInfo?: IProductFeatureInfo
+  // productScale?: 
   description: string
   discount: number
   categoryList?: string[]
   categoryLevels?: ICategoryLevel[]
+  parentCategories: CategoryWithAllParents;
+  stockItems : GetStockItems[]
   categoryId: string
   size?: string[]
   sold?: number
@@ -28,9 +41,31 @@ export interface IProduct {
   lastUpdated?: string
 }
 
+export interface GetStockItems {
+  id?: string
+  stockId?: string
+  imagesSrc?: {
+    id:string
+    imageUrl: string
+    placeholder : string
+  }[]
+  featureValueId?: string[]
+  sizeId?: string
+  idx?: string
+  quantity?: number
+  price?: number
+  discount?: number
+   [key: string]: any;
+}
+
+export interface CategoryWithAllParents {
+  category: ICategory
+  parentCategories: ICategory[]
+}
+
 export interface IProductSizeInfo {
   sizeType: '0' | '1'
-  columns?: ISizeDTO[]
+  columns?: SizeDTO[] | null
   rows?: ISizeInfoModel[]
   imagesSrc?: {
     id: string
@@ -38,18 +73,12 @@ export interface IProductSizeInfo {
     placeholder: string
   }
 }
-
-export interface ISizeDTO {
-  id: string
-  name: string
-  count: number
-  description: string
-  isDeleted: boolean
-}
-
 export interface ISizeInfoModel {
-  productSizeValue: string
+  id?: string
+  idx?: string
   scaleValues?: string[]
+  productSizeValue?: string
+  productSizeValueId?: string
 }
 
 export interface IProductFeatureInfo {
@@ -67,7 +96,7 @@ export interface IColorDTO {
 export interface IObjectValue {
   id: string
   title: string
-  value?: {id:string, name:string}[]
+  value?: { id: string; name: string }[]
 }
 
 export interface ICategoryLevel {

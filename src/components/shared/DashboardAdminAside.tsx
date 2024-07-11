@@ -32,9 +32,10 @@ import { IoCart } from 'react-icons/io5'
 import { TbPointFilled } from 'react-icons/tb'
 import { RiShoppingBag2Fill } from 'react-icons/ri'
 import { IconType } from 'react-icons'
-import { useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { IoMdDocument } from 'react-icons/io'
+import Drawer from './Drawer'
 
 interface ProfilePath {
   id: number
@@ -50,7 +51,25 @@ interface ProfilePath {
   pathName?: string
 }
 
-const profilePaths: ProfilePath[] = [
+function makeIdsUnique(arr: ProfilePath[]) {
+  let idCounter = 1
+
+  const recursiveIdUpdate = (arr: ProfilePath[]) => {
+    arr.forEach((item: any) => {
+      item.id = idCounter
+      idCounter++
+
+      if (item.subItem && Array.isArray(item.subItem)) {
+        recursiveIdUpdate(item.subItem)
+      }
+    })
+  }
+
+  recursiveIdUpdate(arr)
+  return arr
+}
+
+const profileData: ProfilePath[] = [
   { id: 1, name: 'پیشخوان', Icon: BiSolidGridAlt, path: '/admin' },
   { id: 1, name: 'سفارشات', Icon: IoCart, path: '/admin/orders' },
   {
@@ -194,30 +213,30 @@ const profilePaths: ProfilePath[] = [
     ],
   },
   {
-    id: 1,
+    id: 8,
     name: 'تنظیمات',
     Icon: IoSettings,
     subItem: [
       {
-        id: 1,
+        id: 8,
         name: 'دیزاین',
         Icon: TbPointFilled,
         path: '/admin/setting',
       },
       {
-        id: 1,
+        id: 8,
         name: 'پیکربندی محصول',
         Icon: TbPointFilled,
         path: '/admin/setting',
       },
       {
-        id: 1,
+        id: 8,
         name: 'مبالغ و هزینه ها',
         Icon: TbPointFilled,
         path: '/admin/setting',
       },
       {
-        id: 1,
+        id: 8,
         name: 'دپارتمان',
         Icon: TbPointFilled,
         path: '/admin/setting',
@@ -226,7 +245,13 @@ const profilePaths: ProfilePath[] = [
   },
 ]
 
-export default function DashboardAdminAside() {
+const profilePaths = makeIdsUnique(profileData)
+interface Props {
+  openRight: boolean
+  setOpenRight: Dispatch<SetStateAction<boolean>>
+}
+export default function DashboardAdminAside(props: Props) {
+  const { openRight, setOpenRight } = props
   const router = useRouter()
 
   const [openIndex, setOpenIndex] = useState<number | null>(null)
@@ -254,98 +279,200 @@ export default function DashboardAdminAside() {
   }
 
   return (
-    <aside className="sticky top-6 w-[265px] bg-[#1e1e2d]">
-      <div className="py-5 pt-4.5">
-        {profilePaths.map((item, index) => (
-          <>
-            {item.path ? (
-              <Link href={item.path} key={item.id}>
-                <div
-                  className={`flex cursor-pointer hover:bg-[#1b1b28] justify-between items-center py-2.5 text-sm px-6 pl-4 w-full gap-3 text-[#9899ac] ${
-                    router.pathname === item.path ? 'text-[#e90089] bg-[#1b1b28]' : ' text-gray-700'
-                  }`}
-                  onClick={() => handleToggle(item.id)}
-                >
-                  <div className="flex gap-3 items-center">
-                    <item.Icon
-                      className={`text-xl ${router.pathname === item.path ? 'text-[#e90089]' : 'text-[#5a6080]'}`}
-                    />
-                    <span className={`ml-2 ${router.pathname === item.path ? 'text-white' : ' text-gray-400'}`}>
-                      {item.name}
-                    </span>
-                  </div>{' '}
-                  {item.subItem && (
-                    <span className="text-white">
-                      <ArrowLeft
-                        className={`transition-all ease-in-out duration-500 ${
-                          openIndex == item.id ? '-rotate-90' : ''
-                        } text-3xl hover:shadow-xl rounded-full text-[#e90089]`}
+    <>
+      <aside className="sticky top-[60px] w-[265px] bg-[#1e1e2d] hidden lg2:block">
+        <div className="py-5 flex flex-col justify-between h-screen">
+          <div className="overflow-auto">
+            {profilePaths.map((item, index) =>
+              item.path ? (
+                <Link href={item.path} key={index}>
+                  <div
+                    className={`flex cursor-pointer hover:bg-[#1b1b28] justify-between items-center py-2.5 text-sm px-6 pl-4 w-full gap-3 text-[#9899ac] ${
+                      router.pathname === item.path ? 'text-[#e90089] bg-[#1b1b28]' : ' text-gray-700'
+                    }`}
+                    onClick={() => handleToggle(item.id)}
+                  >
+                    <div className="flex gap-3 items-center">
+                      <item.Icon
+                        className={`text-xl ${router.pathname === item.path ? 'text-[#e90089]' : 'text-[#5a6080]'}`}
                       />
-                    </span>
-                  )}
-                </div>
-              </Link>
-            ) : (
-              <div key={index}>
-                <div
-                  className={`flex cursor-pointer hover:bg-[#1b1b28] justify-between items-center py-2.5 text-sm px-6 pl-4 w-full gap-3 text-[#9899ac] ${
-                    router.pathname === item.pathName
-                      ? 'text-[#e90089] bg-[#1b1b28]'
-                      : openIndex === item.id
-                      ? 'bg-[#1b1b28]'
-                      : 'text-gray-700'
-                  }`}
-                  onClick={() => handleToggle(item.id)}
-                >
-                  <div className="flex gap-3 items-center">
-                    <item.Icon className="text-xl text-[#5a6080]" />
-                    <span
-                  className={`ml-2 ${
-                    isPathActive(item.pathName || '') || isParentPathActive(item.subItem)
-                      ? 'text-white'
-                      : 'text-gray-400'
-                  }`}
-                >
-                  {item.name}
-                </span>
-                  </div>{' '}
-                  {item.subItem && (
-                    <span className="text-white">
-                      <ArrowLeft
-                        className={`transition-all ease-in-out duration-500 ${
-                          openIndex == item.id ? '-rotate-90' : ''
-                        } text-3xl hover:shadow-xl rounded-full text-[#e90089]`}
-                      />
-                    </span>
-                  )}
-                </div>
-
-                <div
-                  className={`overflow-hidden w-full transition-all ease-in-out duration-500 ${
-                    item.subItem && openIndex === item.id ? 'max-h-screen' : 'max-h-0'
-                  }`}
-                >
-                  {item.subItem?.map((subItem, subIndex) => (
-                    <Link
-                      key={subIndex}
-                      href={subItem.path}
-                      className="flex items-center hover:bg-[#1b1b28] py-2.5 text-sm px-6 w-full gap-3 text-[#9899ac]"
-                    >
-                      <subItem.Icon
-                        className={`mr-4 text-sm ${isPathActive(subItem.path) ? 'text-[#e90089]' : 'text-[#5a6080]'}`}
-                      />
-                      <span className={`${isPathActive(subItem.path) ? 'text-white' : 'text-gray-400'}`}>
-                        {subItem.name}
+                      <span className={`ml-2 ${router.pathname === item.path ? 'text-white' : ' text-gray-400'}`}>
+                        {item.name}
                       </span>
-                    </Link>
-                  ))}
+                    </div>{' '}
+                    {item.subItem && (
+                      <span className="text-white">
+                        <ArrowLeft
+                          className={`transition-all ease-in-out duration-500 ${
+                            openIndex == item.id ? '-rotate-90' : ''
+                          } text-3xl hover:shadow-xl rounded-full text-[#e90089]`}
+                        />
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              ) : (
+                <div key={index}>
+                  <div
+                    className={`flex cursor-pointer hover:bg-[#1b1b28] justify-between items-center py-2.5 text-sm px-6 pl-4 w-full gap-3 text-[#9899ac] ${
+                      router.pathname === item.pathName
+                        ? 'text-[#e90089] bg-[#1b1b28]'
+                        : openIndex === item.id
+                        ? 'bg-[#1b1b28]'
+                        : 'text-gray-700'
+                    }`}
+                    onClick={() => handleToggle(item.id)}
+                  >
+                    <div className="flex gap-3 items-center">
+                      <item.Icon className="text-xl text-[#5a6080]" />
+                      <span
+                        className={`ml-2 ${
+                          isPathActive(item.pathName || '') || isParentPathActive(item.subItem)
+                            ? 'text-white'
+                            : 'text-gray-400'
+                        }`}
+                      >
+                        {item.name}
+                      </span>
+                    </div>{' '}
+                    {item.subItem && (
+                      <span className="text-white">
+                        <ArrowLeft
+                          className={`transition-all ease-in-out duration-500 ${
+                            openIndex == item.id ? '-rotate-90' : ''
+                          } text-3xl hover:shadow-xl rounded-full text-[#e90089]`}
+                        />
+                      </span>
+                    )}
+                  </div>
+
+                  <div
+                    className={`overflow-hidden w-full transition-all ease-in-out duration-500 ${
+                      item.subItem && openIndex === item.id ? 'max-h-screen' : 'max-h-0'
+                    }`}
+                  >
+                    {item.subItem?.map((subItem, subIndex) => (
+                      <Link
+                        key={subIndex}
+                        href={subItem.path}
+                        className="flex items-center hover:bg-[#1b1b28] py-2.5 text-sm px-6 w-full gap-3 text-[#9899ac]"
+                      >
+                        <subItem.Icon
+                          className={`mr-4 text-sm ${isPathActive(subItem.path) ? 'text-[#e90089]' : 'text-[#5a6080]'}`}
+                        />
+                        <span className={`${isPathActive(subItem.path) ? 'text-white' : 'text-gray-400'}`}>
+                          {subItem.name}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )
             )}
-          </>
-        ))}
-        <LogoutButton isShowDrawer />
-      </div>
-    </aside>
+          </div>
+          <LogoutButton isShowDrawer />
+        </div>
+      </aside>
+
+      <Drawer open={openRight} side="right" setOpen={setOpenRight}>
+        {openRight && (
+          <aside className="sticky  pt-[70px] top-[60px] w-[265px] bg-[#1e1e2d] block lg2:hidden">
+            <div className="py-5 flex flex-col justify-between h-screen">
+              <div className="overflow-auto">
+                {profilePaths.map((item, index) =>
+                  item.path ? (
+                    <Link href={item.path} key={index}>
+                      <div
+                        className={`flex cursor-pointer hover:bg-[#1b1b28] justify-between items-center py-2.5 text-sm px-6 pl-4 w-full gap-3 text-[#9899ac] ${
+                          router.pathname === item.path ? 'text-[#e90089] bg-[#1b1b28]' : ' text-gray-700'
+                        }`}
+                        onClick={() => handleToggle(item.id)}
+                      >
+                        <div className="flex gap-3 items-center">
+                          <item.Icon
+                            className={`text-xl ${router.pathname === item.path ? 'text-[#e90089]' : 'text-[#5a6080]'}`}
+                          />
+                          <span className={`ml-2 ${router.pathname === item.path ? 'text-white' : ' text-gray-400'}`}>
+                            {item.name}
+                          </span>
+                        </div>{' '}
+                        {item.subItem && (
+                          <span className="text-white">
+                            <ArrowLeft
+                              className={`transition-all ease-in-out duration-500 ${
+                                openIndex == item.id ? '-rotate-90' : ''
+                              } text-3xl hover:shadow-xl rounded-full text-[#e90089]`}
+                            />
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                  ) : (
+                    <div key={index}>
+                      <div
+                        className={`flex cursor-pointer hover:bg-[#1b1b28] justify-between items-center py-2.5 text-sm px-6 pl-4 w-full gap-3 text-[#9899ac] ${
+                          router.pathname === item.pathName
+                            ? 'text-[#e90089] bg-[#1b1b28]'
+                            : openIndex === item.id
+                            ? 'bg-[#1b1b28]'
+                            : 'text-gray-700'
+                        }`}
+                        onClick={() => handleToggle(item.id)}
+                      >
+                        <div className="flex gap-3 items-center">
+                          <item.Icon className="text-xl text-[#5a6080]" />
+                          <span
+                            className={`ml-2 ${
+                              isPathActive(item.pathName || '') || isParentPathActive(item.subItem)
+                                ? 'text-white'
+                                : 'text-gray-400'
+                            }`}
+                          >
+                            {item.name}
+                          </span>
+                        </div>{' '}
+                        {item.subItem && (
+                          <span className="text-white">
+                            <ArrowLeft
+                              className={`transition-all ease-in-out duration-500 ${
+                                openIndex == item.id ? '-rotate-90' : ''
+                              } text-3xl hover:shadow-xl rounded-full text-[#e90089]`}
+                            />
+                          </span>
+                        )}
+                      </div>
+
+                      <div
+                        className={`overflow-hidden w-full transition-all ease-in-out duration-500 ${
+                          item.subItem && openIndex === item.id ? 'max-h-screen' : 'max-h-0'
+                        }`}
+                      >
+                        {item.subItem?.map((subItem, subIndex) => (
+                          <Link
+                            key={subIndex}
+                            href={subItem.path}
+                            className="flex items-center hover:bg-[#1b1b28] py-2.5 text-sm px-6 w-full gap-3 text-[#9899ac]"
+                          >
+                            <subItem.Icon
+                              className={`mr-4 text-sm ${
+                                isPathActive(subItem.path) ? 'text-[#e90089]' : 'text-[#5a6080]'
+                              }`}
+                            />
+                            <span className={`${isPathActive(subItem.path) ? 'text-white' : 'text-gray-400'}`}>
+                              {subItem.name}
+                            </span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                )}
+                <LogoutButton isShowDrawer />
+              </div>
+            </div>
+          </aside>
+        )}
+      </Drawer>
+    </>
   )
 }
