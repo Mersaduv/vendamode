@@ -43,7 +43,7 @@ const LoginPage: NextPage = () => {
         />
       )}
 
-<main className="grid min-h-screen items-center">
+      <main className="grid min-h-screen items-center">
         <Head>
           <title>مدیریت | ورود</title>
         </Head>

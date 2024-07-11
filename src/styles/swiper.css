@@ -2,7 +2,7 @@
 .swiper-button-next {
   color: #0ea5e9 !important;
   background: #ffffff;
-  opacity: 50%;
+  opacity: 100%;
   border-radius: 5px;
   width: 2rem !important;
   height: 2rem !important;
@@ -19,6 +19,31 @@
   }
 @media (max-width: 450px) {
   .swiper-button-prev {
+    margin-right: 10px !important;
+    }
+}
+
+.detailSwiper .swiper-button-prev,
+.detailSwiper .swiper-button-next {
+  color: #e90089 !important;
+  background: #ffffff;
+  opacity: 100%;
+  border-radius: 5px;
+  width: 2rem !important;
+  height: 2rem !important;
+  z-index: 99;
+}
+.detailSwiper .swiper-button-next::after,
+.detailSwiper .swiper-button-prev::after {
+  font-size: 20px !important;
+}
+
+
+.detailSwiper .swiper-button-prev {
+  margin-right: 10px !important;
+  }
+@media (max-width: 450px) {
+  .detailSwiper .swiper-button-prev {
     margin-right: 10px !important;
     }
 }

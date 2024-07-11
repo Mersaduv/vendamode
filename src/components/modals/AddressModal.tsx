@@ -14,10 +14,11 @@ interface Props {
   onClose: () => void
   address: IAddress
   refetch: () => void
+  openIsAddressList?:() => void
 }
 
 const AddressModal: React.FC<Props> = (props) => {
-  const { isShow, onClose, address, refetch } = props
+  const { isShow, onClose, address, refetch ,openIsAddressList} = props
   const AllProvinces = iranCity.allProvinces()
   const { data: userInfo } = useGetUserAddressInfoQuery({ page: 1 })
 
@@ -74,13 +75,16 @@ const AddressModal: React.FC<Props> = (props) => {
         body: address,
       }).unwrap()
       refetch()
+      if (openIsAddressList) {
+        openIsAddressList()
+      }
     } catch (error) {
       console.error('Failed to update user data:', error)
     }
   }
 
   return (
-    <>
+    <div className=''>
       {(isSuccess || isError) && (
         <HandleResponse
           isError={isError}
@@ -92,7 +96,7 @@ const AddressModal: React.FC<Props> = (props) => {
       )}
 
       <Modal isShow={isShow} onClose={onClose} effect="bottom-to-top">
-        <Modal.Content onClose={onClose} className="flex h-full flex-col gap-y-5 bg-white px-5 py-5 md:rounded-lg ">
+        <Modal.Content onClose={onClose} className="flex h-full flex-col z-[199] gap-y-5 bg-white px-5 py-5 md:rounded-lg ">
           <Modal.Header onClose={onClose}>ثبت آدرس</Modal.Header>
           <Modal.Body>
             <p>لطفا اطلاعات موقعیت مکانی خود را وارد کنید.</p>
@@ -149,7 +153,7 @@ const AddressModal: React.FC<Props> = (props) => {
           </Modal.Body>
         </Modal.Content>
       </Modal>
-    </>
+    </div>
   )
 }
 

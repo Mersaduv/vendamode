@@ -1,111 +1,165 @@
-// import { PayloadAction, createSlice, nanoid } from '@reduxjs/toolkit'
+import { PayloadAction, createSlice, nanoid } from '@reduxjs/toolkit'
 
-// import { exsitItem, getTotal } from '@/utils'
+import { exsitItem, getTotal } from '@/utils'
 
-// import type { ICart, IColor, ISize } from '@/types'
+import type { ICart, IColorDTO, IObjectValue, ISizeDTO } from '@/types'
 
-// interface CartState {
-//   cartItems: ICart[]
-//   totalItems: number
-//   totalPrice: number
-//   totalDiscount: number
-//   tempSize: ISize | null
-//   tempColor: IColor | null
-// }
+interface CartState {
+  cartItems: ICart[]
+  totalItems: number
+  totalPrice: number
+  totalDiscount: number
+  tempSize: ISizeDTO | null
+  tempColor: IColorDTO | null
+  tempObjectValue: IObjectValue | null
+  isProcessPayment: boolean
+  placeOrderId: string
+}
 
-// const getCartItems = (): ICart[] => {
-//   if (typeof window !== 'undefined') {
-//     const cartItemsJSON = localStorage.getItem('cartItems')
-//     if (cartItemsJSON) return JSON.parse(localStorage.getItem('cartItems') as string)
-//   }
-//   return [] as ICart[]
-// }
+const getCartItems = (): ICart[] => {
+  if (typeof window !== 'undefined') {
+    const cartItemsJSON = localStorage.getItem('cartItems')
+    if (cartItemsJSON) return JSON.parse(localStorage.getItem('cartItems') as string)
+  }
+  return [] as ICart[]
+}
 
-// const setCartItems = (cartItems: ICart[]) => localStorage.setItem('cartItems', JSON.stringify(cartItems))
+const setCartItems = (cartItems: ICart[]) => localStorage.setItem('cartItems', JSON.stringify(cartItems))
 
-// const initialState: CartState = {
-//   cartItems: getCartItems(),
-//   totalItems: getTotal(getCartItems(), 'quantity'),
-//   totalPrice: getTotal(getCartItems(), 'price'),
-//   totalDiscount: getTotal(getCartItems(), 'discount'),
-//   tempSize: null,
-//   tempColor: null,
-// }
+const getIsProcessPayment = () => {
+  if (typeof window !== 'undefined') {
+    const isProcessPayment = localStorage.getItem('isProcessPayment')
+    return isProcessPayment !== null ? JSON.parse(isProcessPayment) : false
+  }
+}
 
-// const cartSlice = createSlice({
-//   name: 'cart',
-//   initialState,
-//   reducers: {
-//     addToCart: (state, action: PayloadAction<Omit<ICart, 'itemID'>>) => {
-//       const { color, size, productID } = action.payload
+const getPlaceOrderId = () => {
+  if (typeof window !== 'undefined') {
+    const placeOrderId = localStorage.getItem('placeOrderId')
+    return placeOrderId !== null ? JSON.parse(placeOrderId) : false
+  }
+}
 
-//       const isItemExist = exsitItem(state.cartItems, productID, color, size)
+const initialState: CartState = {
+  cartItems: getCartItems(),
+  totalItems: getTotal(getCartItems(), 'quantity'),
+  totalPrice: getTotal(getCartItems(), 'price'),
+  totalDiscount: getTotal(getCartItems(), 'discount'),
+  tempObjectValue: null,
+  tempSize: null,
+  tempColor: null,
+  isProcessPayment: getIsProcessPayment(),
+  placeOrderId: getPlaceOrderId(),
+}
 
-//       if (isItemExist) {
-//         isItemExist.quantity += 1
-//         state.totalItems = getTotal(state.cartItems, 'quantity')
-//         state.totalPrice = getTotal(state.cartItems, 'price')
-//         state.totalDiscount = getTotal(state.cartItems, 'discount')
-//         setCartItems(state.cartItems)
-//       } else {
-//         state.cartItems.push({ itemID: nanoid(), ...action.payload })
-//         state.totalItems = getTotal(state.cartItems, 'quantity')
-//         state.totalPrice = getTotal(state.cartItems, 'price')
-//         state.totalDiscount = getTotal(state.cartItems, 'discount')
-//         setCartItems(state.cartItems)
-//       }
-//     },
+const cartSlice = createSlice({
+  name: 'cart',
+  initialState,
+  reducers: {
+    addToCart: (state, action: PayloadAction<Omit<ICart, 'itemID'>>) => {
+      const { color, size, productID, features, } = action.payload;
+    
+      const isItemExist = exsitItem(state.cartItems, productID, color, size, features);
+    
+      if (isItemExist) {
+        isItemExist.quantity += 1;
+        state.totalItems = getTotal(state.cartItems, 'quantity');
+        state.totalPrice = getTotal(state.cartItems, 'price');
+        state.totalDiscount = getTotal(state.cartItems, 'discount');
+        setCartItems(state.cartItems);
+      } else {
+        state.cartItems.push({ itemID: nanoid(), ...action.payload });
+        state.totalItems = getTotal(state.cartItems, 'quantity');
+        state.totalPrice = getTotal(state.cartItems, 'price');
+        state.totalDiscount = getTotal(state.cartItems, 'discount');
+        setCartItems(state.cartItems);
+      }
+    },
 
-//     removeFromCart: (state, action: PayloadAction<string>) => {
-//       const index = state.cartItems.findIndex((item) => item.itemID === action.payload)
+    removeFromCart: (state, action: PayloadAction<string>) => {
+      const index = state.cartItems.findIndex((item) => item.itemID === action.payload)
 
-//       if (index !== -1) {
-//         state.cartItems.splice(index, 1)
-//         state.totalItems = getTotal(state.cartItems, 'quantity')
-//         state.totalPrice = getTotal(state.cartItems, 'price')
-//         state.totalDiscount = getTotal(state.cartItems, 'discount')
-//         setCartItems(state.cartItems)
-//       }
-//     },
+      if (index !== -1) {
+        state.cartItems.splice(index, 1)
+        state.totalItems = getTotal(state.cartItems, 'quantity')
+        state.totalPrice = getTotal(state.cartItems, 'price')
+        state.totalDiscount = getTotal(state.cartItems, 'discount')
+        setCartItems(state.cartItems)
+      }
+    },
 
-//     increase: (state, action: PayloadAction<string>) => {
-//       state.cartItems.forEach((item) => {
-//         if (item.itemID === action.payload) item.quantity += 1
-//       })
-//       state.totalItems = getTotal(state.cartItems, 'quantity')
-//       state.totalPrice = getTotal(state.cartItems, 'price')
-//       state.totalDiscount = getTotal(state.cartItems, 'discount')
-//       setCartItems(state.cartItems)
-//     },
+    increase: (state, action: PayloadAction<string>) => {
+      state.cartItems.forEach((item) => {
+        if (item.itemID === action.payload) item.quantity += 1
+      })
+      state.totalItems = getTotal(state.cartItems, 'quantity')
+      state.totalPrice = getTotal(state.cartItems, 'price')
+      state.totalDiscount = getTotal(state.cartItems, 'discount')
+      setCartItems(state.cartItems)
+    },
 
-//     decrease: (state, action: PayloadAction<string>) => {
-//       state.cartItems.forEach((item) => {
-//         if (item.itemID === action.payload) item.quantity -= 1
-//       })
-//       state.totalItems = getTotal(state.cartItems, 'quantity')
-//       state.totalPrice = getTotal(state.cartItems, 'price')
-//       state.totalDiscount = getTotal(state.cartItems, 'discount')
-//       setCartItems(state.cartItems)
-//     },
+    decrease: (state, action: PayloadAction<string>) => {
+      state.cartItems.forEach((item) => {
+        if (item.itemID === action.payload) item.quantity -= 1
+      })
+      state.totalItems = getTotal(state.cartItems, 'quantity')
+      state.totalPrice = getTotal(state.cartItems, 'price')
+      state.totalDiscount = getTotal(state.cartItems, 'discount')
+      setCartItems(state.cartItems)
+    },
 
-//     clearCart: (state) => {
-//       state.cartItems = []
-//       state.totalItems = 0
-//       state.totalPrice = 0
-//       state.totalDiscount = 0
-//       localStorage.removeItem('cartItems')
-//     },
+    clearCart: (state) => {
+      state.cartItems = []
+      state.totalItems = 0
+      state.totalPrice = 0
+      state.totalDiscount = 0
+      localStorage.removeItem('cartItems')
+    },
 
-//     setTempColor: (state, action: PayloadAction<IColor | null>) => {
-//       state.tempColor = action.payload
-//     },
+    setTempColor: (state, action: PayloadAction<IColorDTO | null>) => {
+      state.tempColor = action.payload
+    },
 
-//     setTempSize: (state, action: PayloadAction<ISize | null>) => {
-//       state.tempSize = action.payload
-//     },
-//   },
-// })
+    setTempSize: (state, action: PayloadAction<ISizeDTO | null>) => {
+      state.tempSize = action.payload
+    },
+    setTempObjectValue: (state, action: PayloadAction<IObjectValue | null>) => {
+      state.tempObjectValue = action.payload
+    },
 
-// export const { addToCart, removeFromCart, clearCart, decrease, increase, setTempColor, setTempSize } = cartSlice.actions
+    setIsProcessPayment: (state, action: PayloadAction<{ id: string; isProcessPayment: boolean }>) => {
+      const { id, isProcessPayment } = action.payload
+      state.placeOrderId = id
+      state.isProcessPayment = isProcessPayment
+      console.log(isProcessPayment, id)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('placeOrderId', JSON.stringify(id))
+        localStorage.setItem('isProcessPayment', JSON.stringify(isProcessPayment))
+      }
+    },
 
-// export default cartSlice.reducer
+    clearIsProcessPayment: (state) => {
+      state.placeOrderId = ''
+      state.isProcessPayment = false
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('placeOrderId')
+        localStorage.removeItem('isProcessPayment')
+      }
+    },
+  },
+})
+
+export const {
+  addToCart,
+  removeFromCart,
+  clearCart,
+  decrease,
+  increase,
+  setTempColor,
+  setTempSize,
+  setTempObjectValue,
+  setIsProcessPayment,
+  clearIsProcessPayment
+} = cartSlice.actions
+
+export default cartSlice.reducer

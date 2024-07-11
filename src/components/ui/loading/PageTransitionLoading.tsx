@@ -28,7 +28,7 @@ export default function PageTransitionLoading() {
   // ? Render(s)
   return (
     loading && (
-      <div className="fixed inset-0 z-40 ">
+      <div className="fixed inset-0 z-[300]">
         <div className="grid h-full place-items-center bg-blue-50/30 ">
           <FullScreenLoading />
         </div>

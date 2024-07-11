@@ -1,0 +1,86 @@
+import { Button, Modal } from '@/components/ui'
+import { IProductSizeInfo } from '@/types'
+import { digitsEnToFa } from '@persian-tools/persian-tools'
+
+interface Props {
+  isShow: boolean
+  onClose: () => void
+  productSizeInfo: IProductSizeInfo
+}
+
+const ProductScaleModal: React.FC<Props> = (props) => {
+  const { isShow, onClose, productSizeInfo } = props
+  if (productSizeInfo) {
+    console.log(productSizeInfo)
+  }
+  return (
+    <>
+      {/* {(isSuccess || isError) && (
+        <HandleResponse
+          isError={isError}
+          isSuccess={isSuccess}
+          error={error}
+          message={data?.message}
+          onSuccess={onClose}
+        />
+      )} */}
+
+      <Modal isShow={isShow} onClose={onClose} effect="bottom-to-top">
+        <Modal.Content onClose={onClose} className="flex h-full flex-col gap-y-5 bg-white md:rounded-lg  w-full">
+          <Modal.Header notBar onClose={onClose}>
+            راهنمای سایز
+          </Modal.Header>
+          <Modal.Body>
+            <div className="flex flex-col-reverse  items-center sm:flex-row gap-x-6 pb-4 px-5">
+              <div className="flex flex-col flex-1">
+                <div className='text-center sm:text-start'>
+                  <span className="font-normal">
+                    - تلورانس اندازه گیری تا {digitsEnToFa('5%')} طبیعی است <br /> - اعداد بر حسب{' '}
+                    <span className="text-red-600">{productSizeInfo.sizeType == '0' ? 'سانتیمتر' : 'میلیمتر'}</span>{' '}
+                    میباشد
+                  </span>
+                </div>
+                <Button className="bg-white mt-1.5 text-gray-800 font-semibold border rounded">سایز</Button>
+                <table className="table-auto mt-4 border-collapse w-full">
+                  <thead className="bg-[#8fdcff]">
+                    <tr>
+                      <th className=" px-4 py-2"></th>
+                      {productSizeInfo?.columns?.map((column) => (
+                        <th key={column.id} className="px-4 py-2 w-[135px] font-normal">
+                          {column.name}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productSizeInfo?.rows?.map((row, rowIndex) => (
+                      <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-gray-100' : ''}>
+                        <td className="px-4 py-2">{row.productSizeValue}</td>
+                        {productSizeInfo?.columns?.map((column, colIndex) => (
+                          <td key={colIndex} className="px-4 py-2 font-normal">
+                            <div className="border h-9 w-full flex justify-start  items-center pr-1 rounded-md bg-white">
+                              {row.scaleValues![colIndex] || ''}
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="rounded-lg shadow-product w-[240px] h-[240px]">
+                <img
+                  className="w-full h-full rounded-lg"
+                  src={productSizeInfo.imagesSrc?.imageUrl}
+                  alt="عکس اندازه محصول"
+                />
+              </div>
+            </div>
+          </Modal.Body>
+        </Modal.Content>
+      </Modal>
+    </>
+  )
+}
+
+export default ProductScaleModal

@@ -70,61 +70,65 @@ export const bannerSchema = Yup.object().shape({
 export const addressSchema = Yup.object().shape({
   fullName: Yup.string().required('نام و نام خانوادگی الزامی است'),
   mobileNumber: Yup.string()
-  .required('شماره موبایل الزامی است')
-  .matches(/^[0-9]{11}$/, 'شماره موبایل باید 11 رقم باشد'),
+    .required('شماره موبایل الزامی است')
+    .matches(/^[0-9]{11}$/, 'شماره موبایل باید 11 رقم باشد'),
   city: Yup.object().shape({
-  id: Yup.number().optional(),
-  name: Yup.string().required('نام شهر الزامی است'),
-  slug: Yup.string().optional(),
-  province_id: Yup.number().optional(),
+    id: Yup.number().optional(),
+    name: Yup.string().required('نام شهر الزامی است'),
+    slug: Yup.string().optional(),
+    province_id: Yup.number().optional(),
   }),
   province: Yup.object().shape({
-  id: Yup.number().optional(),
-  name: Yup.string().required('نام استان الزامی است'),
-  slug: Yup.string().optional(),
+    id: Yup.number().optional(),
+    name: Yup.string().required('نام استان الزامی است'),
+    slug: Yup.string().optional(),
   }),
   fullAddress: Yup.string().required('آدرس کامل الزامی است'),
-  postalCode: Yup.string()
-  .required('کد پستی الزامی است'),
-  });
+  postalCode: Yup.string().required('کد پستی الزامی است'),
+})
 
 export const reviewSchema = Yup.object().shape({
-  title: Yup.string().required('عنوان نظر نباید خالی باشد').min(4, 'عنوان نظر نباید کمتر از 4 حرف باشد'),
-  comment: Yup.string().required('متن نظر نباید خالی باشد').min(4, 'متن نظر نباید کمتر از 4 حرف باشد'),
-})
+  userId: Yup.string(),
+  productId: Yup.string(),
+  rating: Yup.number().required('امتیاز الزامی است').min(1, 'امتیاز باید حداقل ۱ باشد').max(5, 'امتیاز نباید بیشتر از ۵ باشد'),
+  positivePoints: Yup.array().of(
+    Yup.object().shape({
+      id: Yup.string(),
+      title: Yup.string()
+    })
+  ),
+  negativePoints: Yup.array().of(
+    Yup.object().shape({
+      id: Yup.string(),
+      title: Yup.string()
+    })
+  ),
+  comment: Yup.string().required('نظر الزامی است').min(4, 'نظر باید حداقل ۴ کاراکتر باشد'),
+  Thumbnail: Yup.mixed()
+});
 
 export const productSchema = Yup.object().shape({
-  title: Yup.string().required('عنوان الزامی است'),
-  description: Yup.string(),
-  price: Yup.number().required('قیمت الزامی است'),
-  discount: Yup.number(),
-  images: Yup.array()
-    .of(
-      Yup.object().shape({
-        placeholder: Yup.string(),
-        id: Yup.string(),
-        url: Yup.string()
-          .required()
-          .url('آدرس تصویر معتبر نیست')
-          .matches(/\.(gif|jpe?g|png|webp)$/i, 'آدرس تصویر باید یک URL تصویر معتبر باشد'),
-      })
-    )
-    .min(1, 'حداقل یک تصویر الزامی است')
-    .required('تصویر الزامی است'),
-  inStock: Yup.number().required('موجودی الزامی است'),
-  info: Yup.array().of(
+  Title: Yup.string().required("نام محصول الزامی است"),
+  IsActive: Yup.boolean(),
+  MainThumbnail: Yup.mixed().required("نگاره اول برای محصول الزامی است"),
+  Thumbnail: Yup.mixed().required("حداقل یک عکس در گالری باید اضافه شود"),
+  CategoryId: Yup.string().required("دسته بندی برای محصول الزامی است"),
+  Description: Yup.string(),
+  IsFake: Yup.boolean(),
+  BrandId: Yup.string().nullable(),
+  FeatureValueIds: Yup.array().of(Yup.string()),
+  ProductScale: Yup.object().nullable(),
+  StockItems: Yup.array().of(
     Yup.object().shape({
-      title: Yup.string().required('عنوان ویژگی‌ها الزامی است'),
-      description: Yup.string(),
+      id: Yup.string().nullable(),
+      featureValueId: Yup.array().of(Yup.string()),
+      price: Yup.number().nullable().required("تعیین قیمت محصول الزامی است"),
+      discoint: Yup.number().nullable(),
+      sizeId: Yup.string().nullable(),
+      quantity: Yup.string().required("تعیین تعداد محصول الزامی است"),
     })
-  ),
-  specification: Yup.array().of(
-    Yup.object().shape({
-      title: Yup.string().required('عنوان مشخصات الزامی است'),
-      value: Yup.string(),
-    })
-  ),
-})
+  ).nullable(),
+});
 
 export const detailsSchema = Yup.object().shape({
   info: Yup.array().of(

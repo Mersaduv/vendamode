@@ -12,7 +12,7 @@ const ProductStockIndicator: React.FC<Props> = ({ inStock }) => {
     return (
       <div className="flex gap-x-1 text-teal-400">
         <Save className="icon text-teal-400" />
-        <span className="text-teal-700">موجود در انبار دیجی کالا</span>
+        <span className="text-teal-700">موجود در انبار  </span>
       </div>
     )
   } else if (inStock === 0) {

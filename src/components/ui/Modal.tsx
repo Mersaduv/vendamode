@@ -39,7 +39,7 @@ const Modal: React.FC<ModalProps> = (props) => {
   const effectClasses =
     effect === 'bottom-to-top'
       ? `
-  ${isShow ? 'bottom-0 md:top-20' : '-bottom-full md:top-60'} w-full h-full md:h-fit md:max-w-3xl 
+  ${isShow ? 'bottom-0 md:top-20' : '-bottom-full md:top-60'} w-full h-full  md:h-fit md:max-w-3xl 
    fixed transition-all duration-700 left-0 right-0 mx-auto`
       : effect === 'ease-out'
         ? `
@@ -54,9 +54,9 @@ const Modal: React.FC<ModalProps> = (props) => {
   // ? Render(s)
   return (
     <div
-      className={`${
+      className={`z-[110] ${
         isShow ? 'visible opacity-100' : 'invisible opacity-0 '
-      } fixed inset-0 z-50 transition-all duration-500`}
+      } fixed inset-0 z-[100] transition-all duration-500`}
     >
       <div className="h-screen w-screen bg-gray-400/20" onClick={onClose} />
       <div className={effectClasses}>
@@ -98,14 +98,17 @@ const Content: React.FC<ContentProps> = (props) => {
 
 interface HeaderProps {
   onClose: () => void
+  notBar?: boolean
   children: React.ReactNode
 }
 
 const Header: React.FC<HeaderProps> = (props) => {
   // ? Props
-  const { onClose, children } = props
+  const { onClose, children,notBar } = props
 
   // ? Render(s)
+  if (notBar) return <span onClick={onClose} className="text-base md:text-xl md:font-medium mt-4 font-normal border-b px-5 pb-3">{children}</span>
+
   return (
     <div className="flex items-center justify-between border bg-[#fdebf6]  border-[#e90089] py-3.5 px-3 rounded-md">
       <span className="text-sm font-normal text-[#e90089]">{children}</span>

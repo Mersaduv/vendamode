@@ -10,7 +10,7 @@ const ProfileLayout: React.FC<Props> = ({ children }) => {
   return (
     <>
     <ProtectedRouteWrapper allowedRoles={[roles.ADMIN, roles.SUPERADMIN, roles.USER]}>
-      <div className="lg:container md:flex md:max-w-7xl md:gap-x-4 md:px-3 pt-40 md:pt-32">
+      <div className="lg:container md:flex md:max-w-7xl md:gap-x-6 md:px-3 pt-40 md:pt-32">
         <div className="hidden md:block">
           <UserProfileAside />
         </div>

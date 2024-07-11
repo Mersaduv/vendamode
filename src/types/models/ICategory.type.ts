@@ -17,6 +17,8 @@ export interface ICategory {
   isActive: boolean
   isDeleted: boolean
   parentCategory?: ICategory
+  parentCategories?: ICategory[]
+  parentCategoriesTree?: ICategory[]
   childCategories?: ICategory[]
   categories?: ICategory[]
 }

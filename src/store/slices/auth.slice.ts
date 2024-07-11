@@ -1,3 +1,4 @@
+import { IAddress } from '@/types'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface AuthState {
@@ -10,6 +11,7 @@ interface AuthState {
     expireTime: number | null
     refreshTokenExpireTime: number | null
   } | null
+  address: IAddress
   loggedIn: boolean
 }
 
@@ -17,8 +19,16 @@ const getToken = () => (typeof window !== 'undefined' && localStorage.getItem('t
 const getRefreshToken = () => (typeof window !== 'undefined' && localStorage.getItem('refreshToken')) || null
 const getUserInfo = () => {
   if (typeof window !== 'undefined' && localStorage.getItem('userInfo')) {
-   var data =JSON.parse(localStorage.getItem('userInfo') as string)
-   console.log(data , 'slice ------------')
+    var data = JSON.parse(localStorage.getItem('userInfo') as string)
+    console.log(data, 'slice ------------')
+    return data
+  }
+  return null
+}
+const getAddress = () => {
+  if (typeof window !== 'undefined' && localStorage.getItem('address')) {
+    var data = JSON.parse(localStorage.getItem('address') as string)
+    console.log(data, 'slice ------------')
     return data
   }
   return null
@@ -34,6 +44,7 @@ const initialState: AuthState = {
   token: getToken(),
   refreshToken: getRefreshToken(),
   userInfo: getUserInfo(),
+  address: getAddress(),
   loggedIn: getLoggedIn(),
 }
 
@@ -41,6 +52,12 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    setAddress: (state, action: PayloadAction<IAddress>) => {
+      const data = action.payload
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('address', JSON.stringify(data))
+      }
+    },
     setCredentials: (
       state,
       action: PayloadAction<{ token: string; refreshToken: string; userInfo: any; loggedIn: boolean }>
@@ -83,6 +100,6 @@ const authSlice = createSlice({
   },
 })
 
-export const { setCredentials, setCredentialsToken, clearCredentials } = authSlice.actions
+export const { setAddress, setCredentials, setCredentialsToken, clearCredentials } = authSlice.actions
 
 export default authSlice.reducer

@@ -2,7 +2,7 @@ export default interface IAddress {
   id: string
   userId: string
   fullName: string
-  mobileNumber: string
+  mobileNumber: string | null
   city: {
     id?: number
     name: string

@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 import { Address, Delete, Edit, Location, Location2, Phone, Plus, Post, User, UserLocation, Users } from '@/icons'
 
 import { ProfileLayout } from '@/components/Layouts'
-import { Header, WithAddressModal } from '@/components/shared'
+import { Header } from '@/components/shared'
 import { AddressSkeleton } from '@/components/skeleton'
 import { PageContainer } from '@/components/ui'
 
@@ -91,28 +91,6 @@ const BasicAddresses: NextPage = () => {
                       </button>
                     </div>
                   </div>
-                  {/* <div className="my-2 space-y-3 text-gray-500">
-                  <div className="flex items-center gap-x-2 ">
-                    <UserLocation className="icon text-gray-500" />
-                    <span className="text-xs md:text-sm">
-                      {address?.province.name}, {address?.city.name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-x-2 ">
-                    <Post className="icon text-gray-500" />
-                    <span className="text-xs md:text-sm">{address?.postalCode}</span>
-                  </div>
-                  {address?.mobileNumber && (
-                    <div className="flex items-center gap-x-2 ">
-                      <Phone className="icon text-gray-500" />
-                      <span className="text-xs md:text-sm">{address?.mobileNumber}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-x-2 ">
-                    <User className="icon text-gray-500" />
-                    <span className="text-xs md:text-sm">{address?.fullName}</span>
-                  </div>
-                </div> */}
                 </section>
               ))}
             </div>

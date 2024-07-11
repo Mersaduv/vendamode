@@ -1,6 +1,6 @@
 import baseApi from '@/services/baseApi'
 
-import { generateQueryParams } from '@/utils'
+import { generateQueryParams, getToken } from '@/utils'
 
 import type {
   CreateCategoryQuery,
@@ -12,6 +12,7 @@ import type {
   MsgResult,
   UpdateCategoryQuery,
 } from './types'
+import { ICategory, ServiceResponse } from '@/types'
 
 export const categoryApiSlice = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -24,6 +25,27 @@ export const categoryApiSlice = baseApi.injectEndpoints({
         result?.data?.categoryDTO
           ? [
               ...result.data.categoryDTO.map(({ id }) => ({
+                type: 'Category' as const,
+                id: id,
+              })),
+              'Category',
+            ]
+          : ['Category'],
+      
+    }),
+
+    getCategoriesTree: builder.query<ServiceResponse<ICategory[]>, void>({
+      query: () => ({
+        url: '/api/categories-tree',
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      }),
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result.data.map(({ id }) => ({
                 type: 'Category' as const,
                 id: id,
               })),
@@ -77,4 +99,5 @@ export const {
   useGetSingleCategoryQuery,
   useUpdateCategoryMutation,
   useGetSubCategoriesQuery,
+  useGetCategoriesTreeQuery
 } = categoryApiSlice
