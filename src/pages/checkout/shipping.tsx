@@ -62,6 +62,7 @@ const ShippingPage: NextPage = () => {
   ] = usePlaceOrderMutation()
 
   const saveIncompleteOrder = () => {
+    console.log(address , '    console.log(address)')
     if (!address?.city && !address?.province && !address?.fullAddress && !address?.postalCode) {
       return dispatch(
         showAlert({

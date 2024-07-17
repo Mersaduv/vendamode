@@ -1,3 +1,5 @@
+import { CategorySizeDTO } from "@/services/category/types"
+
 export interface ICategory {
   id: string
   name: string
@@ -13,6 +15,7 @@ export interface ICategory {
   subCategoryCount: number
   featureCount: number
   sizeCount: number
+  categorySizes?: CategorySizeDTO
   brandCount: number
   isActive: boolean
   isDeleted: boolean

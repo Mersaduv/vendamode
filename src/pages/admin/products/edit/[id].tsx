@@ -17,13 +17,15 @@ import type { IProduct, IProductForm } from '@/types'
 import { ProductForm } from '@/components/form'
 import ProductFormEdit from '@/components/form/ProductFormEdit'
 import { useGetSingleProductQuery, useUpdateProductMutation } from '@/services'
+import { useDispatch } from 'react-redux'
+import { setUpdated } from '@/store'
 
 interface Props {}
 const Edit: NextPage<Props> = () => {
   // ? Assets
   const { query, back, push } = useRouter()
   const id = query.id as string
-
+  const dispatch = useDispatch()
   const initialUpdataInfo = {} as IProduct
 
   // ? Modals
@@ -34,7 +36,7 @@ const Edit: NextPage<Props> = () => {
 
   // ? Queries
   //*    Get Product
-  const { data: selectedProduct, isLoading: isLoadingGetSelectedProduct } = useGetSingleProductQuery({ id })
+  const { refetch, data: selectedProduct, isLoading: isLoadingGetSelectedProduct } = useGetSingleProductQuery({ id })
 
   //*   Update Product
   const [
@@ -54,6 +56,7 @@ const Edit: NextPage<Props> = () => {
     confirmUpdateModalHandlers.open()
   }
   const onSuccess = () => {
+    dispatch(setUpdated(true))
     push('/admin/products')
   }
 
@@ -75,18 +78,20 @@ const Edit: NextPage<Props> = () => {
         </Head>
 
         <DashboardLayout>
-            {isLoadingGetSelectedProduct ? (
-              <div className="px-3 py-20">
-                <FullScreenLoading />
-              </div>
-            ) : selectedProduct?.data ? (
+          {isLoadingGetSelectedProduct ? (
+            <div className="px-3 py-20">
+              <FullScreenLoading />
+            </div>
+          ) : selectedProduct?.data ? (
+            <section className="bg-[#f5f8fa] w-full px-8 lg:px-14">
               <ProductFormEdit
                 mode="edit"
                 isLoadingUpdate={isLoadingUpdate}
                 updateHandle={updateHandle}
                 selectedProduct={selectedProduct.data}
               />
-            ) : null}
+            </section>
+          ) : null}
         </DashboardLayout>
       </main>
     </>

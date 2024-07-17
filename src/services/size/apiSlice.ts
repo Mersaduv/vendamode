@@ -22,13 +22,6 @@ export const sizeApiSlice = baseApi.injectEndpoints({
           Authorization: `Bearer ${getToken()}`,
         },
       }),
-      providesTags: (result) =>
-        result?.data
-          ? [
-              ...result.data.map(({ id }) => ({ type: 'Size' as const, id })),
-              'Size',
-            ]
-          : ['Size'],
     }),
 
     getSize: builder.query<GetSizeResult, IdQuery>({
@@ -39,7 +32,6 @@ export const sizeApiSlice = baseApi.injectEndpoints({
           Authorization: `Bearer ${getToken()}`,
         },
       }),
-      providesTags: (result, err, arg) => [{ type: 'Size', id: arg.id }],
     }),
 
     getSizeByCategoryId: builder.query<GetProductSizeResult, IdQuery>({
@@ -50,7 +42,6 @@ export const sizeApiSlice = baseApi.injectEndpoints({
           Authorization: `Bearer ${getToken()}`,
         },
       }),
-      providesTags: (result, err, arg) => [{ type: 'ProductSize', id: arg.id }],
     }),
 
     createSize: builder.mutation<CreateSizeResult, CreateSizeQuery>({
@@ -62,7 +53,6 @@ export const sizeApiSlice = baseApi.injectEndpoints({
         },
         body,
       }),
-      invalidatesTags: ['Size'],
     }),
 
     createCategorySize: builder.mutation<CreateSizeResult, CreateProductSizeQuery>({
@@ -74,7 +64,6 @@ export const sizeApiSlice = baseApi.injectEndpoints({
         },
         body,
       }),
-      invalidatesTags: ['ProductSize'],
     }),
 
     deleteSize: builder.mutation<DeleteSizeResult, IdQuery>({
@@ -85,7 +74,6 @@ export const sizeApiSlice = baseApi.injectEndpoints({
           Authorization: `Bearer ${getToken()}`,
         },
       }),
-      invalidatesTags: ['Size'],
     }),
   }),
 });

@@ -57,7 +57,7 @@ const TextEditor: React.FC<Props> = ({ control }) => {
             modules={modules}
             formats={formats}
             onChange={(content, delta, source, editor) => {
-              field.onChange(stripTags(content))
+              field.onChange(content)
             }}
           />
         )}

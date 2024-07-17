@@ -1,10 +1,10 @@
 import type { ICart, ICategory, IProduct, IReview, IUser } from '@/types'
 
 export interface ICategoryForm {
-  id?: string
+  id?: string | undefined
   name: string
   isActive: boolean
-  thumbnail?: FileList
+  thumbnail?: File | undefined
   mainCategoryId?: string
   parentCategoryId?: string
   level: number
@@ -42,6 +42,7 @@ export interface IBrandForm {
 }
 
 export interface IProductForm {
+  Id : string
   Title: string
   IsActive: boolean
   MainThumbnail?: File | null
@@ -58,7 +59,7 @@ export interface IProductForm {
 export interface IStockItem {
   id?: string
   stockId?: string
-  ImageStock?: File | null
+  ImageStock?: File 
   featureValueId?: string[]
   sizeId?: string
   quantity?: number
@@ -80,7 +81,7 @@ export interface ISizeIds {
 
 export interface ISizeInfoModel {
   id: string
-  idx : string
+  idx: string
   scaleValues?: any[]
   productSizeValue: string
   productSizeValueId: string

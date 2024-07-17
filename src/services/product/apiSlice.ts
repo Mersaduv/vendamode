@@ -15,16 +15,6 @@ export const productApiSlice = baseApi.injectEndpoints({
           method: 'GET',
         }
       },
-      providesTags: (result) =>
-        result?.data?.pagination?.data
-          ? [
-              ...result.data.pagination.data.map(({ id }) => ({
-                type: 'Product' as const,
-                id: id,
-              })),
-              'Product',
-            ]
-          : ['Product'],
     }),
 
     getSingleProduct: builder.query<GetProductResult, IdQuery>({
@@ -32,16 +22,21 @@ export const productApiSlice = baseApi.injectEndpoints({
         url: `/api/product/${id}`,
         method: 'GET',
       }),
-      providesTags: (result, error, arg) => [{ type: 'Product', id: arg.id }],
     }),
 
-    // deleteProduct: builder.mutation<MsgResult, IdQuery>({
-    //   query: ({ id }) => ({
-    //     url: `/api/products/${id}`,
-    //     method: 'DELETE',
-    //   }),
-    //   invalidatesTags: ['Product'],
-    // }),
+    getProductByCategory: builder.query<GetProductResult, IdQuery>({
+      query: ({ id }) => ({
+        url: `/api/products/category/${id}`,
+        method: 'GET',
+      }),
+    }),
+
+    deleteProduct: builder.mutation<MsgResult, IdQuery>({
+      query: ({ id }) => ({
+        url: `/api/product/${id}`,
+        method: 'DELETE',
+      }),
+    }),
 
     createProduct: builder.mutation<MsgResult, FormData>({
       query: (body) => ({
@@ -52,19 +47,32 @@ export const productApiSlice = baseApi.injectEndpoints({
         },
         body,
       }),
-      invalidatesTags: ['Product'],
     }),
 
     updateProduct: builder.mutation<MsgResult, FormData>({
       query: (body) => ({
         url: `/api/product/update`,
-        method: 'PUT',
+        method: 'POST',
         body,
       }),
-      invalidatesTags: (result, error, arg) => [{ type: 'Product' }],
+    }),
+
+    bulkUpdateProduct: builder.mutation<MsgResult, { productIds: string[]; isActive: boolean }>({
+      query: (body) => ({
+        url: `/api/product/bulk-update`,
+        method: 'POST',
+        body,
+      }),
     }),
   }),
 })
 
-export const { useGetProductsQuery, useCreateProductMutation, useUpdateProductMutation, useGetSingleProductQuery } =
-  productApiSlice
+export const {
+  useGetProductsQuery,
+  useCreateProductMutation,
+  useUpdateProductMutation,
+  useGetSingleProductQuery,
+  useDeleteProductMutation,
+  useBulkUpdateProductMutation,
+  useGetProductByCategoryQuery,
+} = productApiSlice

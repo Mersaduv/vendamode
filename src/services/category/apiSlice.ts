@@ -4,12 +4,15 @@ import { generateQueryParams, getToken } from '@/utils'
 
 import type {
   CreateCategoryQuery,
+  GetAllCategoriesResult,
+  GetCategoriesQuery,
   GetCategoriesResult,
   GetSingleCategoryResult,
   GetSubCategoriesQuery,
   GetSubCategoriesResult,
   IdQuery,
   MsgResult,
+  UpdateCategoryFeature,
   UpdateCategoryQuery,
 } from './types'
 import { ICategory, ServiceResponse } from '@/types'
@@ -21,17 +24,16 @@ export const categoryApiSlice = baseApi.injectEndpoints({
         url: '/api/categories',
         method: 'GET',
       }),
-      providesTags: (result) =>
-        result?.data?.categoryDTO
-          ? [
-              ...result.data.categoryDTO.map(({ id }) => ({
-                type: 'Category' as const,
-                id: id,
-              })),
-              'Category',
-            ]
-          : ['Category'],
-      
+    }),
+
+    getAllCategories: builder.query<GetAllCategoriesResult, GetCategoriesQuery>({
+      query: ({ ...params }) => {
+        const queryParams = generateQueryParams(params)
+        return {
+          url: `/api/all-categories?${queryParams}`,
+          method: 'GET',
+        }
+      },
     }),
 
     getCategoriesTree: builder.query<ServiceResponse<ICategory[]>, void>({
@@ -42,17 +44,6 @@ export const categoryApiSlice = baseApi.injectEndpoints({
           Authorization: `Bearer ${getToken()}`,
         },
       }),
-      providesTags: (result) =>
-        result?.data
-          ? [
-              ...result.data.map(({ id }) => ({
-                type: 'Category' as const,
-                id: id,
-              })),
-              'Category',
-            ]
-          : ['Category'],
-      
     }),
 
     getSingleCategory: builder.query<GetSingleCategoryResult, IdQuery>({
@@ -60,7 +51,6 @@ export const categoryApiSlice = baseApi.injectEndpoints({
         url: `/api/category/${id}`,
         method: 'GET',
       }),
-      providesTags: (result, error, arg) => [{ type: 'Category', id: arg.id }],
     }),
 
     getSubCategories: builder.query<GetSubCategoriesResult, GetSubCategoriesQuery>({
@@ -73,31 +63,52 @@ export const categoryApiSlice = baseApi.injectEndpoints({
       },
     }),
 
-    updateCategory: builder.mutation<MsgResult, UpdateCategoryQuery>({
-      query: (data) => ({
-        url: `/api/category/${data.id}`,
-        method: 'PUT',
-        data,
+
+    updateCategory: builder.mutation<MsgResult, FormData>({
+      query: (body) => ({
+        url: `/api/category/update`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body,
       }),
-      invalidatesTags: (result, error, arg) => [{ type: 'Category', id: arg.id }],
+    }),
+  
+    createCategory: builder.mutation<MsgResult, FormData>({
+      query: (body) => ({
+        url: `/api/category`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body,
+      }),
     }),
 
-    createCategory: builder.mutation<MsgResult, CreateCategoryQuery>({
-      query: (data) => ({
-        url: '/api/category',
-        method: 'POST',
-        data,
-      }),
-      invalidatesTags: ['Category'],
+
+    updateCategoryFeature: builder.mutation<ServiceResponse<boolean>, UpdateCategoryFeature>({
+      query: (data) => {
+        return {
+          url: '/api/category/feature-update',
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      },
     }),
   }),
 })
 
 export const {
-  useCreateCategoryMutation,
   useGetCategoriesQuery,
+  useGetAllCategoriesQuery,
   useGetSingleCategoryQuery,
-  useUpdateCategoryMutation,
   useGetSubCategoriesQuery,
-  useGetCategoriesTreeQuery
+  useGetCategoriesTreeQuery,
+  useUpdateCategoryFeatureMutation,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation
 } = categoryApiSlice
