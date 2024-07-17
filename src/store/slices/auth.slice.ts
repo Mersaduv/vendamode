@@ -54,6 +54,7 @@ const authSlice = createSlice({
   reducers: {
     setAddress: (state, action: PayloadAction<IAddress>) => {
       const data = action.payload
+      state.address = data
       if (typeof window !== 'undefined') {
         localStorage.setItem('address', JSON.stringify(data))
       }

@@ -7,12 +7,14 @@ import { HandleResponse } from '@/components/shared'
 import { IProductForm } from '@/types'
 import { useCreateProductMutation } from '@/services'
 import { ProductForm } from '@/components/form'
+import { useDispatch } from 'react-redux'
+import { setUpdated } from '@/store'
 
 interface Props {}
 const Create: NextPage<Props> = () => {
   // ? Assets
   const { push } = useRouter()
-
+  const dispatch = useDispatch()
   // ? Queries
   //*   Create Product
   const [createProduct, { data, isSuccess, isLoading, isError, error }] = useCreateProductMutation()
@@ -23,6 +25,7 @@ const Create: NextPage<Props> = () => {
   }
 
   const onSuccess = () => {
+    dispatch(setUpdated(true))
     push('/admin/products')
   }
 

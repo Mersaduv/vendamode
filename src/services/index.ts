@@ -10,4 +10,5 @@ export * from './review/apiSlice'
 export * from './order/apiSlice'
 export * from './canceled/apiSlice'
 export * from './feature/apiSlice'
+export * from './size/apiSlice'
 

@@ -54,7 +54,7 @@ const ReviewsList: React.FC<Porps> = (props) => {
             </div>
           </DataStateDisplay>
 
-          {data && data?.data?.reviewsLength! > 5 && data.data?.pagination && (
+          {data && data?.data?.reviewsLength! > 2 && data.data?.pagination && (
             <Pagination pagination={data.data?.pagination} section="_productReviews" client />
           )}
         </div>

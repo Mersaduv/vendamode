@@ -94,7 +94,7 @@ const ProductsHome: NextPage = () => {
             </div>
           </div>
 
-          {data && data.data?.productsLength! > 10 && (
+          {data && data.data?.productsLength! > 5 && (
             <div className="mx-auto py-4 lg:max-w-5xl">
               <Pagination pagination={data?.data?.pagination!} section="_products" client />
             </div>

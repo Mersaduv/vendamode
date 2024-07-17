@@ -35,6 +35,7 @@ import { useGetSizeByCategoryIdQuery } from '@/services/size/apiSlice'
 import { digitsEnToFa, digitsFaToEn } from '@persian-tools/persian-tools'
 import { useAppDispatch, useDisclosure } from '@/hooks'
 import { showAlert } from '@/store'
+import { MdClose } from 'react-icons/md'
 
 const generateUniqueId = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -437,7 +438,7 @@ const ProductForm: React.FC<Props> = (props) => {
   useEffect(() => {
     if (stateStockItems) {
       setValue('StockItems', stateStockItems)
-      console.log(stateStockItems , 'stateStockItems-2')
+      console.log(stateStockItems, 'stateStockItems-2')
     }
   }, [stateStockItems])
 
@@ -445,13 +446,14 @@ const ProductForm: React.FC<Props> = (props) => {
     if (productSizeScale) {
       setProductScaleCreate({
         columnSizes: productSizeScale?.columns?.map((col) => ({ id: col.id, name: col.name })),
-        Rows: productSizeScale?.rows?.map((row, rowIndex) => ({
-          id: rowIndex.toString(),
-          idx: rowIndex.toString(),
-          scaleValues: productSizeScale?.columns?.map(() => ''),
-          productSizeValue: row.productSizeValue,
-          productSizeValueId: rowIndex.toString(),
-        })) || [],
+        Rows:
+          productSizeScale?.rows?.map((row, rowIndex) => ({
+            id: rowIndex.toString(),
+            idx: rowIndex.toString(),
+            scaleValues: productSizeScale?.columns?.map(() => ''),
+            productSizeValue: row.productSizeValue,
+            productSizeValueId: rowIndex.toString(),
+          })) || [],
       })
     }
   }, [productSizeScale])
@@ -473,11 +475,21 @@ const ProductForm: React.FC<Props> = (props) => {
       })
     }
   }
-  if (productScaleCreate) {
+  const handleDelete = (index: number) => {
+    setSelectedFiles((prevFiles) => {
+      const updatedFiles = [...prevFiles]
+      updatedFiles.splice(index, 1)
+      return updatedFiles
+    })
+
+    setValue(
+      'Thumbnail',
+      ((getValues('Thumbnail') as File[]) || []).filter((_, i) => i !== index)
+    )
   }
   return (
     <section>
-      <form className="flex gap-4 flex-col pt-4  lg:pt-14" onSubmit={handleSubmit(editedCreateHandler)}>
+      <form className="flex gap-4 flex-col pt-4 lg:pt-14" onSubmit={handleSubmit(editedCreateHandler)}>
         {/* register title , isActive */}
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex flex-1">
@@ -600,12 +612,19 @@ const ProductForm: React.FC<Props> = (props) => {
                     {selectedFiles.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-4 px-8">
                         {selectedFiles.map((file, index) => (
-                          <div key={index} className="text-sm text-gray-600">
+                          <div key={index} className="text-sm text-gray-600 relative">
                             <img
                               src={URL.createObjectURL(file)}
                               alt={file.name}
-                              className="w-16 h-16 object-cover  rounded-lg shadow-product"
+                              className="w-[80px] h-[88px] object-cover  rounded-lg shadow-product"
                             />
+                            <button
+                              type="button"
+                              className="absolute -top-2 -right-2 shadow-product bg-gray-50 p-0.5 rounded-full text-gray-500"
+                              onClick={() => handleDelete(index)}
+                            >
+                              <MdClose className="text-base" /> {/* Add your delete icon here */}
+                            </button>
                           </div>
                         ))}
                       </div>
@@ -634,7 +653,7 @@ const ProductForm: React.FC<Props> = (props) => {
               </div>
             </div>
             {/* is show Product features,size */}
-            <div className="flex flex-1">
+            <div className="flex flex-1 ">
               <div className="bg-white w-full rounded-md shadow-item">
                 <h3 className="border-b p-6 text-gray-600">ویژگی محصول</h3>
                 {/*select isFake , brand and feature*/}
@@ -690,13 +709,13 @@ const ProductForm: React.FC<Props> = (props) => {
                   </div>
                 </div>
                 {/* feature */}
-                {stateFeatureDataByCategory.length > 0 &&
-                  features?.data?.sizeDTOs &&
-                  features.data.sizeDTOs.length > 0 && (
-                    <div
-                      style={{ background: 'rgba(169, 243, 252,0.2)' }}
-                      className="px-2 py-4 flex flex-col space-y-8 mb-6 mx-7 rounded-xl"
-                    >
+
+                <div
+                  style={{ background: 'rgba(169, 243, 252,0.2)' }}
+                  className={`px-2 py-4 flex flex-col space-y-8 mb-6 mx-7 rounded-xl ${
+                    stateFeatureDataByCategory.length === 0 && features?.data?.sizeDTOs?.length === 0 && 'invisible'
+                  }`}
+                >
                       {stateFeatureDataByCategory &&
                         stateFeatureDataByCategory
                           ?.filter((feature) => feature.values?.some((value) => value.hexCode !== null))
@@ -706,8 +725,8 @@ const ProductForm: React.FC<Props> = (props) => {
                               values: feature.values?.filter((value) => value.hexCode !== null) ?? [],
                             }
                             return (
-                              <div className="flex items-center w-full gap-5" key={feature.id}>
-                                <div className="text-gray-600 text-sm w-[250px] px-2"> {filteredFeature.name} </div>
+                              <div className="flex items-center flex-col xs:flex-row w-full gap-2 xs:gap-5" key={feature.id}>
+                                <div className="text-gray-600 text-sm w-[190px] px-2"> {filteredFeature.name} </div>
                                 <div className="w-full">
                                   <FeatureCombobox onFeatureSelect={handleFeatureSelect} features={filteredFeature} />
                                 </div>
@@ -722,8 +741,8 @@ const ProductForm: React.FC<Props> = (props) => {
                           })}
 
                       {features?.data?.sizeDTOs && features.data.sizeDTOs.length > 0 && (
-                        <div className="flex items-center w-full gap-5">
-                          <div className="text-gray-600 text-sm w-[250px] px-2"> سایزبندی </div>
+                        <div className="flex items-center flex-col xs:flex-row  w-full gap-2 xs:gap-5">
+                          <div className="text-gray-600 text-sm w-[190px] px-2"> سایزبندی </div>
                           <div className="w-full">
                             <FeatureCombobox
                               onFeatureSelect={handleFeatureSelect}
@@ -747,8 +766,8 @@ const ProductForm: React.FC<Props> = (props) => {
                               values: feature.values?.filter((value) => value.hexCode == null) ?? [],
                             }
                             return (
-                              <div className="flex items-center w-full gap-5" key={feature.id}>
-                                <div className="text-gray-600 text-sm w-[250px] px-2"> {filteredFeature.name} </div>
+                              <div className="flex items-center flex-col xs:flex-row  w-full gap-2 xs:gap-5" key={feature.id}>
+                                <div className="text-gray-600 text-sm w-[190px] px-2"> {filteredFeature.name} </div>
                                 <div className="w-full">
                                   <FeatureCombobox onFeatureSelect={handleFeatureSelect} features={filteredFeature} />
                                 </div>
@@ -762,7 +781,7 @@ const ProductForm: React.FC<Props> = (props) => {
                             )
                           })}
                     </div>
-                  )}
+               
               </div>
             </div>
             {/* is show Product features, quantity, price , discount */}
@@ -785,7 +804,7 @@ const ProductForm: React.FC<Props> = (props) => {
               <div className="flex flex-1">
                 <div className="bg-white w-full rounded-md shadow-item  overflow-auto">
                   <h3 className="border-b p-6 text-gray-600">اندازه ها</h3>
-                  <div className="flex flex-col-reverse mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
+                  <div className="flex flex-col-reverse md:w-[1000px] lg:w-[1300px] mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
                     <div className="flex flex-col items-start flex-1 mdx:w-auto w-full overflow-auto">
                       <table className="table-auto border-collapse w-full">
                         <thead className="bg-[#8fdcff]">
@@ -1028,10 +1047,10 @@ const Table: React.FC<PropTable> = (props) => {
 
   useEffect(() => {
     const initialStockItems = rows.map((row) => {
-      const dynamicProperties :any = {};
+      const dynamicProperties: any = {}
       for (const key in row) {
         if (key !== 'id' && key !== 'featureValueIds' && key !== 'sizeId') {
-          dynamicProperties[key] = row[key];
+          dynamicProperties[key] = row[key]
         }
       }
       return {
@@ -1039,10 +1058,10 @@ const Table: React.FC<PropTable> = (props) => {
         featureValueId: row.featureValueIds || [],
         sizeId: row.sizeId || undefined,
         ...dynamicProperties,
-      };
-    });
-    setStockItems(initialStockItems);
-  }, [rows, featuresAndSizeSelected]);
+      }
+    })
+    setStockItems(initialStockItems)
+  }, [rows, featuresAndSizeSelected])
 
   useEffect(() => {
     if (stockItems) {

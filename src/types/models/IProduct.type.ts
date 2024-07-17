@@ -76,6 +76,7 @@ export interface IProductSizeInfo {
 export interface ISizeInfoModel {
   id?: string
   idx?: string
+  modelSizeId? :string
   scaleValues?: string[]
   productSizeValue?: string
   productSizeValueId?: string
