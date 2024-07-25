@@ -31,9 +31,6 @@ export default function Sidebar() {
     else document.body.style.overflow = 'unset'
   }, [isSidebar])
 
-  if (data != undefined) {
-    // console.log(data)
-  }
   // ? Render(s)
   return (
     <>

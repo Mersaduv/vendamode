@@ -195,7 +195,7 @@ const ProductFormEdit: React.FC<Props> = (props) => {
 
   const { productScales } = useGetSizeByCategoryIdQuery(
     {
-      id: selectedCategories?.categorySelected?.id as string,
+      categoryId: selectedCategories?.categorySelected?.id as string,
     },
     {
       selectFromResult: ({ data }) => ({
@@ -206,7 +206,6 @@ const ProductFormEdit: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (productScales) {
-      // console.log(productScales)
       if (productSizeScale?.columns == null) {
         setProductSizeScale({
           sizeType: productScales.sizeType,
@@ -225,7 +224,15 @@ const ProductFormEdit: React.FC<Props> = (props) => {
     // console.log(productSizeScale, 'productSizeScale', productScales, 'productScales')
   }
   //؟ all Features Query
-  const { data: allFeatures } = useGetFeaturesQuery()
+  const { data: allFeatures } = useGetFeaturesQuery(
+    {},
+    {
+      selectFromResult: ({ data, isLoading }) => ({
+        data: data?.data?.data,
+        isLoading,
+      }),
+    }
+  )
 
   // ? Get Categories Query
   const { categoriesData } = useGetCategoriesTreeQuery(undefined, {
@@ -271,7 +278,15 @@ const ProductFormEdit: React.FC<Props> = (props) => {
 
   // Queries
   //* Get Feature
-  const { data: featureData, isLoading: isLoadingFeature } = useGetFeaturesQuery()
+  const { data: featureData, isLoading: isLoadingFeature } = useGetFeaturesQuery(
+    {},
+    {
+      selectFromResult: ({ data, isLoading }) => ({
+        data: data?.data?.data,
+        isLoading,
+      }),
+    }
+  )
   // Queries
   //* Get Feature Values
   const { data: featureValueData, isLoading: isLoadingFeatureValue } = useGetFeatureValuesQuery()
@@ -325,7 +340,7 @@ const ProductFormEdit: React.FC<Props> = (props) => {
             id: row.idx,
             modelSizeId: row.id ?? '',
             scaleValues: row.scaleValues,
-            productSizeValue: row.productSizeValue,
+            productSizeValue: row.productSizeValue ?? '',
             productSizeValueId: row.idx,
           })) || []
         )
@@ -346,7 +361,7 @@ const ProductFormEdit: React.FC<Props> = (props) => {
               discount: stock.discount,
             }
 
-            const dynamicProperties = Object.keys(stock).reduce((acc, key) => {
+            const dynamicProperties = Object.keys(stock).reduce((acc: { [key: string]: any }, key) => {
               if (!fixedProperties.hasOwnProperty(key)) {
                 acc[key] = stock[key]
               }
@@ -366,10 +381,10 @@ const ProductFormEdit: React.FC<Props> = (props) => {
           productFeatureInfo?.featureValueInfos?.flatMap((feature) => feature?.value?.map((val) => val.id)) || []
         const featureValuesIds = [...colorDTOsIds, ...featureValueIds]
 
-        const filteredFeatureData = featureData?.data
+        const filteredFeatureData = featureData
           ?.map((featureItem) => {
             const filteredValues = featureItem?.values?.filter((value) => featureValuesIds.includes(value.id))
-            if (filteredValues.length === 0) {
+            if (filteredValues?.length === 0) {
               return null
             }
             return {
@@ -377,8 +392,7 @@ const ProductFormEdit: React.FC<Props> = (props) => {
               // values: filteredValues,
             }
           })
-          .filter((feature) => feature !== null && feature !== undefined)
-
+          .filter((feature): feature is ProductFeature => feature !== null && feature !== undefined)
         if (filteredFeatureData) {
           setStateFeatureDataByCategory(filteredFeatureData)
         }
@@ -638,8 +652,8 @@ const ProductFormEdit: React.FC<Props> = (props) => {
   }
 
   useEffect(() => {
-    if (allFeatures?.data && stateFeatureDataByCategory) {
-      const filteredData = allFeatures.data.filter(
+    if (allFeatures && stateFeatureDataByCategory) {
+      const filteredData = allFeatures.filter(
         (allFeature) => !stateFeatureDataByCategory?.some((feature) => feature.id === allFeature.id)
       )
       setStateFeatureData(filteredData)
@@ -666,7 +680,13 @@ const ProductFormEdit: React.FC<Props> = (props) => {
         const sortedProductSizeScaleData = productSizeScaleData?.sort((a, b) => Number(a.id) - Number(b.id))
         setProductScaleCreate({
           columnSizes: productSizeScale?.columns?.map((col) => ({ id: col.id, name: col.name })),
-          Rows: sortedProductSizeScaleData,
+          Rows: sortedProductSizeScaleData.map((item) => ({
+            id: item.id ?? '',
+            idx: item.idx ?? '',
+            productSizeValue: item.productSizeValue ?? '',
+            productSizeValueId: item.productSizeValueId ?? '',
+            scaleValues: item.scaleValues ?? [],
+          })),
         })
       } else {
         setProductScaleCreate({
@@ -676,29 +696,17 @@ const ProductFormEdit: React.FC<Props> = (props) => {
               id: rowIndex.toString(),
               idx: rowIndex.toString(),
               scaleValues: productSizeScale?.columns?.map(() => ''),
-              productSizeValue: row.productSizeValue,
+              productSizeValue: row.productSizeValue ?? '',
               productSizeValueId: rowIndex.toString(),
             })) || [],
         })
       }
     }
   }, [productSizeScale])
-  // useEffect(() => {
-  //   if (productSizeScaleData) {
-  //     setProductSizeScale({ ...productSizeScale, rows: productSizeScaleData })
-  //   }
-  //   console.log(productSizeScaleData, 'productSizeScaleData add')
-  //   console.log(productSizeScale, 'productSizeScale to settt')
-  // }, [productSizeScaleData])
+
   useEffect(() => {
-    // if (productScaleCreate.Rows && productScaleCreate.Rows.some(row => row.ScaleValues?.length! > 0)) {
-
     setValue('ProductScale', productScaleCreate)
-    // console.log(productScaleCreate, 'productScaleCreate - ')
-
-    // }
   }, [productScaleCreate])
-  // console.log(formErrors)
 
   // Function to handle input changes
   const handleChange = (rowIndex: number, colIndex: number, value: any) => {
@@ -854,7 +862,13 @@ const ProductFormEdit: React.FC<Props> = (props) => {
               {/* negare  */}
               <div className="flex justify-center mt-8">
                 <div className="">
-                  <input type="file" accept=".jpg, .jpeg, .png, .gif" className="hidden" id="MainThumbnail" onChange={handleMainFileChange} />
+                  <input
+                    type="file"
+                    accept=".jpg, .jpeg, .png, .gif"
+                    className="hidden"
+                    id="MainThumbnail"
+                    onChange={handleMainFileChange}
+                  />
                   <label htmlFor="MainThumbnail" className="block cursor-pointer p-6  text-sm font-normal">
                     <h3 className="font-medium text-center mb-6">نگاره اول</h3>
                     {selectedMainFile.length > 0 ? (
@@ -912,7 +926,7 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                               className="absolute -top-2 -right-2 shadow-product bg-gray-50 p-0.5 rounded-full text-gray-500"
                               onClick={() => handleDelete(index)}
                             >
-                              <MdClose className='text-base' /> {/* Add your delete icon here */}
+                              <MdClose className="text-base" /> {/* Add your delete icon here */}
                             </button>
                           </div>
                         ))}
@@ -1014,7 +1028,10 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                           values: feature.values?.filter((value) => value.hexCode !== null) ?? [],
                         }
                         return (
-                          <div className="flex items-center flex-col xs:flex-row w-full gap-2 xs:gap-5" key={feature.id}>
+                          <div
+                            className="flex items-center flex-col xs:flex-row w-full gap-2 xs:gap-5"
+                            key={feature.id}
+                          >
                             <div className="text-gray-600 text-sm w-[250px] px-2"> {filteredFeature.name} </div>
                             <div className="w-full">
                               <FeatureCombobox
@@ -1060,7 +1077,10 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                           values: feature.values?.filter((value) => value.hexCode == null) ?? [],
                         }
                         return (
-                          <div className="flex items-center flex-col xs:flex-row w-full gap-2 xs:gap-5" key={feature.id}>
+                          <div
+                            className="flex items-center flex-col xs:flex-row w-full gap-2 xs:gap-5"
+                            key={feature.id}
+                          >
                             <div className="text-gray-600 text-sm w-[250px] px-2"> {filteredFeature.name} </div>
                             <div className="w-full">
                               <FeatureCombobox
@@ -1339,8 +1359,6 @@ const Table: React.FC<PropTable> = (props) => {
   ///................
 
   const handleInputChange = (index: number, field: string, value: any) => {
-    console.log(index, 'index', field, 'field', value, 'value')
-
     const numericValue = Number(digitsFaToEn(value))
     if (!isNaN(value) || value === '') {
       const updatedStockItems = [...stockItems]
@@ -1464,7 +1482,7 @@ const Table: React.FC<PropTable> = (props) => {
           return { ...feature, values: updatedValues }
         }
       })
-      .filter((feature) => feature?.values?.length > 0)
+      .filter((feature) => feature?.values?.length! > 0)
 
     setFeaturesAndSizeSelected(updatedFeaturesAndSizeSelected)
 
@@ -1475,7 +1493,7 @@ const Table: React.FC<PropTable> = (props) => {
           const updatedValues = feature?.values?.filter((value) => remainingFeatureValueIds.includes(value.id))
           return { ...feature, values: updatedValues }
         })
-        .filter((feature) => feature?.values?.length > 0)
+        .filter((feature) => feature?.values?.length! > 0)
     })
 
     setStateSizeFeature((prevSizes) => {

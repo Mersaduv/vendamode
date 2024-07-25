@@ -11,7 +11,6 @@ export type * from './models/IBrand.type'
 export type * from './models/IReview.type'
 export type * from './models/IOrder.type'
 
-
 export type { default as ICategoriesList } from './ICategoriesList.type'
 export type { default as IPagination } from './IPagination.type'
 export type { default as ServiceResponse } from './ServiceResponse.type'

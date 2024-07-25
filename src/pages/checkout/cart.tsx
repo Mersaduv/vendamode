@@ -4,9 +4,9 @@ import { useRouter } from 'next/router'
 
 import { clearCart } from '@/store'
 
-import { Delete, EmptyCart, More, Toman } from '@/icons'
-import { Menu, Tab, Transition } from '@headlessui/react'
-import { CartItemDisplay, CartSummary, FreeShippingIndicator } from '@/components/cart'
+import { Delete, EmptyCart, More } from '@/icons'
+import { Menu, Transition } from '@headlessui/react'
+import { CartItemDisplay, CartSummary } from '@/components/cart'
 import { RedirectToLogin } from '@/components/modals'
 import { Button } from '@/components/ui'
 import { Header } from '@/components/shared'
@@ -18,9 +18,8 @@ import { useDisclosure, useAppSelector, useAppDispatch } from '@/hooks'
 
 import type { NextPage } from 'next'
 import { Fragment } from 'react'
-import { TfiRulerAlt2 } from 'react-icons/tfi'
-import { BiCart } from 'react-icons/bi'
 import { IoLogoUsd } from 'react-icons/io5'
+import { digitsEnToFa } from '@persian-tools/persian-tools'
 
 const classNames = (...classes: string[]) => {
   return classes.filter(Boolean).join(' ')
@@ -160,7 +159,7 @@ const Cart: NextPage = () => {
                 {/* title */}
                 <section className="flex justify-between px-4">
                   <div>
-                    <span className="farsi-digits">{formatNumber(totalItems)} کالا</span>
+                    <span className="farsi-digits">{digitsEnToFa(formatNumber(totalItems))} کالا</span>
                   </div>
                   <DeleteAllDropDown />
                 </section>

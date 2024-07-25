@@ -42,14 +42,14 @@ const Modal: React.FC<ModalProps> = (props) => {
   ${isShow ? 'bottom-0 md:top-20' : '-bottom-full md:top-60'} w-full h-full  md:h-fit md:max-w-3xl 
    fixed transition-all duration-700 left-0 right-0 mx-auto`
       : effect === 'ease-out'
-        ? `
+      ? `
   ${isShow ? 'top-40 transform scale-100' : 'top-40 transform scale-50 '} max-w-3xl 
    fixed transition-all duration-700 left-0 right-0 mx-auto`
-        : effect === 'buttom-to-fit'
-          ? `
+      : effect === 'buttom-to-fit'
+      ? `
   ${isShow ? 'bottom-0' : '-bottom-full'} w-full h-fit lg:max-w-3xl 
    fixed transition-all duration-700 left-0 right-0 mx-auto`
-          : ''
+      : ''
 
   // ? Render(s)
   return (
@@ -104,10 +104,21 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = (props) => {
   // ? Props
-  const { onClose, children,notBar } = props
+  const { onClose, children, notBar } = props
 
   // ? Render(s)
-  if (notBar) return <span onClick={onClose} className="text-base md:text-xl md:font-medium mt-4 font-normal border-b px-5 pb-3">{children}</span>
+  if (notBar)
+    return (
+      <div
+        onClick={onClose}
+        className="text-base pt-2 flex items-center justify-between md:text-xl md:font-medium  font-normal border-b px-5 pb-3"
+      >
+        {children}
+        <button onClick={onClose} className="">
+          <Close className="icon " />
+        </button>
+      </div>
+    )
 
   return (
     <div className="flex items-center justify-between border bg-[#fdebf6]  border-[#e90089] py-3.5 px-3 rounded-md">

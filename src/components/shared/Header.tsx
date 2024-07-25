@@ -11,7 +11,7 @@ const Header = () => {
   const [isShowSearch, setIsShowSearch] = useState(false)
   return (
     <>
-      <header className="bg-white px-4 shadow xl:inset-x-0 top-0 fixed w-full z-[101] transition duration-700 ease-in-out">
+      <header className="bg-white pl-1 pr-4 sm:px-4 shadow xl:inset-x-0 top-0 fixed w-full z-[101] transition duration-700 ease-in-out">
         {/* <TextMarquee /> */}
 
         {/* Tablet and Desktop */}
@@ -61,7 +61,7 @@ const Header = () => {
               isShowSearch ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0  overflow-hidden'
             }`}
           >
-            <div className="flex grow gap-x-7 lg:mr-8">
+            <div className="flex pl-2 sm:pl-0 grow gap-x-7 lg:mr-8 w-full">
               <SearchModal />
             </div>
             </div>

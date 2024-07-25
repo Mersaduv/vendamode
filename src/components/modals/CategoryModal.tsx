@@ -22,33 +22,15 @@ interface Props {
   refetch: () => void
 }
 
-const fetchImageAsFile = async (url: string): Promise<File> => {
-  const response = await fetch(url)
-  const blob = await response.blob()
-  const fileName = url.split('/').pop()
-  return new File([blob], fileName || 'image.jpg', { type: blob.type })
-}
-
 const CategoryModal: React.FC<Props> = (props) => {
   const [stateCategoryData, setStateCategoryData] = useState<ICategoryForm>({
     level: 0,
     name: '',
-    isActive: false, // Initialize isActive
+    isActive: false,
   } as ICategoryForm)
-  const [selectedMainFile, setSelectedMainFile] = useState<File[]>([])
+  const [selectedFile, setSelectedFile] = useState<File[]>([])
 
-  const { category, isShow, onClose, refetch, title } = props
-
-  const [
-    updateCategory,
-    {
-      data: dataUpdate,
-      isSuccess: isSuccessUpdate,
-      isError: isErrorUpdate,
-      error: errorUpdate,
-      isLoading: isLoadingUpdate,
-    },
-  ] = useUpdateCategoryMutation()
+  const { isShow, onClose, refetch, title } = props
 
   const [
     createCategory,
@@ -66,72 +48,28 @@ const CategoryModal: React.FC<Props> = (props) => {
     name: '',
     level: 0,
     isActive: false, // Add default value for isActive
-    // Add other fields with default values if needed
   }
 
   // ? Form Hook
   const {
     handleSubmit,
-    control,
-    formState: { errors: formErrors },
-    reset,
+    formState: { errors: formErrors, isValid },
     register,
-    watch,
-    getValues,
     setValue,
+    reset,
   } = useForm<ICategoryForm>({
     resolver: yupResolver(categorySchema) as unknown as Resolver<ICategoryForm>,
     defaultValues,
   })
 
-  useEffect(() => {
-    const loadData = async () => {
-      onClose()
-      setStateCategoryData({} as ICategoryForm)
-      reset()
-      setSelectedMainFile([])
-      if (category) {
-        setStateCategoryData({
-          id: category.id,
-          name: category.name,
-          isActive: category.isActive ?? false, // Ensure isActive has a boolean value
-          level: category.level,
-          parentCategoryId: category.parentCategoryId,
-          mainCategoryId: category.parentCategoryId,
-          thumbnail: undefined,
-        })
-        if (category.imagesSrc) {
-          const imageFile = await fetchImageAsFile(category.imagesSrc.imageUrl)
-          if (imageFile) {
-            setSelectedMainFile([imageFile])
-          }
-
-          console.log(category, imageFile)
-
-          reset({
-            id: category.id,
-            name: category.name,
-            isActive: category.isActive ?? false, // Ensure isActive has a boolean value
-            parentCategoryId: category.parentCategoryId,
-            mainCategoryId: category.parentCategoryId,
-            level: category.level,
-            thumbnail: imageFile,
-          })
-        }
-      }
-    }
-    loadData()
-  }, [category])
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const files = Array.from(e.target.files)
-      if (files.length > 0) {
-        setValue('thumbnail', files[0])
-        setSelectedMainFile(files)
+      setSelectedFile([...Array.from(e.target.files)])
+      if ([...Array.from(e.target.files)].length > 0) {
+        var ffff = e.target.files[0]
+        setValue('thumbnail', ffff)
       } else {
-        setValue('thumbnail', undefined)
-        setSelectedMainFile([])
+        setValue('thumbnail', null)
       }
     }
   }
@@ -146,7 +84,6 @@ const CategoryModal: React.FC<Props> = (props) => {
   }
 
   const onConfirm: SubmitHandler<ICategoryForm> = (data) => {
-    console.log(data, 'data--data')
 
     const formData = new FormData()
 
@@ -162,34 +99,13 @@ const CategoryModal: React.FC<Props> = (props) => {
     }
     if (data.id != undefined) {
       formData.append('Id', data.id)
-      console.log('formData', stateCategoryData, 'stateCategoryData', data.id)
-
-      updateCategory(formData)
     } else {
       createCategory(formData)
     }
   }
 
-  if (formErrors) {
-    console.log(formErrors, 'formErrors')
-  }
-
   return (
     <>
-      {(isSuccessUpdate || isErrorUpdate) && (
-        <HandleResponse
-          isError={isErrorUpdate}
-          isSuccess={isSuccessUpdate}
-          error={errorUpdate}
-          message={dataUpdate?.message}
-          onSuccess={() => {
-            onClose()
-            refetch()
-            setStateCategoryData({} as ICategoryForm)
-            setSelectedMainFile([])
-          }}
-        />
-      )}
       {(isSuccessCreate || isErrorCreate) && (
         <HandleResponse
           isError={isErrorCreate}
@@ -197,10 +113,11 @@ const CategoryModal: React.FC<Props> = (props) => {
           error={errorCreate}
           message={dataCreate?.message}
           onSuccess={() => {
+            reset()
             onClose()
             refetch()
             setStateCategoryData({} as ICategoryForm)
-            setSelectedMainFile([])
+            setSelectedFile([])
           }}
         />
       )}
@@ -209,7 +126,7 @@ const CategoryModal: React.FC<Props> = (props) => {
         onClose={() => {
           onClose()
           // setStateCategoryData({} as ICategoryForm)
-          // setSelectedMainFile([])
+          setSelectedFile([])
         }}
         effect="bottom-to-top"
       >
@@ -242,7 +159,7 @@ const CategoryModal: React.FC<Props> = (props) => {
 
               <div className="flex py-3 items-center gap-x-12 border mx-6 rounded-lg px-2">
                 <label htmlFor="isActive" className="flex items-center gap-x-2">
-                <CustomCheckbox
+                  <CustomCheckbox
                     name="isActive"
                     checked={stateCategoryData.isActive}
                     onChange={handleIsActiveChange}
@@ -253,42 +170,47 @@ const CategoryModal: React.FC<Props> = (props) => {
               </div>
 
               <div className=" flex flex-col items-center justify-center">
-                <input type="file" className="hidden" id="Thumbnail" onChange={handleFileChange} />
-                <label htmlFor="Thumbnail" className="block w-fit  rounded-lg cursor-pointer text-sm font-normal">
-                  {selectedMainFile.length === 0 ? (
+                <input type="file" className="hidden" id="thumbnailCreate" onChange={handleMainFileChange} />
+                <label htmlFor="thumbnailCreate" className="block w-fit  rounded-lg cursor-pointer text-sm font-normal">
+                  {selectedFile.length === 0 ? (
                     <img
                       className="w-[125px] h-[125px] rounded-md"
                       src="/images/other/product-placeholder.png"
                       alt="product-placeholder"
                     />
                   ) : (
-                    selectedMainFile.map((file, index) => (
-                      <div key={index} className="text-sm shadow-item rounded-lg p-2 text-gray-600">
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={file.name}
-                          className="w-[125px] object-contain h-[125px] rounded-md"
-                        />
-                      </div>
-                    ))
+                    <div className="text-sm shadow-item rounded-lg p-2 text-gray-600">
+                      <img
+                        src={URL.createObjectURL(selectedFile[0])}
+                        alt={selectedFile[0].name}
+                        className="w-[125px] object-contain h-[125px] rounded-md"
+                      />
+                    </div>
                   )}
                 </label>
                 <div className="text-xs mt-3">تصویر</div>
               </div>
 
-              <div className="flex px-5 py-3 justify-between items-center gap-x-20 bg-[#f5f8fa]">
+              <div className="flex flex-col md:flex-row gap-y-4 px-5 py-3 justify-between items-center gap-x-20 bg-[#f5f8fa]">
                 <div className="flex flex-col items-start">
-                  <p className="text-xs text-gray-500 ">سایز عکس میبایست 200*200 پیکسل باشد</p>
-                  <p className="text-xs text-gray-500 ">حجم عکس میبایست حداکثر 30 کیلوبایت باشد</p>
-                  <p className="text-xs text-gray-500 ">نوع عکس میبایست png باشد</p>
+                  <p className="text-xs text-gray-500 whitespace-nowrap ">سایز عکس میبایست 200*200 پیکسل باشد</p>
+                  <p className="text-xs text-gray-500 whitespace-nowrap ">حجم عکس میبایست حداکثر 30 کیلوبایت باشد</p>
+                  <p className="text-xs text-gray-500 whitespace-nowrap ">نوع عکس میبایست png باشد</p>
+                </div>
+                {/* validation errors */}
+                <div className="flex flex-col">
+                  {formErrors.name && <p className="text-red-500 px-10">{formErrors.name.message}</p>}
+
+                  {formErrors.thumbnail && <p className="text-red-500 px-10">{formErrors.thumbnail?.message}</p>}
                 </div>
                 <Button
                   type="submit"
-                  className="bg-sky-500 px-5 py-2.5 hover:bg-sky-600"
-                  // onClick={onConfirm}
-                  isLoading={isLoadingCreate || isLoadingUpdate}
+                  className={`bg-sky-500 px-5 py-2.5 hover:bg-sky-600 ${
+                    !isValid ? 'bg-gray-300' : 'hover:text-black'
+                  } `}
+                  isLoading={isLoadingCreate}
                 >
-                  {stateCategoryData.id ? 'به‌روزرسانی' : 'انتشار'}
+                  {'انتشار'}
                 </Button>
               </div>
             </form>

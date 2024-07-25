@@ -29,13 +29,13 @@ const AppContent: FC<AppContentProps> = ({ Component, pageProps }) => {
   }
 
   // ? Get user in initial
-  if (typeof window !== 'undefined') {
-    const info = JSON.parse(localStorage.getItem('userInfo') as string)
-    if (info) {
-      const loggedIn = localStorage.getItem('loggedIn')
-      if (loggedIn) store.dispatch(authApiSlice.endpoints.getUserInfo.initiate(info.mobileNumber))
-    }
-  }
+  // if (typeof window !== 'undefined') {
+  //   const info = JSON.parse(localStorage.getItem('userInfo') as string)
+  //   if (info) {
+  //     const loggedIn = localStorage.getItem('loggedIn')
+  //     if (loggedIn) store.dispatch(authApiSlice.endpoints.getUserInfo.initiate(info.mobileNumber))
+  //   }
+  // }
   return (
     <>
       <Component {...pageProps} />

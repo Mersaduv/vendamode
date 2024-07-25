@@ -12,6 +12,9 @@ import { EmptySearchList } from '@/components/emptyList'
 // import { ProductDiscountTag, ProductPriceDisplay } from '@/components/product'
 // import { DataStateDisplay } from '@/components/shared'
 import { Modal, ResponsiveImage } from '@/components/ui'
+import { useGetProductsQuery } from '@/services'
+import { DataStateDisplay } from '../shared'
+import { ProductDiscountTag, ProductPriceDisplay } from '../product'
 
 interface Props {}
 
@@ -23,12 +26,12 @@ const SearchModal: React.FC<Props> = (props) => {
   const debouncedSearch = useDebounce(search, 1200)
 
   // ? Search Products Query
-  // const { data, ...productQueryProps } = useGetProductsQuery(
-  //   {
-  //     search,
-  //   },
-  //   { skip: !debouncedSearch }
-  // )
+  const { data, ...productQueryProps } = useGetProductsQuery(
+    {
+      search,
+    },
+    { skip: !debouncedSearch }
+  )
 
   // ? Re-Renders
   //* Reset Search
@@ -61,9 +64,12 @@ const SearchModal: React.FC<Props> = (props) => {
   // ? Render(s)
   return (
     <>
-      <button onClick={searchModalHanlders.open} className="flex max-w-lg grow rounded-md bg-zinc-200/80 items-center transition duration-700 ease-in-out">
+      <button
+        onClick={searchModalHanlders.open}
+        className="flex w-full z-0  rounded-md bg-zinc-200/80 items-center transition duration-700 ease-in-out"
+      >
         <Search className="icon m-2" />
-        <span className='mr-'>جستجو</span>
+        <span className="mr-">جستجو</span>
       </button>
 
       <Modal isShow={isShowSearchModal} onClose={searchModalHanlders.close} effect="bottom-to-top">
@@ -71,7 +77,9 @@ const SearchModal: React.FC<Props> = (props) => {
           onClose={searchModalHanlders.close}
           className="flex h-screen flex-col gap-y-3 bg-white py-3 pl-2 pr-4 md:rounded-lg lg:h-fit"
         >
-          <Modal.Header notBar onClose={searchModalHanlders.close}>جستجو محصول</Modal.Header>
+          <Modal.Header notBar onClose={searchModalHanlders.close}>
+            جستجو محصول
+          </Modal.Header>
           <Modal.Body>
             <div className="my-3 flex flex-row-reverse rounded-md bg-zinc-200/80">
               <button type="button" className="p-2.5" onClick={handleRemoveSearch}>
@@ -90,35 +98,37 @@ const SearchModal: React.FC<Props> = (props) => {
               </div>
             </div>
             <div className="overflow-y-auto lg:max-h-[500px]">
-              {/* <DataStateDisplay
+              <DataStateDisplay
                 {...productQueryProps}
-                dataLength={data ? data.productsLength : 0}
+                dataLength={data ? data.data?.productsLength! : 0}
                 emptyComponent={<EmptySearchList />}
               >
                 <div className="space-y-3 divide-y px-4 py-3">
-                  {data?.productsLength &&
-                    data.productsLength > 0 &&
+                  {data?.data?.productsLength &&
+                    data?.data?.productsLength > 0 &&
                     search.length > 0 &&
-                    data?.products.map((item) => (
-                      <article key={item._id} className="py-2">
+                    data?.data?.pagination?.data?.map((item) => (
+                      <article key={item.id} className="py-2">
                         <Link href={`/products/${item.slug}`} onClick={() => searchModalHanlders.close()}>
                           <ResponsiveImage
                             dimensions="w-20 h-20"
-                            src={item.images[0].url}
-                            blurDataURL={item.images[0].placeholder}
+                            src={item.mainImageSrc.imageUrl}
+                            blurDataURL={item.mainImageSrc.placeholder}
                             alt={item.title}
                             imageStyles="object-contain"
                           />
                           <span className="py-2 text-sm">{truncate(item.title, 70)}</span>
                           <div className="flex justify-between">
-                            <div>{item.discount > 0 && <ProductDiscountTag discount={item.discount} />}</div>
-                            <ProductPriceDisplay inStock={item.inStock} discount={item.discount} price={item.price} />
+                            <div>
+                              {/* {item.stockItems[0].discount! > 0 && <ProductDiscountTag price={item.stockItems[0].price ?? 0} discount={item.stockItems[0].discount ?? 0} />} */}
+                            </div>
+                            <ProductPriceDisplay inStock={item.inStock} discount={item.stockItems[0].discount ?? 0} price={item.stockItems[0].price ?? 0} />
                           </div>
                         </Link>
                       </article>
                     ))}
                 </div>
-              </DataStateDisplay> */}
+              </DataStateDisplay>
               {/* <EmptySearchList /> */}
               خالی
             </div>

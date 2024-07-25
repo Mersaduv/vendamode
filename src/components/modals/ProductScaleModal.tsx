@@ -10,9 +10,6 @@ interface Props {
 
 const ProductScaleModal: React.FC<Props> = (props) => {
   const { isShow, onClose, productSizeInfo } = props
-  if (productSizeInfo) {
-    console.log(productSizeInfo)
-  }
   return (
     <>
       {/* {(isSuccess || isError) && (

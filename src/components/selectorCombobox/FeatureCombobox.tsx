@@ -94,8 +94,6 @@ const FeatureCombobox: React.FC<Props> = ({
   }
 
   const handleRemoveSize = (item: SizeDTO) => {
-    console.log(item)
-
     const newSelectedSizes = selectedSizes.filter((size) => size.id !== item.id)
     setSelectedSizes(newSelectedSizes)
     onFeatureSelect(newSelectedSizes)

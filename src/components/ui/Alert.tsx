@@ -43,7 +43,7 @@ export default function Alert() {
   // ? Render(s)
   return (
     <div
-      className={`${
+      className={`z-[500] ${
         isShow ? 'visible opacity-100' : 'invisible opacity-0 '
       } fixed inset-0 z-40 transition-all duration-500`}
     >

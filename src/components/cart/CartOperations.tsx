@@ -28,30 +28,73 @@ const CartOperations: React.FC<Porps> = (props) => {
 
   // ? State
   const [currentItemInCart, setCurrentItemInCart] = useState<ICart | undefined>(undefined)
+  const [currentPrice, setCurrentPrice] = useState(product.stockItems[0]?.price ?? 0)
+  const [currentDiscount, setCurrentDiscount] = useState(product.stockItems[0]?.discount ?? 0)
 
   // ? Re-Renders
   useEffect(() => {
     const item = exsitItem(cartItems, product.id, tempColor, tempSize, tempObjectValue)
     setCurrentItemInCart(item)
-  }, [tempColor, tempSize, cartItems, tempObjectValue, product.id])
+
+    const selectedStockItem = product.stockItems.find((item) => {
+      let matches = true
+
+      if (tempColor && item['رنگ'] !== tempColor.name) {
+        matches = false
+      }
+      if (tempSize && item.sizeId !== tempSize.id) {
+        matches = false
+      }
+      if (tempObjectValue && tempObjectValue.value && !item.featureValueId?.includes(tempObjectValue?.value[0].id)) {
+        matches = false
+      }
+
+      return matches
+    })
+
+    if (selectedStockItem) {
+      setCurrentPrice(selectedStockItem.price ?? 0)
+      setCurrentDiscount(selectedStockItem.discount ?? 0)
+    } else {
+      setCurrentPrice(product.stockItems[0]?.price ?? 0)
+      setCurrentDiscount(product.stockItems[0]?.discount ?? 0)
+    }
+  }, [tempColor, tempSize, tempObjectValue, cartItems, product.id, product.stockItems])
 
   // ? handlers
   const handleAddItem = () => {
-    if (product.inStock === 0)
+    const stockItem = product.stockItems.find((item) => {
+      let matches = true
+
+      if (tempColor && item['رنگ'] !== tempColor.name) {
+        matches = false
+      }
+      if (tempSize && item.sizeId !== tempSize.id) {
+        matches = false
+      }
+      if (tempObjectValue && tempObjectValue.value && !item.featureValueId?.includes(tempObjectValue?.value[0].id)) {
+        matches = false
+      }
+
+      return matches
+    })
+
+    if (!stockItem || stockItem.quantity === 0) {
       return dispatch(
         showAlert({
           status: 'error',
           title: 'موجودی این محصول به اتمام رسیده',
         })
       )
+    }
 
     dispatch(
       addToCart({
         productID: product.id,
         name: product.title,
         slug: product.slug,
-        price: product.price,
-        discount: product.discount,
+        price: stockItem.price ?? 0 ,
+        discount: stockItem.discount ?? 0,
         inStock: product.inStock,
         sold: product.sold ?? 0,
         color: tempColor,
@@ -59,7 +102,7 @@ const CartOperations: React.FC<Porps> = (props) => {
         features: tempObjectValue,
         img: product.imagesSrc[0],
         quantity: 1,
-        cancelOrder : null
+        cancelOrder: null,
       })
     )
   }
@@ -83,12 +126,7 @@ const CartOperations: React.FC<Porps> = (props) => {
       )}
 
       <div className="min-w-fit md:flex md:justify-center md:w-full md:self-end">
-        <ProductPriceDisplay
-          inStock={product.inStock}
-          discount={product.discount}
-          price={product.price}
-          singleProduct
-        />
+        <ProductPriceDisplay inStock={product.inStock} discount={currentDiscount} price={currentPrice} singleProduct />
       </div>
     </div>
   )

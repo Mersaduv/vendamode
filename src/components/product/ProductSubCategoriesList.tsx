@@ -24,10 +24,6 @@ const ProductSubCategoriesList: React.FC<Props> = (props) => {
     }
   )
 
-  if (childCategories) {
-    console.log(childCategories)
-  }
-
   // ? Render(s)
   return (
     <section className="ps-4 md:px-4">
@@ -48,7 +44,7 @@ const ProductSubCategoriesList: React.FC<Props> = (props) => {
               >
                 <ResponsiveImage
                   dimensions="w-24 h-24 md:h-32 md:w-32 xl:w-40 xl:h-40"
-                  src={item.imagesSrc?.imageUrl}
+                  src={item.imagesSrc?.imageUrl!}
                   blurDataURL={item.imagesSrc?.placeholder}
                   alt={item.name}
                   imageStyles="object-contain"

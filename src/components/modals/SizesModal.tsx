@@ -7,7 +7,7 @@ import { HandleResponse } from '../shared'
 import { CategoryFeatureForm } from '@/services/category/types'
 
 interface Props {
-  category: ICategory
+  category: ICategory | undefined
   isShow: boolean
   onClose: () => void
   refetch: () => void
@@ -16,12 +16,12 @@ interface Props {
 const SizesModal: React.FC<Props> = (props) => {
   // States
   const [stateSizeFeature, setStateSizeFeature] = useState<SizeDTO[]>([])
-  const [stateSizeData, setStateSizeData] = useState<SizeDTO[]>()
+  const [sizeDb, setSizeDb] = useState<SizeDTO[]>()
 
   // ? Props
   const { category, isShow, onClose, refetch } = props
 
-  const { data } = useGetSizesQuery()
+  const { data, isLoading } = useGetSizesQuery()
   const [
     updateCategoryFeature,
     {
@@ -35,9 +35,9 @@ const SizesModal: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (data?.data) {
-      setStateSizeData(data?.data.filter((size) => category.categorySizes?.sizeIds?.includes(size.id)))
+      setSizeDb(data?.data)
     }
-  }, [data])
+  }, [data?.data])
 
   const handleFeatureSelect = (sizes: SizeDTO[]) => {
     setStateSizeFeature((prevState) => {
@@ -53,11 +53,10 @@ const SizesModal: React.FC<Props> = (props) => {
 
   const onConfirm = () => {
     const sizeListIds = stateSizeFeature.map((size) => size.id)
-    console.log(sizeListIds, 'sizeListIds', category.id)
 
     updateCategoryFeature({
-      categoryId: category.id,
-      categorySizes: { ids: category.categorySizes?.ids ?? null, sizeIds: sizeListIds ?? null },
+      categoryId: category!.id,
+      categorySizes: { ids: category?.categorySizes?.ids ?? null, sizeIds: sizeListIds ?? null },
     })
   }
 
@@ -77,13 +76,19 @@ const SizesModal: React.FC<Props> = (props) => {
           }}
         />
       )}
-      <Modal isShow={isShow} onClose={onClose} effect="bottom-to-top">
+      <Modal
+        isShow={isShow}
+        onClose={() => {
+          onClose()
+        }}
+        effect="bottom-to-top"
+      >
         <Modal.Content
           onClose={onClose}
           className="flex h-full flex-col z-[199] gap-y-5 bg-white  py-5 pb-0 md:rounded-lg "
         >
           <Modal.Header notBar onClose={onClose}>
-            <div className="text-start text-base">انتخاب سایزبندی برای {category.name}</div>
+            <div className="text-start text-base">انتخاب سایزبندی برای {category?.name}</div>
           </Modal.Header>
           <Modal.Body>
             <div className="space-y-4 bg-white   text-center md:rounded-lg">
@@ -93,7 +98,7 @@ const SizesModal: React.FC<Props> = (props) => {
                   <SizesCombobox
                     onFeatureSelect={handleFeatureSelect}
                     sizeList={data?.data ?? []}
-                    stateSizeData={stateSizeData}
+                    stateSizeData={sizeDb?.filter((size) => category?.categorySizes?.sizeIds?.includes(size.id))}
                   />
                 </div>
               </div>

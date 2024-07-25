@@ -76,7 +76,7 @@ export default function Navbar() {
                       <ResponsiveImage
                         dimensions="w-7 h-7"
                         className="grayscale"
-                        src={levelOneCategory.imagesSrc?.imageUrl}
+                        src={levelOneCategory.imagesSrc?.imageUrl!}
                         blurDataURL={levelOneCategory.imagesSrc?.placeholder}
                         alt={levelOneCategory.name}
                       />

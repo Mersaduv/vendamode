@@ -1,11 +1,18 @@
 import baseApi from '@/services/baseApi'
 
-import type { AddUserAddressQuery, EditUserQuery, GetQuery, GetUserAddressResult, MsgResult, MsgResultSecond } from './types'
+import type {
+  AddUserAddressQuery,
+  EditUserQuery,
+  GetQuery,
+  GetUserAddressResult,
+  MsgResult,
+  MsgResultSecond,
+} from './types'
 import { getToken } from '@/utils'
+import { ServiceResponse } from '@/types'
 
 export const userApiSlice = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-
     editUser: builder.mutation<MsgResult, EditUserQuery>({
       query: ({ body }) => ({
         url: '/api/user',
@@ -40,9 +47,19 @@ export const userApiSlice = baseApi.injectEndpoints({
     }),
 
     getUserAddressInfo: builder.query<GetUserAddressResult, GetQuery>({
-      query: ({page}) => ({
+      query: ({ page }) => ({
         url: `/api/addresses?page=${page}&pagesize=5`,
         method: 'GET',
+      }),
+    }),
+
+    deleteUserAddress: builder.mutation<ServiceResponse<boolean>, string>({
+      query: (id) => ({
+        url: `/api/address/${id}`,
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
       }),
     }),
 
@@ -57,8 +74,13 @@ export const userApiSlice = baseApi.injectEndpoints({
     //   }),
     //   invalidatesTags: ['User'],
     // }),
-
   }),
 })
 
-export const { useEditUserMutation,useGetUserAddressInfoQuery, useAddUserAddressMutation,useEditUserAddressMutation } = userApiSlice
+export const {
+  useDeleteUserAddressMutation,
+  useEditUserMutation,
+  useGetUserAddressInfoQuery,
+  useAddUserAddressMutation,
+  useEditUserAddressMutation,
+} = userApiSlice

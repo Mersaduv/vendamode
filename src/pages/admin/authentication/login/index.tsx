@@ -13,6 +13,7 @@ import { HandleResponse } from '@/components/shared'
 import type { ILoginForm } from '@/types'
 import type { NextPage } from 'next'
 import { LoginForm } from '@/components/form'
+import { digitsFaToEn } from '@persian-tools/persian-tools'
 
 const LoginPage: NextPage = () => {
   // ? Assets
@@ -23,9 +24,12 @@ const LoginPage: NextPage = () => {
 
   // ? Handlers
   const submitHander: SubmitHandler<ILoginForm> = ({ mobileNumber, password }) => {
-    login({ mobileNumber, password })
+    const mobile = digitsFaToEn(mobileNumber)
+    const passCode = digitsFaToEn(password)
+    console.log(mobile , "mobile" , passCode , "passCode");
+    
+    // login({ mobileNumber, password })
   }
-
   const onSuccess = () => replace(query?.redirectTo?.toString() || '/admin')
 
   // ? Render(s)

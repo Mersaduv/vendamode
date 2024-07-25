@@ -7,6 +7,13 @@
   width: 2rem !important;
   height: 2rem !important;
   z-index: 99;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+.swiper-button-prev.swiper-button-disabled, .swiper-button-next.swiper-button-disabled {
+  opacity: 50% !important;
+  cursor: pointer !important;
+  pointer-events: all !important;
 }
 .swiper-button-next::after,
 .swiper-button-prev::after {
@@ -15,9 +22,9 @@
 
 
 .swiper-button-prev {
-  margin-right: 150px !important;
+  margin-right: 120px !important;
   }
-@media (max-width: 450px) {
+@media (max-width: 640px) {
   .swiper-button-prev {
     margin-right: 10px !important;
     }

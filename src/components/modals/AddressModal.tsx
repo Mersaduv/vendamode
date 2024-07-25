@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useEditUserAddressMutation, useGetUserAddressInfoQuery } from '@/services'
-import { Controller, SubmitHandler, useForm } from 'react-hook-form'
+import { Controller, Resolver, SubmitHandler, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { addressSchema } from '@/utils'
 import { HandleResponse } from '@/components/shared'
@@ -14,11 +14,11 @@ interface Props {
   onClose: () => void
   address: IAddress
   refetch: () => void
-  openIsAddressList?:() => void
+  openIsAddressList?: () => void
 }
 
 const AddressModal: React.FC<Props> = (props) => {
-  const { isShow, onClose, address, refetch ,openIsAddressList} = props
+  const { isShow, onClose, address, refetch, openIsAddressList } = props
   const AllProvinces = iranCity.allProvinces()
   const { data: userInfo } = useGetUserAddressInfoQuery({ page: 1 })
 
@@ -33,7 +33,7 @@ const AddressModal: React.FC<Props> = (props) => {
     watch,
     reset,
   } = useForm<Omit<IAddress, 'id' | 'userId'>>({
-    resolver: yupResolver(addressSchema),
+    resolver: yupResolver(addressSchema) as unknown as Resolver<Omit<IAddress, 'id' | 'userId'>>,
     defaultValues: {
       fullName: address.fullName || '',
       mobileNumber: address.mobileNumber || '',
@@ -84,7 +84,7 @@ const AddressModal: React.FC<Props> = (props) => {
   }
 
   return (
-    <div className=''>
+    <div className="">
       {(isSuccess || isError) && (
         <HandleResponse
           isError={isError}
@@ -96,7 +96,10 @@ const AddressModal: React.FC<Props> = (props) => {
       )}
 
       <Modal isShow={isShow} onClose={onClose} effect="bottom-to-top">
-        <Modal.Content onClose={onClose} className="flex h-full flex-col z-[199] gap-y-5 bg-white px-5 py-5 md:rounded-lg ">
+        <Modal.Content
+          onClose={onClose}
+          className="flex h-full flex-col z-[199] gap-y-5 bg-white px-5 py-5 md:rounded-lg "
+        >
           <Modal.Header onClose={onClose}>ثبت آدرس</Modal.Header>
           <Modal.Body>
             <p>لطفا اطلاعات موقعیت مکانی خود را وارد کنید.</p>
@@ -127,7 +130,7 @@ const AddressModal: React.FC<Props> = (props) => {
                   <DisplayError errors={formErrors.city?.name} />
                 </div>
 
-                <div className='col-span-2'>  
+                <div className="col-span-2">
                   <TextField
                     label="آدرس کامل گیرنده"
                     control={control}
@@ -147,7 +150,9 @@ const AddressModal: React.FC<Props> = (props) => {
               </div>
 
               <div className="border-t-2 border-gray-200 py-3 lg:pb-0 flex justify-end">
-                <SubmitModalButton className='' isLoading={isLoading}>ثبت اطلاعات</SubmitModalButton>
+                <SubmitModalButton className="" isLoading={isLoading}>
+                  ثبت اطلاعات
+                </SubmitModalButton>
               </div>
             </form>
           </Modal.Body>

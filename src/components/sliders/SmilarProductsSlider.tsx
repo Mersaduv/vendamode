@@ -32,15 +32,20 @@ const SmilarProductsSlider: React.FC<Props> = (props) => {
     <>
       <section className="hidden sm:flex absolute w-full -top-24 py-2.5">
         <div className="flex gap-8 flex-col bg-[#dee2e6]  z-50 items-center -ml-24 ab">
-          <div className="w-full h-[86px] whitespace-nowrap text-center pt-6 text-2xl text-gray-400 bg-white pr-10">
-          محصولات مشابه
-          </div>
+          <div className="w-full h-[86px] text-center pt-6 text-2xl text-gray-400 bg-white pr-10"> محصولات مشابه </div>
           <div className="flex gap-8 flex-col pl-8  items-center pr-10">
             <img width={260} src="/images/Similar.webp" alt="offer img" />
-            <span className="text-gray-800 font-normal text-lg">محصولات مشابه رو اینجا ببین</span>
-            <Button className="bg-red-600 hover:shadow-lg mt-4 ">نمایش همه</Button>
+            <span className="text-gray-500 font-normal whitespace-nowrap text-lg">محصولات مشابه رو اینجا ببین</span>
+            <Button className="bg-red-600 hover:shadow-lg mt-4 p-0">
+              <Link
+                className="w-full h-full px-5 py-3"
+                href={`/products?category=${smilarProducts.products.length > 0  ?  smilarProducts.products[0].categoryId : ""}`}
+              >
+                نمایش همه
+              </Link>
+            </Button>
           </div>{' '}
-        </div>{' '}
+        </div>
         <Swiper
           breakpoints={{
             490: { width: 640, height: 1000, slidesPerView: 3 },
@@ -62,22 +67,24 @@ const SmilarProductsSlider: React.FC<Props> = (props) => {
               key={product.id}
               className="bg-white rounded-lg absolute shadow-product my-4 "
             >
-              <Link href={`/products/${product.slug}`} className="w-full">
+              <Link href={`/products/${product.slug}`} className="w-full  inline-block pb-9">
                 <ResponsiveImage
                   dimensions="w-[200px] h-[200px] lg:w-[200px] lg:h-[200px]"
                   className="mx-auto relative"
-                  src={product.imagesSrc[0].imageUrl}
-                  blurDataURL={product.imagesSrc[0].placeholder}
+                  src={product.mainImageSrc.imageUrl}
+                  blurDataURL={product.mainImageSrc.placeholder}
                   alt={product.title}
                   imageStyles="object-center rounded-t-lg"
                 />
                 <div className="h-full flex flex-col gap-y-4 pt-4 ">
                   <h2 className="text-center">{product.title}</h2>
                   <div className="mt-1.5 flex justify-center gap-x-2 px-2 ">
-                    <div>
-                      {/* <ProductDiscountTag discount={product.discount} tag={'جدید'} /> */}
-                    </div>
-                    <ProductPriceDisplay inStock={product.inStock} discount={0} price={product.price} />
+                    <div>{/* <ProductDiscountTag discount={product.discount} tag={'جدید'} /> */}</div>
+                    <ProductPriceDisplay
+                      inStock={product.inStock}
+                      discount={0}
+                      price={product.stockItems[0].price ?? 0}
+                    />
                   </div>
                 </div>
               </Link>
@@ -88,9 +95,11 @@ const SmilarProductsSlider: React.FC<Props> = (props) => {
 
       <section className="flex flex-col-reverse xs:flex-row  sm:hidden absolute w-full -top-24 py-2.5">
         <div className=" gap-8 flex-col bg-[#dee2e6]  z-50 items-center xs:-ml-24">
-          <div className="hidden xs:block w-full h-[86px] text-center pt-6 text-lg text-gray-400 bg-white pr-10">محصولات مشابه</div>
+          <div className="hidden xs:block w-full h-[86px] text-center pt-6 text-lg text-gray-400 bg-white pr-10">
+            محصولات مشابه
+          </div>
           <div className="flex gap-8 flex-col pl-8  items-center pr-10">
-            <img className='w-[200px]' src="/images/Similar.webp" alt="offer img" />
+            <img className="w-[200px]" src="/images/Similar.webp" alt="offer img" />
             <span className="text-white font-normal whitespace-nowrap text-lg">محصولات مشابه رو اینجا ببین</span>
             <Button className="bg-red-600 hover:shadow-lg my-4 xs:mb-0 ">نمایش همه</Button>
           </div>{' '}
@@ -110,37 +119,35 @@ const SmilarProductsSlider: React.FC<Props> = (props) => {
           modules={[Navigation]}
           className="mySwiper overflow-auto"
         >
-            {smilarProducts?.products.map((product, index) => (
-              <SwiperSlide
-                style={{ height: '300px', width: '300px' }}
-                key={product.id}
-                className="bg-white rounded-lg absolute shadow-product my-4 "
-              >
-                <Link href={`/products/${product.slug}`} className="w-full">
-                  <ResponsiveImage
-                    dimensions="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] lg:w-[200px] lg:h-[200px]"
-                    className="mx-auto relative"
-                    src={product.imagesSrc[0].imageUrl}
-                    blurDataURL={product.imagesSrc[0].placeholder}
-                    alt={product.title}
-                    imageStyles="object-center rounded-t-lg"
-                  />
-                  <div className="h-full flex flex-col gap-y-4 pt-4 ">
-                    <h2 className="text-center">{product.title}</h2>
-                    <div className="mt-1.5 flex justify-center gap-x-2 px-2 ">
-                      <div>
-                        {/* <ProductDiscountTag discount={product.discount} /> */}
-                      </div>
-                      <ProductPriceDisplay
-                        inStock={product.inStock}
-                        discount={product.discount}
-                        price={product.price}
-                      />
-                    </div>
+          {smilarProducts?.products.map((product, index) => (
+            <SwiperSlide
+              style={{ height: '300px', width: '300px' }}
+              key={product.id}
+              className="bg-white rounded-lg absolute shadow-product my-4 "
+            >
+              <Link href={`/products/${product.slug}`} className="w-full inline-block pb-9">
+                <ResponsiveImage
+                  dimensions="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] lg:w-[200px] lg:h-[200px]"
+                  className="mx-auto relative"
+                  src={product.mainImageSrc.imageUrl}
+                  blurDataURL={product.mainImageSrc.placeholder}
+                  alt={product.title}
+                  imageStyles="object-center rounded-t-lg"
+                />
+                <div className="h-full flex flex-col gap-y-4 pt-4 ">
+                  <h2 className="text-center">{product.title}</h2>
+                  <div className="mt-1.5 flex justify-center gap-x-2 px-2 ">
+                    <div>{/* <ProductDiscountTag discount={product.discount} /> */}</div>
+                    <ProductPriceDisplay
+                      inStock={product.inStock}
+                      discount={product.stockItems[0].discount ?? 0}
+                      price={product.stockItems[0].price ?? 0}
+                    />
                   </div>
-                </Link>
-              </SwiperSlide>
-            ))}
+                </div>
+              </Link>
+            </SwiperSlide>
+          ))}
         </Swiper>
       </section>
     </>

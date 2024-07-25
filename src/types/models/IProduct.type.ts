@@ -1,3 +1,4 @@
+import { ISizeInfoModel } from '../forms.type'
 import { IBrand } from './IBrand.type'
 import { ICategory } from './ICategory.type'
 
@@ -72,14 +73,6 @@ export interface IProductSizeInfo {
     imageUrl: string
     placeholder: string
   }
-}
-export interface ISizeInfoModel {
-  id?: string
-  idx?: string
-  modelSizeId? :string
-  scaleValues?: string[]
-  productSizeValue?: string
-  productSizeValueId?: string
 }
 
 export interface IProductFeatureInfo {

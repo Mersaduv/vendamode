@@ -9,7 +9,7 @@ export type MsgResultSecond = ServiceResponse<boolean>
 export type GetUsersResult = {
   users: Exclude<IUser, 'password' | 'address'>[]
   usersLength: number
-  pagination: IPagination
+  pagination: IPagination<any>
 }
 export type GetQuery = {
   page: number

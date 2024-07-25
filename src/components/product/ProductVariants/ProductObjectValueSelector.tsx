@@ -19,7 +19,6 @@ const ProductObjectValueSelector: React.FC<Props> = (props) => {
     id: string,
     title: string
   ) => {
-    console.log(val, id, title)
     dispatch(setTempObjectValue({ id, title, value: [val] } as IObjectValue))
   }
 

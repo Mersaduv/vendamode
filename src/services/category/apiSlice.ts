@@ -10,6 +10,7 @@ import type {
   GetSingleCategoryResult,
   GetSubCategoriesQuery,
   GetSubCategoriesResult,
+  IdAndQuery,
   IdQuery,
   MsgResult,
   UpdateCategoryFeature,
@@ -63,6 +64,15 @@ export const categoryApiSlice = baseApi.injectEndpoints({
       },
     }),
 
+    getParenSubCategories: builder.query<ServiceResponse<ICategory[]>, IdAndQuery>({
+      query: ({ id, query }) => {
+        const queryParams = generateQueryParams(query)
+        return {
+          url: `/api/category/parentSub/${id}?${queryParams}`,
+          method: 'GET',
+        }
+      },
+    }),
 
     updateCategory: builder.mutation<MsgResult, FormData>({
       query: (body) => ({
@@ -74,7 +84,7 @@ export const categoryApiSlice = baseApi.injectEndpoints({
         body,
       }),
     }),
-  
+
     createCategory: builder.mutation<MsgResult, FormData>({
       query: (body) => ({
         url: `/api/category`,
@@ -85,7 +95,6 @@ export const categoryApiSlice = baseApi.injectEndpoints({
         body,
       }),
     }),
-
 
     updateCategoryFeature: builder.mutation<ServiceResponse<boolean>, UpdateCategoryFeature>({
       query: (data) => {
@@ -99,10 +108,18 @@ export const categoryApiSlice = baseApi.injectEndpoints({
         }
       },
     }),
+
+    deleteCategory: builder.mutation<MsgResult, IdQuery>({
+      query: ({ id }) => ({
+        url: `/api/category/${id}`,
+        method: 'DELETE',
+      }),
+    }),
   }),
 })
 
 export const {
+  useGetParenSubCategoriesQuery,
   useGetCategoriesQuery,
   useGetAllCategoriesQuery,
   useGetSingleCategoryQuery,
@@ -110,5 +127,6 @@ export const {
   useGetCategoriesTreeQuery,
   useUpdateCategoryFeatureMutation,
   useCreateCategoryMutation,
-  useUpdateCategoryMutation
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
 } = categoryApiSlice

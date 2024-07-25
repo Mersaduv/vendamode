@@ -2,14 +2,14 @@ import { PayloadAction, createSlice, nanoid } from '@reduxjs/toolkit'
 
 import { exsitItem, getTotal } from '@/utils'
 
-import type { ICart, IColorDTO, IObjectValue, ISizeDTO } from '@/types'
+import type { ICart, IColorDTO, IObjectValue } from '@/types'
 
 interface CartState {
   cartItems: ICart[]
   totalItems: number
   totalPrice: number
   totalDiscount: number
-  tempSize: ISizeDTO | null
+  tempSize: SizeDTO | null
   tempColor: IColorDTO | null
   tempObjectValue: IObjectValue | null
   isProcessPayment: boolean
@@ -120,7 +120,7 @@ const cartSlice = createSlice({
       state.tempColor = action.payload
     },
 
-    setTempSize: (state, action: PayloadAction<ISizeDTO | null>) => {
+    setTempSize: (state, action: PayloadAction<SizeDTO | null>) => {
       state.tempSize = action.payload
     },
     setTempObjectValue: (state, action: PayloadAction<IObjectValue | null>) => {
@@ -131,7 +131,6 @@ const cartSlice = createSlice({
       const { id, isProcessPayment } = action.payload
       state.placeOrderId = id
       state.isProcessPayment = isProcessPayment
-      console.log(isProcessPayment, id)
       if (typeof window !== 'undefined') {
         localStorage.setItem('placeOrderId', JSON.stringify(id))
         localStorage.setItem('isProcessPayment', JSON.stringify(isProcessPayment))

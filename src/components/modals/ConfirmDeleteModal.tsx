@@ -25,7 +25,7 @@ const ConfirmDeleteModal: React.FC<Props> = (props) => {
               </p>
               <div className="flex justify-center gap-x-20">
                 <Button onClick={onConfirm} isLoading={isLoading}>
-                  حذف و ادامه
+                  حذف 
                 </Button>
 
                 <Button className="!bg-green-500" onClick={onCancel}>

@@ -20,7 +20,6 @@ const getRefreshToken = () => (typeof window !== 'undefined' && localStorage.get
 const getUserInfo = () => {
   if (typeof window !== 'undefined' && localStorage.getItem('userInfo')) {
     var data = JSON.parse(localStorage.getItem('userInfo') as string)
-    console.log(data, 'slice ------------')
     return data
   }
   return null
@@ -28,7 +27,6 @@ const getUserInfo = () => {
 const getAddress = () => {
   if (typeof window !== 'undefined' && localStorage.getItem('address')) {
     var data = JSON.parse(localStorage.getItem('address') as string)
-    console.log(data, 'slice ------------')
     return data
   }
   return null

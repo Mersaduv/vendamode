@@ -79,11 +79,11 @@ const bannerAds: IBanner[] = [
 ]
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const { data: sliders } = await getSliders()
-  const { data: categories } = await getCategories()
-  
-  const slidersData = sliders ?? []
-  const categoriesData = categories?.categoryList ?? []
+  const dataSlider = await getSliders()
+  const dataCategory = await getCategories()
+
+  const slidersData = dataSlider?.data ?? []
+  const categoriesData = dataCategory?.data?.categoryList ?? []
   return {
     revalidate: config.revalidate,
     props: {

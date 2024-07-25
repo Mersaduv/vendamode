@@ -28,7 +28,7 @@ const ReveiwCard: React.FC<Props> = (props) => {
   // ? Handlers
   const handleChangeStatus = (statusNum: number) => {
     editReview({
-      id: item._id,
+      id: item.id,
       body: { status: statusNum },
     })
     setStatus(statusNum)
@@ -81,7 +81,7 @@ const ReveiwCard: React.FC<Props> = (props) => {
               <button
                 type="button"
                 className="flex w-52 cursor-pointer items-center gap-x-3 px-1.5 py-3 "
-                onClick={() => deleteReviewHandler(item._id)}
+                onClick={() => deleteReviewHandler(item.id)}
               >
                 <Delete className="icon" />
                 <span>حذف دیدگاه‌</span>
@@ -109,13 +109,13 @@ const ReveiwCard: React.FC<Props> = (props) => {
       <div className="flex gap-x-3 space-y-3 border-b border-gray-200 py-4 lg:gap-x-8 lg:rounded-lg lg:border lg:px-2 ">
         {/* image */}
         <div>
-          <ResponsiveImage
+          {/* <ResponsiveImage
             dimensions="w-16 h-12 lg:w-24 lg:h-20"
             src={item.product.images[0].url}
             blurDataURL={item.product.images[0].placeholder}
             alt="تصویر محصول"
             imageStyles="object-contain"
-          />
+          /> */}
 
           <span
             className={`farsi-digits mr-10 inline-block h-5 w-5 rounded-md pt-0.5 text-center  text-white lg:mr-20 ${

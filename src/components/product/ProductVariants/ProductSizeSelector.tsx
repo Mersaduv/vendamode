@@ -3,10 +3,9 @@ import { setTempSize } from '@/store'
 import { formatNumber } from '@/utils'
 
 import { useAppDispatch, useAppSelector } from '@/hooks'
-import { ISizeDTO } from '@/types'
 
 interface Props {
-  sizes: ISizeDTO[]
+  sizes: SizeDTO[]
 }
 
 const ProductSizeSelector: React.FC<Props> = (props) => {

@@ -100,7 +100,7 @@ const Footer = () => {
             <p className="text-sm">کلیه حقوق این سایت متعلق به شرکت توسعه خلاقیت مدیسا می باشد</p>
           </div>
           <div className="flex items-center space-x-4">
-            <img src="logo-samandehi.png" alt="Samandehi Logo" className="w-12 h-12" />
+            {/* <img src="logo-samandehi.png" alt="Samandehi Logo" className="w-12 h-12" /> */}
             <p className="text-sm">پشتیبانی 24/7 - 021-91692410</p>
           </div>
         </div>

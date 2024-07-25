@@ -4,7 +4,7 @@ export interface ICategoryForm {
   id?: string | undefined
   name: string
   isActive: boolean
-  thumbnail?: File | undefined
+  thumbnail?: File | null
   mainCategoryId?: string
   parentCategoryId?: string
   level: number
@@ -42,7 +42,7 @@ export interface IBrandForm {
 }
 
 export interface IProductForm {
-  Id : string
+  Id: string
   Title: string
   IsActive: boolean
   MainThumbnail?: File | null
@@ -59,7 +59,7 @@ export interface IProductForm {
 export interface IStockItem {
   id?: string
   stockId?: string
-  ImageStock?: File 
+  ImageStock?: File
   featureValueId?: string[]
   sizeId?: string
   quantity?: number
@@ -80,11 +80,12 @@ export interface ISizeIds {
 }
 
 export interface ISizeInfoModel {
-  id: string
-  idx: string
-  scaleValues?: any[]
-  productSizeValue: string
-  productSizeValueId: string
+  id?: string
+  idx?: string
+  modelSizeId?: string
+  scaleValues?: string[]
+  productSizeValue?: string
+  productSizeValueId?: string
 }
 
 export type IReviewForm = {
@@ -119,4 +120,12 @@ export type IOrderForm = {
   delivered: boolean
   paid: boolean
   purchaseInvoice?: FileList
+}
+
+export interface IProductSizeForm {
+  id?: string | null
+  sizeType: '0' | '1'
+  productSizeValues: string[]
+  thumbnail: File | null
+  categoryIds : string[]
 }

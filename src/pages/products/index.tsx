@@ -13,11 +13,14 @@ import { Pagination } from '@/components/navigation'
 import { FilterModal } from '@/components/modals'
 
 import type { NextPage } from 'next'
+import { digitsEnToFa } from '@persian-tools/persian-tools'
 
 const ProductsHome: NextPage = () => {
   // ? Assets
   const { query } = useRouter()
   const category = query?.category?.toString() ?? ''
+  const sortBy = query?.sortBy?.toString()
+  const discount = query?.discount
 
   // ? Querirs
   //*    Get Products Data
@@ -59,13 +62,13 @@ const ProductsHome: NextPage = () => {
          
                 </div> */}
                 <div className="flex gap-x-3 py-2 flex-col">
-                <div className="w-full lg:flex flex-col hidden">
-                      <div className="mb-6 text-gray-400 text-sm -mt-2 md:-mt-0 md:text-lg md:text-gray-800">
-                        دسته بندی محصولات : <span className="text-[#00c3e1] md:font-bold">وندامد</span>
-                      </div>
-                      <ProductSort />
+                  <div className="w-full lg:flex flex-col hidden">
+                    <div className="mb-6 text-gray-400 text-sm -mt-2 md:-mt-0 md:text-lg md:text-gray-800">
+                      دسته بندی محصولات : <span className="text-[#00c3e1] md:font-bold">وندامد</span>
                     </div>
-                  <div className="block lg:hidden">
+                    <ProductSort />
+                  </div>
+                  <div className="block lg:hidden mt-4">
                     {!productsQueryProps.isLoading && (
                       <FilterModal mainMaxPrice={data?.data?.mainMaxPrice} mainMinPrice={data?.data?.mainMinPrice} />
                     )}
@@ -73,7 +76,7 @@ const ProductsHome: NextPage = () => {
                 </div>
 
                 <div className="flex justify-end py-1 text-end">
-                  <span className="farsi-digits">{data?.data?.productsLength} کالا</span>
+                  <span className="farsi-digits">{digitsEnToFa(data?.data?.productsLength ?? 0)} کالا</span>
                 </div>
               </div>
 
@@ -83,7 +86,7 @@ const ProductsHome: NextPage = () => {
                 loadingComponent={<ProductSkeleton />}
                 emptyComponent={<EmptyCustomList />}
               >
-                {data && data.data!.pagination.data!.length > 0 && (
+                {data && data.data && data.data.pagination.data && data.data.pagination.data.length > 0 && (
                   <section className="grid grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-8">
                     {data?.data?.pagination.data!.map((item) => (
                       <ProductCard product={item} key={item.id} />

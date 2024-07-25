@@ -62,7 +62,6 @@ const ShippingPage: NextPage = () => {
   ] = usePlaceOrderMutation()
 
   const saveIncompleteOrder = () => {
-    console.log(address , '    console.log(address)')
     if (!address?.city && !address?.province && !address?.fullAddress && !address?.postalCode) {
       return dispatch(
         showAlert({
@@ -71,7 +70,6 @@ const ShippingPage: NextPage = () => {
         })
       )
     }else {
-      console.log(address)
       const formData = new FormData()
       formData.append('address', address.id)
       formData.append('status', '1')
@@ -85,12 +83,9 @@ const ShippingPage: NextPage = () => {
       postData(formData)
         .unwrap()
         .then((d) => {
-          console.log('Order saved successfully:', d)
           dispatch(clearCart())
-          console.log('clearCart dispatched')
         })
         .catch((error) => {
-          console.error('Error saving order:', error)
         })
     }
    
@@ -110,7 +105,6 @@ const ShippingPage: NextPage = () => {
       setOrderCreated(true)
     }
     if (isProcessPayment) {
-      console.log(placeOrderId)
       placeOrder({ id: placeOrderId })
       setOrderCreated(true)
       dispatch(clearIsProcessPayment())
@@ -134,9 +128,6 @@ const ShippingPage: NextPage = () => {
     }
   }, [orderCreated , address])
 
-  console.log(updateIsSuccess, updateError, updateData, updateIsError)
-
-  console.log(totalItems, totalDiscount, totalPrice, totalPrice - totalDiscount)
   // ? Render(s)
   return (
     <ProtectedRouteWrapper allowedRoles={[roles.ADMIN, roles.SUPERADMIN, roles.USER]}>

@@ -54,8 +54,8 @@ const AddressCart: NextPage = () => {
 
   const handleSelectAddress = (address: IAddress, isRefetchData?: IAddress[]) => {
     if (isRefetchData) {
-      const addressData = isRefetchData.filter((f: IAddress) => f.id == selectedAddressState?.id)
-      if (addressData[0] != undefined) {
+      const addressData = isRefetchData.filter((f: IAddress) => f.id === selectedAddressState?.id)
+      if (addressData[0] !== undefined) {
         dispatch(setAddress(addressData[0]))
         setSelectedAddress(addressData[0])
       }

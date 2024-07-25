@@ -62,7 +62,6 @@ const ProfileForm: React.FC<Props> = ({ onSubmit, isLoading, defaultValues }) =>
   const handleModalClose = () => setIsModalOpen(false)
 
   const handleDateChange = (field: 'day' | 'month' | 'year', value: string) => {
-    console.log(field, value)
     const birthDate = watch('birthDate') || ''
     const [year, month, day] = birthDate.split('-')
     const newBirthDate = {

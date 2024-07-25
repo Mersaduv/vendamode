@@ -37,7 +37,7 @@ const UserHistory: NextPage = () => {
                     <ResponsiveImage
                       dimensions="w-36 h-36"
                       className="md:mx-auto"
-                      src={item.image.url}
+                      src={item.image.imageUrl}
                       blurDataURL={item.image.placeholder}
                       alt={item.title}
                     />

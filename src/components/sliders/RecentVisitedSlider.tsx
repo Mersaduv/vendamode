@@ -63,7 +63,7 @@ const RecentVisitedSlider: React.FC<Props> = (props) => {
               key={product.productID}
               className="bg-white rounded-lg absolute shadow-product my-4 "
             >
-              <Link href={`/products/${product.slug}`} className="w-full">
+              <Link href={`/products/${product.slug}`} className="w-full inline-block pb-9">
                 <ResponsiveImage
                   dimensions="w-[200px] h-[200px] lg:w-[200px] lg:h-[200px]"
                   className="mx-auto relative"
@@ -85,15 +85,19 @@ const RecentVisitedSlider: React.FC<Props> = (props) => {
         </Swiper>
       </section>
 
-      <section className="flex flex-col-reverse xs:flex-row  sm:hidden absolute w-full -top-24 py-2.5">
-        <div className=" gap-8 flex-col bg-[#dee2e6]  z-50 items-center xs:-ml-24">
-          <div className="hidden xs:block w-full h-[86px] text-center pt-6 text-lg text-gray-400 bg-white pr-10">
-            محصولات مشابه
+      <section className="flex flex-col-reverse sm:flex-row  sm:hidden absolute w-full -top-24 py-2.5">
+        <div className=" gap-8 flex-col bg-[#dee2e6]  z-50 items-center sm:-ml-24">
+          <div className="hidden sm:block w-full h-[86px] text-center pt-6 text-lg text-gray-400 bg-white pr-10">
+            بازدید های اخیر{' '}
           </div>
           <div className="flex gap-8 flex-col pl-8  items-center pr-10">
-            <img className="w-[200px]" src="/images/Similar.webp" alt="offer img" />
-            <span className="text-white font-normal whitespace-nowrap text-lg">محصولات مشابه رو اینجا ببین</span>
-            <Button className="bg-red-600 hover:shadow-lg my-4 xs:mb-0 ">نمایش همه</Button>
+            <img className="w-[200px]" src="/images/Recent Visited.webp" alt="offer img" />
+            <span className="text-gray-500 font-normal whitespace-nowrap text-lg">بازدید های اخیر رو اینجا ببین</span>
+            <Button className="bg-red-600 hover:shadow-lg mt-4 p-0 mb-4">
+              <Link className="w-full h-full px-5 py-3" href={`/products?sortBy=Discount&discount=true`}>
+                نمایش همه
+              </Link>
+            </Button>
           </div>{' '}
         </div>
         <Swiper
@@ -117,7 +121,7 @@ const RecentVisitedSlider: React.FC<Props> = (props) => {
               key={product.productID}
               className="bg-white rounded-lg absolute shadow-product my-4 "
             >
-              <Link href={`/products/${product.slug}`} className="w-full">
+              <Link href={`/products/${product.slug}`} className="w-full inline-block pb-9">
                 <ResponsiveImage
                   dimensions="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] lg:w-[200px] lg:h-[200px]"
                   className="mx-auto relative"

@@ -1,6 +1,7 @@
 import React, { forwardRef } from 'react';
 import { Control, FieldError, useController } from 'react-hook-form';
 import { DisplayError } from '@/components/ui';
+import { digitsEnToFa } from '@persian-tools/persian-tools';
 
 interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   classStyle?: string | null;
@@ -21,9 +22,11 @@ const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
     const inputValue = e.target.value;
 
     if (type === 'number' && inputValue.length !== 0) {
-      field.onChange(parseInt(inputValue));
+      const faInputValue = digitsEnToFa(inputValue)
+      field.onChange(parseInt(faInputValue));
     } else {
-      field.onChange(inputValue);
+      const faInputValue = digitsEnToFa(inputValue)
+      field.onChange(faInputValue);
     }
   }
 
@@ -35,7 +38,7 @@ const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
         </label>
       )}
       <input
-        className={`block w-full ${classStyle ? classStyle : "rounded-md"} border border-gray-200 bg-zinc-100 px-3 py-1.5 text-base outline-none transition-colors placeholder:text-center focus:border-[#ffb9e2] lg:text-lg`}
+        className={`block appearance-none focus:outline-none outline-none ring-0 focus:ring-0 w-full ${classStyle ? classStyle : "rounded-md bg-zinc-100"} border border-gray-200  px-3 py-1.5 text-base outline-none transition-colors placeholder:text-center focus:border-[#ffb9e2] lg:text-lg`}
         style={{ direction }}
         id={name}
         type={type}
@@ -50,5 +53,4 @@ const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
     </div>
   );
 });
-
 export default TextField;

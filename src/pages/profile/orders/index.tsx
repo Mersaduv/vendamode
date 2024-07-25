@@ -25,7 +25,6 @@ const OrderPage: NextPage = () => {
     pageSize: 5,
     page: query.page ? +query.page : 1,
   })
-  console.log(data)
   return (
     <main id="profileOrders">
       <Head>
@@ -120,7 +119,7 @@ const OrderPage: NextPage = () => {
                       <div className="space-y-3">
                         {data?.data?.pagination?.data &&
                           data?.data?.pagination?.data
-                            .filter((item) => item.paid == false && item.status == 1)
+                            .filter((item) => item.paid === false && item.status === 1)
                             .map((item) => <OrderCard isProcessPay key={item.id} order={item} />)}
                       </div>
                     </DataStateDisplay>
@@ -138,7 +137,7 @@ const OrderPage: NextPage = () => {
                       <div className="space-y-3">
                         {data?.data?.pagination?.data &&
                           data?.data?.pagination?.data
-                            .filter((item) => item.paid == true && item.status == 2)
+                            .filter((item) => item.paid === true && item.status === 2)
                             .map((item) => <OrderCard isCurrently key={item.id} order={item} />)}
                       </div>
                     </DataStateDisplay>
@@ -157,7 +156,7 @@ const OrderPage: NextPage = () => {
                       <div className="space-y-3">
                         {data?.data?.pagination?.data &&
                           data?.data?.pagination?.data
-                            .filter((item) => item.delivered == true && item.status == 3)
+                            .filter((item) => item.delivered === true && item.status === 3)
                             .map((item) => <OrderCard isDelivered key={item.id} order={item} />)}
                       </div>
                     </DataStateDisplay>
@@ -175,7 +174,7 @@ const OrderPage: NextPage = () => {
                       <div className="space-y-3">
                         {data?.data?.pagination?.data &&
                           data?.data?.pagination?.data
-                            .filter((item) => item.status == 4)
+                            .filter((item) => item.status === 4)
                             .map((item) => <OrderCard isReturned key={item.id} order={item} />)}
                       </div>
                     </DataStateDisplay>
@@ -193,7 +192,7 @@ const OrderPage: NextPage = () => {
                       <div className="space-y-3">
                         {data?.data?.pagination?.data &&
                           data?.data?.pagination?.data
-                            .filter((item) => item.status == 5)
+                            .filter((item) => item.status === 5)
                             .map((item) => <OrderCard isCanceled key={item.id} order={item} />)}
                       </div>
                     </DataStateDisplay>

@@ -7,16 +7,32 @@ import { Menu, Transition } from '@headlessui/react'
 
 import { ArrowDown, ArrowLeft, Person, User } from '@/icons'
 import { LogoutButton } from '@/components/user'
+import { useAppDispatch } from '@/hooks'
+import { clearCredentials } from '@/store'
 
 interface Props {
-  name: string
+  userInfo: {
+    roles: string[]
+    mobileNumber: string | null
+    fullName: string | null
+    expireTime: number | null
+    refreshTokenExpireTime: number | null
+  }
 }
 
 const UserMenuDropdown: React.FC<Props> = (props) => {
   // ? Props
-  const { name } = props
-  const nameParts = name.split(' ')
-  const firstName = nameParts[0]
+  const { userInfo } = props
+  const nameParts = userInfo?.fullName?.split(' ')
+  const firstName = nameParts![0]
+
+  const dispatch = useAppDispatch()
+
+  // Handlers
+  const handleLogout = () => {
+    dispatch(clearCredentials())
+  }
+
   // ? Render(s)
   return (
     <Menu as="div" className="dropdown">
@@ -34,19 +50,21 @@ const UserMenuDropdown: React.FC<Props> = (props) => {
         leaveTo="transform opacity-0 scale-95"
       >
         <Menu.Items className="dropdown__items">
-          <Menu.Item>
-            <div className="transition-colors">
-              <Link
-                href="/admin"
-                className="flex-center justify-start gap-x-1 py-2.5 text-xs xl:text-sm ml-auto pr-4 text-gray-700 hover:text-[#e90089] font-medium hover:bg-gray-50"
-              >
-                <div>
-                  <AiOutlineProduct className="h-6 w-6 text-black ml-1.5" />
-                </div>
-                پیشخوان وندا
-              </Link>
-            </div>
-          </Menu.Item>
+          {userInfo.roles.includes('مدیر سایت') && (
+            <Menu.Item>
+              <div className="transition-colors">
+                <Link
+                  href="/admin"
+                  className="flex-center justify-start gap-x-1 py-2.5 text-xs xl:text-sm ml-auto pr-4 text-gray-700 hover:text-[#e90089] font-medium hover:bg-gray-50"
+                >
+                  <div>
+                    <AiOutlineProduct className="h-6 w-6 text-black ml-1.5" />
+                  </div>
+                  پیشخوان وندا
+                </Link>
+              </div>
+            </Menu.Item>
+          )}
           <Menu.Item>
             <div className="transition-colors">
               <Link
@@ -76,7 +94,7 @@ const UserMenuDropdown: React.FC<Props> = (props) => {
           <Menu.Item>
             <div className="transition-colors">
               <Link
-                href="/profile"
+                href="/"
                 className="flex-center justify-start gap-x-1 py-2.5 text-xs xl:text-sm ml-auto pr-4 text-gray-700 hover:text-[#e90089] font-medium hover:bg-gray-50"
               >
                 <div>
@@ -87,7 +105,7 @@ const UserMenuDropdown: React.FC<Props> = (props) => {
             </div>
           </Menu.Item>
 
-          <LogoutButton isShowDropDown/>
+          <LogoutButton isShowDropDown />
         </Menu.Items>
       </Transition>
     </Menu>

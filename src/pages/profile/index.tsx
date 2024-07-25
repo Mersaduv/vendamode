@@ -20,7 +20,6 @@ const ProfilePage: NextPage = () => {
   const dispatch = useAppDispatch()
   useEffect(() => {
     if (userData) {
-      console.log(userData)
       setDefaultValues({
         mobileNumber: userData.data?.mobileNumber || '',
         gender: userData.data?.userSpecification.gender || 'آقا',

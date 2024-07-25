@@ -1,9 +1,10 @@
 import baseApi from '@/services/baseApi'
-import { ServiceResponse } from '@/types';
+import { IPagination, QueryParams, ServiceResponse } from '@/types';
+import { FeatureValue, FeatureValueCreateDTO, GetCategoryFeaturesByCategory, GetFeaturesQuery, ProductFeature, ProductFeatureCreateDTO, ProductFeatureUpdateDTO } from './types';
 
 export const productFeatureApi  = baseApi.injectEndpoints({
     endpoints: (builder) => ({
-    getFeatures: builder.query<ServiceResponse<ProductFeature[]>, void>({
+    getFeatures: builder.query<ServiceResponse<IPagination<ProductFeature[]>>, GetFeaturesQuery>({
       query: () => ({
         url: '/api/features',
         method: 'GET',

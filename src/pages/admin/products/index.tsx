@@ -49,10 +49,8 @@ const Products: NextPage = () => {
   const category = (query.category as string) ?? ''
   const dispatch = useDispatch()
   const isUpdated = useAppSelector((state) => state.stateUpdate.isUpdated)
- if (query) {
-  console.log(category , 'category - category');
- }
-  
+  const featureIds = typeof query.featureIds === 'string' ? query.featureIds.split(',') : undefined;
+
   // ? state
   const [selectedCategories, setSelectedCategories] = useState<SelectedCategories>(initialSelectedCategories)
   const [allCategories, setAllCategories] = useState<ICategory[]>([])
@@ -79,12 +77,15 @@ const Products: NextPage = () => {
   //* Get Products Data
   const { refetch, data, productData, isError, isFetching, isSuccess } = useGetProductsQuery(
     {
+      sortBy: 'LastUpdated',
       pageSize: 6,
       page: query.page ? +query.page : 1,
       categoryId: selectedCategoryId ? selectedCategoryId : undefined,
       inStock: selectInStockState !== undefined ? selectInStockState : undefined,
       search: searchTerm,
       category: category != '' ? category : undefined,
+      featureIds: featureIds,
+
     },
     {
       selectFromResult: (data) => ({

@@ -15,8 +15,7 @@ export const logInSchema = Yup.object().shape({
   mobileNumber: Yup.string()
     .required('شماره موبایل لازم است وارد شود')
     .min(11, 'شماره موبایل وارد شده باید 11 رقم باشد')
-    .max(11, 'شماره موبایل وارد شده باید 11 رقم باشد')
-    .matches(/^[0-9]+$/, 'شماره وارد شده معتبر نیست'),
+    .max(11, 'شماره موبایل وارد شده باید 11 رقم باشد'),
   password: Yup.string().required('رمز عبور لازم است وارد شود').min(4, 'رمز عبور نباید کمتر از 4 کارکتر باشد!'),
 })
 
@@ -37,6 +36,10 @@ export const categorySchema = Yup.object().shape({
   name: Yup.string().required('نام دسته‌بندی نباید خالی باشد'),
   thumbnail: Yup.mixed().required('تصویر برای دسته بندی الزامی است'),
   level: Yup.number().required(),
+})
+
+export const singleSchema = Yup.object().shape({
+  name: Yup.string().required('مقدار نباید خالی باشد'),
 })
 
 export const sliderSchema = Yup.object().shape({
@@ -128,6 +131,22 @@ export const productSchema = Yup.object().shape({
     )
     .nullable(),
 })
+
+
+export const productSizeSchema = Yup.object().shape({
+  id: Yup.string().nullable(),
+  sizeType: Yup.string()
+    .required('نوع سایز لازم است ثبت شود')
+    .oneOf(['0', '1'], 'نوع سایز معتبر نیست'),
+  productSizeValues: Yup.array()
+    .of(Yup.string().required('مقدار سایز لازم است ثبت شود'))
+    .required('لیست مقادیر سایز لازم است ثبت شود')
+    .min(1, 'لطفاً حداقل یک مقدار سایز را وارد کنید'),
+  thumbnail: Yup.mixed().nullable().required('تصویر برای اندازه دسته بندی الزامی است'),
+  categoryIds: Yup.array()
+});
+
+
 
 export const detailsSchema = Yup.object().shape({
   info: Yup.array().of(

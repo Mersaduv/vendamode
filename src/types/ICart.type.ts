@@ -1,4 +1,4 @@
-import { IColorDTO, IObjectValue, ISizeDTO } from "./models/IProduct.type"
+import { IColorDTO, IObjectValue } from "./models/IProduct.type"
 
 export default interface ICart {
   itemID: string
@@ -11,7 +11,7 @@ export default interface ICart {
   sold: number
   cancelOrder: ICanceled | null
   color: IColorDTO | null
-  size: ISizeDTO | null
+  size: SizeDTO | null
   features: IObjectValue | null
   img: {
     id: string

@@ -20,7 +20,7 @@ const CategoryList: React.FC<Props> = (props) => {
   // ? Re-Renders
   if (childCategories.categories.length > 0) {
     return (
-      <section className="px-3 border-t-2 pt-8 mx-8 ">
+      <section className="px-3 border-t-2 sm:pt-8 pt-28 mx-8">
         <h4 className="mb-3 text-center text-2xl">
           {childCategories.title}{' '}
           <span
@@ -37,7 +37,7 @@ const CategoryList: React.FC<Props> = (props) => {
                 <ResponsiveImage
                   dimensions="w-28 h-28 lg:h-44 lg:w-44"
                   className="mx-auto mb-1  transition duration-300 ease-in-out transform hover:scale-110"
-                  src={item.imagesSrc?.imageUrl}
+                  src={item.imagesSrc?.imageUrl!}
                   alt={item.name}
                   blurDataURL={item.imagesSrc?.placeholder}
                   imageStyles="object-contain"

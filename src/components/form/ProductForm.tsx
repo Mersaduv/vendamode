@@ -151,7 +151,7 @@ const ProductForm: React.FC<Props> = (props) => {
 
   const { productScales } = useGetSizeByCategoryIdQuery(
     {
-      id: selectedCategories?.categorySelected?.id as string,
+      categoryId: selectedCategories?.categorySelected?.id as string,
     },
     {
       selectFromResult: ({ data }) => ({
@@ -180,7 +180,15 @@ const ProductForm: React.FC<Props> = (props) => {
     // console.log(productSizeScale)
   }
   //؟ all Features Query
-  const { data: allFeatures } = useGetFeaturesQuery()
+  const { data: allFeatures } = useGetFeaturesQuery(
+    {},
+    {
+      selectFromResult: ({ data, isLoading }) => ({
+        data: data?.data?.data,
+        isLoading,
+      }),
+    }
+  )
 
   // ? Get Categories Query
   const { categoriesData } = useGetCategoriesTreeQuery(undefined, {
@@ -284,7 +292,6 @@ const ProductForm: React.FC<Props> = (props) => {
     }
     if (data.ProductScale) {
       formData.append('ProductScale', JSON.stringify(data.ProductScale))
-      console.log(data.ProductScale, 'data.ProductScale')
     }
 
     if (mode == 'create') {
@@ -423,8 +430,8 @@ const ProductForm: React.FC<Props> = (props) => {
   }
 
   useEffect(() => {
-    if (allFeatures?.data && features?.data?.productFeatures) {
-      const filteredData = allFeatures.data.filter(
+    if (allFeatures && features?.data?.productFeatures) {
+      const filteredData = allFeatures.filter(
         (allFeature) => !features?.data?.productFeatures?.some((feature) => feature.id === allFeature.id)
       )
       setStateFeatureData(filteredData)
@@ -438,7 +445,6 @@ const ProductForm: React.FC<Props> = (props) => {
   useEffect(() => {
     if (stateStockItems) {
       setValue('StockItems', stateStockItems)
-      console.log(stateStockItems, 'stateStockItems-2')
     }
   }, [stateStockItems])
 
@@ -451,17 +457,15 @@ const ProductForm: React.FC<Props> = (props) => {
             id: rowIndex.toString(),
             idx: rowIndex.toString(),
             scaleValues: productSizeScale?.columns?.map(() => ''),
-            productSizeValue: row.productSizeValue,
+            productSizeValue: row.productSizeValue ?? '',
             productSizeValueId: rowIndex.toString(),
           })) || [],
       })
     }
   }, [productSizeScale])
   useEffect(() => {
-    console.log(productScaleCreate, 'productScaleCreatec')
     setValue('ProductScale', productScaleCreate)
   }, [productScaleCreate])
-  console.log(formErrors)
 
   // Function to handle input changes
   const handleChange = (rowIndex: number, colIndex: number, value: any) => {
@@ -716,72 +720,77 @@ const ProductForm: React.FC<Props> = (props) => {
                     stateFeatureDataByCategory.length === 0 && features?.data?.sizeDTOs?.length === 0 && 'invisible'
                   }`}
                 >
-                      {stateFeatureDataByCategory &&
-                        stateFeatureDataByCategory
-                          ?.filter((feature) => feature.values?.some((value) => value.hexCode !== null))
-                          .map((feature) => {
-                            const filteredFeature = {
-                              ...feature,
-                              values: feature.values?.filter((value) => value.hexCode !== null) ?? [],
-                            }
-                            return (
-                              <div className="flex items-center flex-col xs:flex-row w-full gap-2 xs:gap-5" key={feature.id}>
-                                <div className="text-gray-600 text-sm w-[190px] px-2"> {filteredFeature.name} </div>
-                                <div className="w-full">
-                                  <FeatureCombobox onFeatureSelect={handleFeatureSelect} features={filteredFeature} />
-                                </div>
-                                <Button
-                                  onClick={() => handleRemoveFeatureToAddOnStateFeatureData(feature)}
-                                  className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
-                                >
-                                  حذف
-                                </Button>
-                              </div>
-                            )
-                          })}
-
-                      {features?.data?.sizeDTOs && features.data.sizeDTOs.length > 0 && (
-                        <div className="flex items-center flex-col xs:flex-row  w-full gap-2 xs:gap-5">
-                          <div className="text-gray-600 text-sm w-[190px] px-2"> سایزبندی </div>
-                          <div className="w-full">
-                            <FeatureCombobox
-                              onFeatureSelect={handleFeatureSelect}
-                              sizeList={features.data.sizeDTOs ?? []}
-                            />
-                          </div>
-                          <Button
-                            onClick={handleRemoveProductSize}
-                            className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
+                  {stateFeatureDataByCategory &&
+                    stateFeatureDataByCategory
+                      ?.filter((feature) => feature.values?.some((value) => value.hexCode !== null))
+                      .map((feature) => {
+                        const filteredFeature = {
+                          ...feature,
+                          values: feature.values?.filter((value) => value.hexCode !== null) ?? [],
+                        }
+                        return (
+                          <div
+                            className="flex items-center flex-col xs:flex-row w-full gap-2 xs:gap-5"
+                            key={feature.id}
                           >
-                            حذف
-                          </Button>
-                        </div>
-                      )}
-                      {stateFeatureDataByCategory &&
-                        stateFeatureDataByCategory
-                          ?.filter((feature) => feature.values?.some((value) => value.hexCode == null))
-                          .map((feature) => {
-                            const filteredFeature = {
-                              ...feature,
-                              values: feature.values?.filter((value) => value.hexCode == null) ?? [],
-                            }
-                            return (
-                              <div className="flex items-center flex-col xs:flex-row  w-full gap-2 xs:gap-5" key={feature.id}>
-                                <div className="text-gray-600 text-sm w-[190px] px-2"> {filteredFeature.name} </div>
-                                <div className="w-full">
-                                  <FeatureCombobox onFeatureSelect={handleFeatureSelect} features={filteredFeature} />
-                                </div>
-                                <Button
-                                  onClick={() => handleRemoveFeatureToAddOnStateFeatureData(feature)}
-                                  className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
-                                >
-                                  حذف
-                                </Button>
-                              </div>
-                            )
-                          })}
+                            <div className="text-gray-600 text-sm w-[190px] px-2"> {filteredFeature.name} </div>
+                            <div className="w-full">
+                              <FeatureCombobox onFeatureSelect={handleFeatureSelect} features={filteredFeature} />
+                            </div>
+                            <Button
+                              onClick={() => handleRemoveFeatureToAddOnStateFeatureData(feature)}
+                              className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
+                            >
+                              حذف
+                            </Button>
+                          </div>
+                        )
+                      })}
+
+                  {features?.data?.sizeDTOs && features.data.sizeDTOs.length > 0 && (
+                    <div className="flex items-center flex-col xs:flex-row  w-full gap-2 xs:gap-5">
+                      <div className="text-gray-600 text-sm w-[190px] px-2"> سایزبندی </div>
+                      <div className="w-full">
+                        <FeatureCombobox
+                          onFeatureSelect={handleFeatureSelect}
+                          sizeList={features.data.sizeDTOs ?? []}
+                        />
+                      </div>
+                      <Button
+                        onClick={handleRemoveProductSize}
+                        className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
+                      >
+                        حذف
+                      </Button>
                     </div>
-               
+                  )}
+                  {stateFeatureDataByCategory &&
+                    stateFeatureDataByCategory
+                      ?.filter((feature) => feature.values?.some((value) => value.hexCode == null))
+                      .map((feature) => {
+                        const filteredFeature = {
+                          ...feature,
+                          values: feature.values?.filter((value) => value.hexCode == null) ?? [],
+                        }
+                        return (
+                          <div
+                            className="flex items-center flex-col xs:flex-row  w-full gap-2 xs:gap-5"
+                            key={feature.id}
+                          >
+                            <div className="text-gray-600 text-sm w-[190px] px-2"> {filteredFeature.name} </div>
+                            <div className="w-full">
+                              <FeatureCombobox onFeatureSelect={handleFeatureSelect} features={filteredFeature} />
+                            </div>
+                            <Button
+                              onClick={() => handleRemoveFeatureToAddOnStateFeatureData(feature)}
+                              className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
+                            >
+                              حذف
+                            </Button>
+                          </div>
+                        )
+                      })}
+                </div>
               </div>
             </div>
             {/* is show Product features, quantity, price , discount */}
@@ -1066,7 +1075,6 @@ const Table: React.FC<PropTable> = (props) => {
   useEffect(() => {
     if (stockItems) {
       setStateStockItems(stockItems)
-      console.log(stockItems, 'stockItems set')
     }
   }, [stockItems])
 
@@ -1093,7 +1101,6 @@ const Table: React.FC<PropTable> = (props) => {
   }
 
   if (selectedStockFiles) {
-    console.log(selectedStockFiles, 'selectedStockFiles')
   }
 
   const handleRemoveRow = (index: number) => {
@@ -1119,7 +1126,7 @@ const Table: React.FC<PropTable> = (props) => {
           return { ...feature, values: updatedValues }
         }
       })
-      .filter((feature) => feature?.values?.length > 0)
+      .filter((feature) => feature?.values?.length! > 0)
 
     setFeaturesAndSizeSelected(updatedFeaturesAndSizeSelected)
 
@@ -1130,7 +1137,7 @@ const Table: React.FC<PropTable> = (props) => {
           const updatedValues = feature?.values?.filter((value) => remainingFeatureValueIds.includes(value.id))
           return { ...feature, values: updatedValues }
         })
-        .filter((feature) => feature?.values?.length > 0)
+        .filter((feature) => feature?.values?.length! > 0)
     })
 
     setStateSizeFeature((prevSizes) => {
@@ -1140,7 +1147,6 @@ const Table: React.FC<PropTable> = (props) => {
     // setProductSizeScale((prevScale) => {
     //   return prevScale.columns?.filter((size) => remainingSizeIds.includes(size.id))
     // })
-    console.log(updatedFeaturesAndSizeSelected, 'Updated features and sizes')
   }
 
   return (
@@ -1357,9 +1363,6 @@ const DialogSetStockItemImage = (props: PropSetStockImage & { index: number }) =
     }
   }
 
-  if (selectedStockFiles) {
-    console.log(selectedStockFiles)
-  }
   return (
     <>
       <Modal isShow={isShow!} onClose={onClose!} effect="ease-out">

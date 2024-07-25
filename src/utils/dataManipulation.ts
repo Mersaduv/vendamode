@@ -1,6 +1,6 @@
-import type { ICart, IColorDTO, IObjectValue, ISizeDTO } from '@/types';
+import type { ICart, IColorDTO, IObjectValue } from '@/types';
 
-export function exsitItem(cartItems: ICart[], productID: string, color: IColorDTO | null, size: ISizeDTO | null, features: IObjectValue | null) {
+export function exsitItem(cartItems: ICart[], productID: string, color: IColorDTO | null, size: SizeDTO | null, features: IObjectValue | null) {
   let result;
   if (color && size && features) {
     result = cartItems.find((item) => item.productID === productID && item.color?.id === color.id && item.size?.id === size.id && item.features?.value![0].id === features.value![0].id);
@@ -23,14 +23,14 @@ export function exsitItem(cartItems: ICart[], productID: string, color: IColorDT
   return result;
 }
 
-export function getTotal(items: ICart[], attr: string) {
+export function getTotal(items: ICart[], attr: string): number {
   const result = items.reduce((total, item) => {
     if (attr === 'price') {
-      total += item.quantity * item.price;
+      total += item.price * item.quantity;
     } else if (attr === 'quantity') {
       total += item.quantity;
     } else if (attr === 'discount') {
-      total += (item.quantity * (item.discount * item.price)) / 100;
+      total += item.discount * item.quantity;
     }
     return total;
   }, 0);

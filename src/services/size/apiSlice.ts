@@ -1,6 +1,6 @@
 // sizeApiSlice.ts
-import baseApi from '@/services/baseApi';
-import { getToken } from '@/utils';
+import baseApi from '@/services/baseApi'
+import { getToken } from '@/utils'
 import type {
   GetSizesResult,
   GetSizeResult,
@@ -9,8 +9,9 @@ import type {
   DeleteSizeResult,
   IdQuery,
   CreateSizeQuery,
-  CreateProductSizeQuery
-} from './types';
+  IdsQuery,
+} from './types'
+import { ServiceResponse } from '@/types'
 
 export const sizeApiSlice = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -34,9 +35,19 @@ export const sizeApiSlice = baseApi.injectEndpoints({
       }),
     }),
 
-    getSizeByCategoryId: builder.query<GetProductSizeResult, IdQuery>({
-      query: ({ id }) => ({
-        url: `/api/size/category-sizes/${id}`,
+    getSizeByCategoryId: builder.query<GetProductSizeResult, IdsQuery>({
+      query: (ids) => ({
+        url: `/api/size/category-sizes/${ids.categoryId}`,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      }),
+    }),
+
+    getSizeByProductSizeId: builder.query<GetProductSizeResult, IdsQuery>({
+      query: (ids) => ({
+        url: `/api/size/category-productSizes/${ids.productSizeId}`,
         method: 'GET',
         headers: {
           Authorization: `Bearer ${getToken()}`,
@@ -55,9 +66,20 @@ export const sizeApiSlice = baseApi.injectEndpoints({
       }),
     }),
 
-    createCategorySize: builder.mutation<CreateSizeResult, CreateProductSizeQuery>({
+    createCategorySize: builder.mutation<ServiceResponse<boolean>, FormData>({
       query: (body) => ({
         url: '/api/size/category',
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body,
+      }),
+    }),
+
+    updateCategorySize: builder.mutation<ServiceResponse<boolean>, FormData>({
+      query: (body) => ({
+        url: '/api/size/category-update',
         method: 'POST',
         headers: {
           Authorization: `Bearer ${getToken()}`,
@@ -76,13 +98,15 @@ export const sizeApiSlice = baseApi.injectEndpoints({
       }),
     }),
   }),
-});
+})
 
 export const {
   useGetSizesQuery,
   useGetSizeQuery,
   useGetSizeByCategoryIdQuery,
+  useGetSizeByProductSizeIdQuery,
   useCreateSizeMutation,
+  useUpdateCategorySizeMutation,
   useCreateCategorySizeMutation,
   useDeleteSizeMutation,
-} = sizeApiSlice;
+} = sizeApiSlice

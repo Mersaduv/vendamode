@@ -10,35 +10,31 @@ interface Props {
 }
 
 const SizesCombobox: React.FC<Props> = ({ onFeatureSelect, sizeList, stateSizeData }) => {
-  const [query, setQuery] = useState('')
-  const [selectedSizes, setSelectedSizes] = useState<SizeDTO[]>([])
+  const [query, setQuery] = useState('');
+  const [selectedSizes, setSelectedSizes] = useState<SizeDTO[]>([]);
 
   useEffect(() => {
     if (stateSizeData) {
       handleSelectSize(stateSizeData)
     }
-  }, [stateSizeData])
+  }, [stateSizeData?.length]);
 
-  let filteredFeatures: SizeDTO[] = []
+  const filteredFeatures = sizeList && sizeList.length > 0 
+    ? query === '' 
+      ? sizeList 
+      : sizeList.filter(sizeItem => sizeItem.name.toLowerCase().includes(query.toLowerCase())) 
+    : [];
 
-  if (sizeList && sizeList.length > 0) {
-    filteredFeatures =
-      query === '' ? sizeList : sizeList.filter((sizeItem) => sizeItem.name.toLowerCase().includes(query.toLowerCase()))
-  }
-
-  const handleSelectSize = (size: SizeDTO[]) => {
-    setSelectedSizes(size)
-    onFeatureSelect(size)
-  }
+  const handleSelectSize = (sizes: SizeDTO[]) => {
+    setSelectedSizes(sizes);
+    onFeatureSelect(sizes);
+  };
 
   const handleRemoveSize = (item: SizeDTO) => {
-    console.log(item)
-
-    const newSelectedSizes = selectedSizes.filter((size) => size.id !== item.id)
-    setSelectedSizes(newSelectedSizes)
-    onFeatureSelect(newSelectedSizes)
-  }
-
+    const newSelectedSizes = selectedSizes.filter(size => size.id !== item.id);
+    setSelectedSizes(newSelectedSizes);
+    onFeatureSelect(newSelectedSizes);
+  };
   return (
     <div className="flex items-center gap-2">
       <div className="w-full relative">
@@ -73,7 +69,7 @@ const SizesCombobox: React.FC<Props> = ({ onFeatureSelect, sizeList, stateSizeDa
 
             <Combobox.Options className="absolute z-[60] mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
               {filteredFeatures.length === 0 && query !== '' ? (
-                <div className="relative cursor-default select-none py-2 px-4 text-gray-700">هیچ رنگی یافت نشد.</div>
+                <div className="relative cursor-default select-none py-2 px-4 text-gray-700">هیچ سایزی یافت نشد.</div>
               ) : (
                 filteredFeatures.map((size) => (
                   <Combobox.Option

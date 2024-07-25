@@ -15,12 +15,13 @@ export const CustomCheckbox = forwardRef(function CustomCheckboxComponent(
   props: CustomCheckboxProps,
   ref: ForwardedRef<HTMLInputElement>
 ) {
-  const { label, name, checked, onChange, customStyle } = props
+  const { label, name, checked = false, onChange, customStyle } = props;
+
 
   return (
     <div className={`flex items-center justify-between ${customStyle ? ""  :"py-2.5"} w-full`}>
       <span className="w-3/4 font-medium text-gray-700">{label}</span>
-      <div className="relative mr-2 inline-block w-11 select-none align-middle">
+      <div className={` ${customStyle ? "w-11" : "md:w-10 w-9" } relative mr-2 inline-block  select-none align-middle`}>
         <input
           type="checkbox"
           name={name}

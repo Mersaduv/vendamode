@@ -17,10 +17,6 @@ const CartItemDisplay: React.FC<Props> = (props) => {
   // ? Props
   const { item } = props
 
-  if (item) {
-    console.log(item)
-  }
-
   // ? Render(s)
   return (
     <article className="flex gap-x-4 px-4 py-5 border border-[#e90089] rounded-xl m-6">
@@ -70,50 +66,6 @@ const CartItemDisplay: React.FC<Props> = (props) => {
               </div>
             </div>
           )}
-
-          {/* {!item.size && !item.color
-            ? item.features?.slice(0, 4).map((feature) => (
-                <div className="flex gap-2 items-center flex-wrap text-xs xs:text-sm md:text-base" key={feature.id}>
-                  {feature.title}:{' '}
-                  {feature.value?.map((val) => (
-                    <div key={val.id} className="font-light border rounded-lg p-0.5">{val.name}</div>
-                  ))}
-                </div>
-              ))
-            : null} */}
-
-          {/* {item.size && item.color
-            ? item.features?.slice(0, 2).map((feature) => (
-                <div className="flex gap-2 items-center flex-wrap text-xs xs:text-sm md:text-base" key={feature.id}>
-                  {feature.title}{' '}
-                  {feature.value?.map((val) => (
-                    <div key={val.id} className="font-light border rounded-lg p-0.5">{val.name}</div>
-                  ))}
-                </div>
-              ))
-            : null} */}
-
-          {/* {!item.size && item.color
-            ? item.features?.slice(0, 3).map((feature) => (
-                <div className="flex gap-2 items-center flex-wrap text-xs xs:text-sm md:text-base" key={feature.id}>
-                  {feature.title}:{' '}
-                  {feature.value?.map((val) => (
-                    <div key={val.id} className="font-light border rounded-lg p-0.5">{val.name}</div>
-                  ))}
-                </div>
-              ))
-            : null} */}
-
-          {/* {item.size && !item.color
-            ? item.features?.slice(0, 3).map((feature) => (
-                <div className="flex gap-2 items-center flex-wrap text-xs xs:text-sm md:text-base" key={feature.id}>
-                  {feature.title}:{' '}
-                  {feature.value?.map((val) => (
-                    <div key={val.id} className="font-light border rounded-lg p-0.5">{val.name}</div>
-                  ))}
-                </div>
-              ))
-            : null} */}
 
           {item.discount > 0 ? (
             <CartDiscountItem discount={item.discount} price={item.price} />
