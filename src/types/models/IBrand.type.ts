@@ -2,11 +2,12 @@ export interface IBrand{
   id: string
   name: string
   imagesSrc: {
-    url: string
+    imageUrl: string
     placeholder: string
   }
   inSlider: boolean
   isActive: boolean
+  isDeleted : boolean
   count: number
   description: string
   isDelete: boolean

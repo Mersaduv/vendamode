@@ -1,7 +1,14 @@
 // types.ts
-import { ServiceResponse } from '@/types'
+import { IPagination, ServiceResponse } from '@/types'
+import { SizeDTO } from '../feature/types'
 
 export type SizeCreateDTO = {
+  name: string
+  description: string
+}
+
+export type SizeUpdateDTO = {
+  id: string
   name: string
   description: string
 }
@@ -23,10 +30,10 @@ export type ProductSizeDTO = {
   }
 }
 
-export type GetSizesResult = ServiceResponse<SizeDTO[]>
+export type GetSizesResult = ServiceResponse<IPagination<SizeDTO[]>>
 export type GetSizeResult = ServiceResponse<SizeDTO>
 export type GetProductSizeResult = ServiceResponse<ProductSizeDTO>
-export type CreateSizeResult = ServiceResponse<boolean>
+export type SizeResult = ServiceResponse<boolean>
 export type DeleteSizeResult = ServiceResponse<boolean>
 
 export type IdQuery = { id: string }

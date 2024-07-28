@@ -1,3 +1,258 @@
+// import type { NextPage } from 'next'
+// import dynamic from 'next/dynamic'
+// import Head from 'next/head'
+// import { DashboardLayout, TabDashboardLayout } from '@/components/Layouts'
+// import { DataStateDisplay, HandleResponse } from '@/components/shared'
+// import { TableSkeleton } from '@/components/skeleton'
+// import { EmptyCustomList } from '@/components/emptyList'
+// import { digitsEnToFa } from '@persian-tools/persian-tools'
+// import { Menu, Tab, Transition } from '@headlessui/react'
+// import {
+//   useDeleteCategoryMutation,
+//   useGetAllCategoriesQuery,
+//   useGetFeaturesQuery,
+//   useGetParenSubCategoriesQuery,
+// } from '@/services'
+// import { useRouter } from 'next/router'
+// import { ICategory } from '@/types'
+// import { useAppSelector, useDisclosure } from '@/hooks'
+// import { CategoryModal, CategoryUpdateModal, ConfirmDeleteModal, FeatureModal, SizesModal } from '@/components/modals'
+// import { Fragment, useEffect, useState } from 'react'
+// import { Pagination } from '@/components/navigation'
+// import { useDispatch } from 'react-redux'
+// import { LuSearch } from 'react-icons/lu'
+// import { Button } from '@/components/ui'
+// import { ParentSubCategoriesTree } from '@/components/categories'
+// import { ProductFeature } from '@/services/feature/types'
+// const ProductConfiguration: NextPage = () => {
+//   // States
+//   const [isShowSizesModal, sizesModalHandlers] = useDisclosure()
+//   const [isShowCategoryModal, categoryModalHandlers] = useDisclosure()
+//   const [isShowFeatureModal, featureModalHandlers] = useDisclosure()
+//   const [isShowEditFeatureModal, editFeatureModalHandlers] = useDisclosure()
+//   const [isShowEditCategoryModal, editCategoryModalHandlers] = useDisclosure()
+//   const [isShowConfirmDeleteModal, confirmDeleteModalHandlers] = useDisclosure()
+//   const [isShowSubCategories, setIsShowSubCategories] = useState(false)
+//   const [deleteInfo, setDeleteInfo] = useState({
+//     id: '',
+//   })
+//   const [searchTerm, setSearchTerm] = useState('')
+//   const [featureSearchTerm, setFeatureSearchTerm] = useState('')
+//   const [stateCategory, setStateCategory] = useState<ICategory>()
+//   const [stateFeature, setStateFeature] = useState<ProductFeature>()
+//   const [stateCategorySize, setStateCategorySize] = useState<ICategory>()
+//   const [categoryParent, setCategoryParent] = useState<ICategory | undefined>(undefined)
+//   const [stateSubCategories, setStateSubCategories] = useState<ICategory[]>([])
+//   const [subCategorySearchTerm, setSubCategorySearchTerm] = useState('')
+//   // ? Assets
+//   const { query, push } = useRouter()
+//   const categoryPage = query.categoryPage ? +query.categoryPage : 1
+//   const featurePage = query.featurePage ? +query.featurePage : 1
+//   const { data, refetch, ...categoriesQueryProps } = useGetAllCategoriesQuery({
+//     pageSize: 5,
+//     page: categoryPage,
+//     search: searchTerm,
+//   })
+
+//   const {
+//     data: featureData,
+//     refetch: refetchFeatures,
+//     ...featuresQueryProps
+//   } = useGetFeaturesQuery({
+//     pageSize: 5,
+//     page: featurePage,
+//     search: searchTerm,
+//   })
+
+//   // ? Queries
+//   //* Get Categories
+//   const {
+//     data: subCategories,
+//     refetch: subRefetch,
+//     isLoading: isLoadingSubCategory,
+//   } = useGetParenSubCategoriesQuery(
+//     {
+//       id: categoryParent != undefined ? categoryParent.id : undefined,
+//       query: { searchTerm: subCategorySearchTerm },
+//     },
+//     {
+//       skip: categoryParent === undefined,
+//     }
+//   )
+
+//   //*    Delete Category
+//   const [
+//     deleteCategory,
+//     {
+//       isSuccess: isSuccessDelete,
+//       isError: isErrorDelete,
+//       error: errorDelete,
+//       data: dataDelete,
+//       isLoading: isLoadingDelete,
+//     },
+//   ] = useDeleteCategoryMutation()
+
+//   useEffect(() => {
+//     if (subCategories) {
+//       setStateSubCategories(subCategories.data ?? [])
+//     }
+//   }, [subCategories])
+
+//   const countAllChildCategories = (category: ICategory | undefined): number => {
+//     if (!category || !category.childCategories) return 0
+
+//     let totalCount = category.childCategories.length
+
+//     for (const childCategory of category.childCategories) {
+//       totalCount += countAllChildCategories(childCategory)
+//     }
+
+//     return totalCount
+//   }
+
+//   // ? Handlers
+//   const handleSearchSubCategoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//     setSubCategorySearchTerm(event.target.value)
+//   }
+//   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//     setSearchTerm(event.target.value)
+//   }
+//   const handleFeatureSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//     setFeatureSearchTerm(event.target.value)
+//   }
+
+//   const handleChangePage = (slugQuery: string) => {
+//     push(`/admin/products?category=${slugQuery}`)
+//   }
+
+//   const handleChangePageFeature = (id: string) => {
+//     push(`/admin/products?featureIds=${id}`)
+//   }
+
+//   const handlerEditCategoryModal = (category: ICategory) => {
+//     setStateCategory(category)
+//     editCategoryModalHandlers.open()
+//   }
+
+//   const handlerEditFeatureModal = (feature: ProductFeature) => {
+//     setStateFeature(feature)
+//     editFeatureModalHandlers.open()
+//   }
+
+//   const handlerEditSizeModal = (category: ICategory) => {
+//     setStateCategorySize(category)
+//     sizesModalHandlers.open()
+//   }
+
+//   //*   Delete Handlers
+//   const handleDelete = (id: string) => {
+//     setDeleteInfo({ id })
+//     confirmDeleteModalHandlers.open()
+//   }
+
+//   const onCancel = () => {
+//     setDeleteInfo({ id: '' })
+//     confirmDeleteModalHandlers.close()
+//   }
+
+//   const onConfirm = () => {
+//     deleteCategory({ id: deleteInfo.id })
+//   }
+
+//   const onSuccess = () => {
+//     refetch()
+//     confirmDeleteModalHandlers.close()
+//     setDeleteInfo({ id: '' })
+//   }
+//   const onError = () => {
+//     confirmDeleteModalHandlers.close()
+//     setDeleteInfo({ id: '' })
+//   }
+
+//   const handleChangeRouteToSubFeature = (feature: ICategory) => {
+//     setIsShowSubFeature(true)
+//     setFeatureValue(categoryParent)
+//   }
+
+//   return (
+//     <>
+//       <ConfirmDeleteModal
+//         title="دسته بندی"
+//         isLoading={isLoadingDelete}
+//         isShow={isShowConfirmDeleteModal}
+//         onClose={confirmDeleteModalHandlers.close}
+//         onCancel={onCancel}
+//         onConfirm={onConfirm}
+//       />
+//       {/* Handle Delete Response */}
+//       {(isSuccessDelete || isErrorDelete) && (
+//         <HandleResponse
+//           isError={isErrorDelete}
+//           isSuccess={isSuccessDelete}
+//           error={errorDelete}
+//           message={dataDelete?.message}
+//           onSuccess={onSuccess}
+//           onError={onError}
+//         />
+//       )}
+
+//       <CategoryModal
+//         title="افزودن"
+//         refetch={refetch}
+//         isShow={isShowCategoryModal}
+//         onClose={() => {
+//           categoryModalHandlers.close()
+//           setStateCategory(undefined)
+//         }}
+//       />
+
+//       <FeatureModal
+//         title="افزودن"
+//         refetch={refetchFeatures}
+//         feature={stateFeature}
+//         isShow={isShowFeatureModal}
+//         onClose={() => {
+//           featureModalHandlers.close()
+//         }}
+//       />
+
+//       <CategoryUpdateModal
+//         title="ویرایش"
+//         refetch={refetch}
+//         category={stateCategory}
+//         isShow={isShowEditCategoryModal}
+//         onClose={() => {
+//           editCategoryModalHandlers.close()
+//         }}
+//       />
+
+//       <SizesModal
+//         refetch={refetch}
+//         category={stateCategorySize ?? undefined}
+//         isShow={isShowSizesModal}
+//         onClose={sizesModalHandlers.close}
+//       />
+
+//       <main>
+//         <Head>
+//           <title>مدیریت | پیکربندی محصول</title>
+//         </Head>
+//         <DashboardLayout>
+//           <section className="w-full px-2 sm:px-6 pt-7 h-screen">
+//             {/* tab changed  */}
+//             <div className="relative flex justify-center w-full overflow-x-auto min-h-96">
+//               <TabDashboardLayout>
+//                 <></>
+//               </TabDashboardLayout>
+//             </div>
+//           </section>
+//         </DashboardLayout>
+//       </main>
+//     </>
+//   )
+// }
+// export default dynamic(() => Promise.resolve(ProductConfiguration), { ssr: false })
+
 import type { NextPage } from 'next'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'

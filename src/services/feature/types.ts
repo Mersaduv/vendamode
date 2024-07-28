@@ -11,7 +11,7 @@ export interface SizeDTO extends BaseClass<string> {
   name: string
   count: number | null
   description: string | null
-  isDeleted: boolean | null
+  isDeleted?: boolean | null
 }
 
 export interface ProductSizeDTO extends BaseClass<string> {
@@ -33,7 +33,7 @@ export interface ProductFeature extends BaseClass<string> {
   name: string
   values: FeatureValue[] | undefined
   count: number
-  valueCount : number
+  valueCount: number
   isDeleted: boolean
   productId: string | null
   categoryId: string | null
@@ -57,15 +57,19 @@ export interface GetCategoryFeaturesByCategory {
 export interface ProductFeatureUpdateDTO {
   id: string
   name: string
-  description: string
-  hexCode: string | null
+}
+export interface ProductFeatureValueUpdateDTO {
+  id: string
+  name: string
+  hexCode?: string
 }
 
-export interface FeatureValueCreateDTO {
+export interface FeatureValueDTO {
+  id?: string
   name: string
-  description: string
-  hexCode: string | null
-  productFeatureId: string
+  description?: string
+  hexCode?: string
+  productFeatureId?: string
 }
 
 export interface ProductFeatureCreateDTO {

@@ -34,11 +34,11 @@ export type AddressFormBody = {
 export interface IBrandForm {
   id?: string
   name: string
-  Thumbnail: FileList
+  Thumbnail: File
   inSlider: boolean
   isActive: boolean
-  Description: number
-  description: string
+  description?: string
+  isDeleted?: boolean
 }
 
 export interface IProductForm {
@@ -127,5 +127,5 @@ export interface IProductSizeForm {
   sizeType: '0' | '1'
   productSizeValues: string[]
   thumbnail: File | null
-  categoryIds : string[]
+  categoryIds: string[]
 }

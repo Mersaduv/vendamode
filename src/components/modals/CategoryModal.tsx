@@ -1,21 +1,17 @@
 import { Modal, Button, CustomCheckbox } from '@/components/ui'
 import { ICategory, ICategoryForm } from '@/types'
-import SizesCombobox from '../selectorCombobox/SizesCombobox'
 import {
   useCreateCategoryMutation,
-  useGetSizesQuery,
-  useUpdateCategoryFeatureMutation,
-  useUpdateCategoryMutation,
 } from '@/services'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { HandleResponse } from '../shared'
-import { CategoryFeatureForm } from '@/services/category/types'
 import { Resolver, SubmitHandler, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { categorySchema } from '@/utils'
 
 interface Props {
   title: string
+  mode: 'create' | 'edit'
   category?: ICategory
   isShow: boolean
   onClose: () => void
@@ -30,7 +26,7 @@ const CategoryModal: React.FC<Props> = (props) => {
   } as ICategoryForm)
   const [selectedFile, setSelectedFile] = useState<File[]>([])
 
-  const { isShow, onClose, refetch, title } = props
+  const { isShow, onClose, refetch, title, mode } = props
 
   const [
     createCategory,
@@ -84,7 +80,6 @@ const CategoryModal: React.FC<Props> = (props) => {
   }
 
   const onConfirm: SubmitHandler<ICategoryForm> = (data) => {
-
     const formData = new FormData()
 
     formData.append('Name', data.name)
@@ -158,9 +153,9 @@ const CategoryModal: React.FC<Props> = (props) => {
               </div>
 
               <div className="flex py-3 items-center gap-x-12 border mx-6 rounded-lg px-2">
-                <label htmlFor="isActive" className="flex items-center gap-x-2">
+                <label htmlFor={`isActive-${mode}`} className="flex items-center gap-x-2">
                   <CustomCheckbox
-                    name="isActive"
+                    name={`isActive-${mode}`}
                     checked={stateCategoryData.isActive}
                     onChange={handleIsActiveChange}
                     label="وضعیت نمایش"
@@ -170,8 +165,16 @@ const CategoryModal: React.FC<Props> = (props) => {
               </div>
 
               <div className=" flex flex-col items-center justify-center">
-                <input type="file" className="hidden" id="thumbnailCreate" onChange={handleMainFileChange} />
-                <label htmlFor="thumbnailCreate" className="block w-fit  rounded-lg cursor-pointer text-sm font-normal">
+                <input
+                  type="file"
+                  className="hidden"
+                  id={`thumbnailCategory-${mode}`}
+                  onChange={handleMainFileChange}
+                />
+                <label
+                  htmlFor={`thumbnailCategory-${mode}`}
+                  className="block w-fit  rounded-lg cursor-pointer text-sm font-normal"
+                >
                   {selectedFile.length === 0 ? (
                     <img
                       className="w-[125px] h-[125px] rounded-md"

@@ -227,7 +227,7 @@ const profileData: ProfilePath[] = [
         id: 8,
         name: 'پیکربندی محصول',
         Icon: TbPointFilled,
-        path: '/admin/product-configuration',
+        path: '/admin/product-configuration/categories',
       },
       {
         id: 8,

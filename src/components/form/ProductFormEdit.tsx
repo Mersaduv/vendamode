@@ -36,6 +36,7 @@ import { showAlert } from '@/store'
 import Link from 'next/link'
 import { AiFillDelete } from 'react-icons/ai'
 import { MdClose } from 'react-icons/md'
+import { FeatureValue, ProductFeature, SizeDTO } from '@/services/feature/types'
 
 const generateUniqueId = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {

@@ -16,6 +16,7 @@ import { categorySchema } from '@/utils'
 
 interface Props {
   title: string
+  mode: 'create' | 'edit'
   category?: ICategory
   isShow: boolean
   onClose: () => void
@@ -37,7 +38,7 @@ const CategoryUpdateModal: React.FC<Props> = (props) => {
   } as ICategoryForm)
   const [selectedMainFile, setSelectedMainFile] = useState<File[]>([])
 
-  const { category, isShow, onClose, refetch, title } = props
+  const { category, isShow, onClose, refetch, title, mode } = props
 
   const [
     updateCategory,
@@ -101,7 +102,7 @@ const CategoryUpdateModal: React.FC<Props> = (props) => {
           const imageFile = await fetchImageAsFile(category.imagesSrc.imageUrl)
           if (imageFile) {
             setSelectedMainFile([imageFile])
-          }     
+          }
 
           reset({
             id: category.id,
@@ -120,7 +121,7 @@ const CategoryUpdateModal: React.FC<Props> = (props) => {
 
   // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   if (e.target.files) {
-      
+
   //     const files = Array.from(e.target.files)
   //     console.log(files);
   //     if (files.length > 0) {
@@ -155,7 +156,6 @@ const CategoryUpdateModal: React.FC<Props> = (props) => {
   }
 
   const onConfirm: SubmitHandler<ICategoryForm> = (data) => {
-
     const formData = new FormData()
 
     formData.append('Name', data.name)
@@ -176,7 +176,6 @@ const CategoryUpdateModal: React.FC<Props> = (props) => {
       createCategory(formData)
     }
   }
-
 
   return (
     <>
@@ -246,7 +245,7 @@ const CategoryUpdateModal: React.FC<Props> = (props) => {
 
               <div className="flex py-3 items-center gap-x-12 border mx-6 rounded-lg px-2">
                 <label htmlFor="isActive" className="flex items-center gap-x-2">
-                <CustomCheckbox
+                  <CustomCheckbox
                     name="isActive"
                     checked={stateCategoryData.isActive}
                     onChange={handleIsActiveChange}
@@ -267,12 +266,12 @@ const CategoryUpdateModal: React.FC<Props> = (props) => {
                     />
                   ) : (
                     <div className="text-sm shadow-item rounded-lg p-2 text-gray-600">
-                    <img
-                      src={URL.createObjectURL(selectedMainFile[0])}
-                      alt={selectedMainFile[0].name}
-                      className="w-[125px] object-contain h-[125px] rounded-md"
-                    />
-                  </div>
+                      <img
+                        src={URL.createObjectURL(selectedMainFile[0])}
+                        alt={selectedMainFile[0].name}
+                        className="w-[125px] object-contain h-[125px] rounded-md"
+                      />
+                    </div>
                   )}
                 </label>
                 <div className="text-xs mt-3">تصویر</div>

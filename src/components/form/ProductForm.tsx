@@ -36,6 +36,7 @@ import { digitsEnToFa, digitsFaToEn } from '@persian-tools/persian-tools'
 import { useAppDispatch, useDisclosure } from '@/hooks'
 import { showAlert } from '@/store'
 import { MdClose } from 'react-icons/md'
+import { ProductFeature, SizeDTO } from '@/services/feature/types'
 
 const generateUniqueId = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {

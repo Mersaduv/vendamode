@@ -49,7 +49,10 @@ const Products: NextPage = () => {
   const category = (query.category as string) ?? ''
   const dispatch = useDispatch()
   const isUpdated = useAppSelector((state) => state.stateUpdate.isUpdated)
-  const featureIds = typeof query.featureIds === 'string' ? query.featureIds.split(',') : undefined;
+  const featureIds = typeof query.featureIds === 'string' ? query.featureIds.split(',') : undefined
+  const featureValueIds = typeof query.featureValueIds === 'string' ? query.featureValueIds.split(',') : undefined
+  const sizes = typeof query.sizes === 'string' ? query.sizes.split(',') : undefined
+  const brands = typeof query.brands === 'string' ? query.brands.split(',') : undefined
 
   // ? state
   const [selectedCategories, setSelectedCategories] = useState<SelectedCategories>(initialSelectedCategories)
@@ -85,7 +88,9 @@ const Products: NextPage = () => {
       search: searchTerm,
       category: category != '' ? category : undefined,
       featureIds: featureIds,
-
+      featureValueIds: featureValueIds,
+      sizes: sizes,
+      brands: brands,
     },
     {
       selectFromResult: (data) => ({
@@ -256,7 +261,7 @@ const Products: NextPage = () => {
           <title>مدیریت | محصولات</title>
         </Head>
         <DashboardLayout>
-          <div className="w-full  mt-14 mb-5  px-2 xs:px-8 lg:px-14">
+          <div className="w-full  mt-8 mb-5  px-2 xs:px-8 lg:px-14">
             <div className=" bg-white p-6 rounded-lg shadow-other">
               <div className="bg-[#e90089] cursor-pointer hover:bg-[#c70174] w-fit px-3 py-3 rounded-xl text-white text-sm">
                 همه محصولات

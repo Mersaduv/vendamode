@@ -38,11 +38,11 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
           </Link>
         </div>
       </header>
-      <div className="flex mt-[75px]">
+      <div className="flex mt-[75px] bg-[#f5f8fa] ">
         <div className="">
           <DashboardAdminAside setOpenRight={setOpenRight} openRight={openRight} />
         </div>
-        <div className="w-full bg-[#f5f8fa]">{children}</div>
+        <div className="w-full flex flex-col items-start max-w-screen-xl mx-auto">{children}</div>
       </div>
     </ProtectedRouteWrapper>
   )

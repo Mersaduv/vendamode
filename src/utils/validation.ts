@@ -42,6 +42,13 @@ export const singleSchema = Yup.object().shape({
   name: Yup.string().required('مقدار نباید خالی باشد'),
 })
 
+export const brandSchema = Yup.object().shape({
+  id: Yup.string().optional(),
+  name: Yup.string().required('نام برند نباید خالی باشد'),
+  Thumbnail: Yup.mixed().required('تصویر برند الزامی است'),
+  description: Yup.string().optional(),
+});
+
 export const sliderSchema = Yup.object().shape({
   title: Yup.string().required('نام اسلایدر نباید خالی باشد'),
   image: Yup.object().shape({

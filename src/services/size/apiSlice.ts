@@ -1,28 +1,32 @@
 // sizeApiSlice.ts
 import baseApi from '@/services/baseApi'
-import { getToken } from '@/utils'
+import { generateQueryParams, getToken } from '@/utils'
 import type {
   GetSizesResult,
   GetSizeResult,
   GetProductSizeResult,
-  CreateSizeResult,
   DeleteSizeResult,
   IdQuery,
   CreateSizeQuery,
   IdsQuery,
+  SizeUpdateDTO,
+  SizeResult,
 } from './types'
-import { ServiceResponse } from '@/types'
+import { QueryParams, ServiceResponse } from '@/types'
 
 export const sizeApiSlice = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getSizes: builder.query<GetSizesResult, void>({
-      query: () => ({
-        url: '/api/sizes',
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      }),
+    getSizes: builder.query<GetSizesResult, QueryParams>({
+      query: ({ ...params }) => {
+        const queryParams = generateQueryParams(params)
+        return {
+          url: `/api/sizes?${queryParams}`,
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      },
     }),
 
     getSize: builder.query<GetSizeResult, IdQuery>({
@@ -55,10 +59,21 @@ export const sizeApiSlice = baseApi.injectEndpoints({
       }),
     }),
 
-    createSize: builder.mutation<CreateSizeResult, CreateSizeQuery>({
+    createSize: builder.mutation<SizeResult, CreateSizeQuery>({
       query: (body) => ({
         url: '/api/size',
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body,
+      }),
+    }),
+
+    updateSize: builder.mutation<SizeResult, SizeUpdateDTO>({
+      query: (body) => ({
+        url: '/api/size',
+        method: 'PUT',
         headers: {
           Authorization: `Bearer ${getToken()}`,
         },
@@ -106,6 +121,7 @@ export const {
   useGetSizeByCategoryIdQuery,
   useGetSizeByProductSizeIdQuery,
   useCreateSizeMutation,
+  useUpdateSizeMutation,
   useUpdateCategorySizeMutation,
   useCreateCategorySizeMutation,
   useDeleteSizeMutation,

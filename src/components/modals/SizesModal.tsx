@@ -5,6 +5,7 @@ import { useGetSizesQuery, useUpdateCategoryFeatureMutation } from '@/services'
 import { useEffect, useState } from 'react'
 import { HandleResponse } from '../shared'
 import { CategoryFeatureForm } from '@/services/category/types'
+import { SizeDTO } from '@/services/feature/types'
 
 interface Props {
   category: ICategory | undefined
@@ -21,7 +22,7 @@ const SizesModal: React.FC<Props> = (props) => {
   // ? Props
   const { category, isShow, onClose, refetch } = props
 
-  const { data, isLoading } = useGetSizesQuery()
+  const { data, isLoading } = useGetSizesQuery({ page: 1, pageSize: 9999 })
   const [
     updateCategoryFeature,
     {
@@ -34,8 +35,8 @@ const SizesModal: React.FC<Props> = (props) => {
   ] = useUpdateCategoryFeatureMutation()
 
   useEffect(() => {
-    if (data?.data) {
-      setSizeDb(data?.data)
+    if (data?.data?.data) {
+      setSizeDb(data?.data.data)
     }
   }, [data?.data])
 
@@ -97,7 +98,7 @@ const SizesModal: React.FC<Props> = (props) => {
                 <div className="w-full">
                   <SizesCombobox
                     onFeatureSelect={handleFeatureSelect}
-                    sizeList={data?.data ?? []}
+                    sizeList={data?.data?.data ?? []}
                     stateSizeData={sizeDb?.filter((size) => category?.categorySizes?.sizeIds?.includes(size.id))}
                   />
                 </div>

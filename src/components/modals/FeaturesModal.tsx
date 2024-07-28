@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { HandleResponse } from '../shared'
 import { CategoryFeatureForm } from '@/services/category/types'
 import { ProductFeatureCombobox } from '../selectorCombobox'
+import { ProductFeature } from '@/services/feature/types'
 
 interface Props {
   category: ICategory | undefined
@@ -72,7 +73,7 @@ const FeaturesModal: React.FC<Props> = (props) => {
   // ? Render(s)
   return (
     <>
-      {/* Handle Delete Response */}
+      {/* Handle Response */}
       {(isSuccessUpdate || isErrorUpdate) && (
         <HandleResponse
           isError={isErrorUpdate}
