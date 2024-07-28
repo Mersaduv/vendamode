@@ -20,6 +20,7 @@ import type {
   IProductSizeInfo,
   IStockItem,
   IProductScaleCreate,
+  IProductStatus,
 } from '@/types'
 import { CategorySelector } from '../categories'
 import {
@@ -29,7 +30,7 @@ import {
   useGetFeaturesQuery,
 } from '@/services'
 import TextEditor from './TextEditor'
-import { AddFeatureCombobox, BrandCombobox, CategoryCombobox, FeatureCombobox } from '../selectorCombobox'
+import { AddFeatureCombobox, BrandCombobox, CategoryCombobox, FeatureCombobox, StatusCombobox } from '../selectorCombobox'
 import { Button } from '../ui'
 import { useGetSizeByCategoryIdQuery } from '@/services/size/apiSlice'
 import { digitsEnToFa, digitsFaToEn } from '@persian-tools/persian-tools'
@@ -132,6 +133,7 @@ const ProductForm: React.FC<Props> = (props) => {
   const [selectedMainCategory, setSelectedMainCategory] = useState<ICategory | null>(null)
   const [selectedBrand, setSelectedBrand] = useState<IBrand | null>(null)
   const [productScaleCreate, setProductScaleCreate] = useState<IProductScaleCreate>()
+  const [selectedStatus, setSelectedStatus] = useState<IProductStatus | null>(null)
 
   // ? Form Hook
   const {
@@ -160,6 +162,7 @@ const ProductForm: React.FC<Props> = (props) => {
       }),
     }
   )
+  console.log(productScales, 'productScalesproductScalesproductScalesproductScales')
 
   useEffect(() => {
     if (productScales) {
@@ -492,6 +495,9 @@ const ProductForm: React.FC<Props> = (props) => {
       ((getValues('Thumbnail') as File[]) || []).filter((_, i) => i !== index)
     )
   }
+
+  console.log(formErrors, isValid, 'formErrors , isValid')
+
   return (
     <section>
       <form className="flex gap-4 flex-col pt-4 lg:pt-14" onSubmit={handleSubmit(editedCreateHandler)}>
@@ -690,26 +696,11 @@ const ProductForm: React.FC<Props> = (props) => {
                       )}
                     </div>
 
-                    <div className="flex flex-col md:flex-row md:items-center md:gap-10 gap-2">
+                    <div className="flex flex-col md:flex-row  md:items-center md:gap-10 gap-2">
                       <label htmlFor="BrandId" className="w-[95px] font-normal  text-gray-600 text-sm  cursor-pointer">
-                        ویژگی محصول{' '}
+                        وضعیت محصول{' '}
                       </label>
-                      <div className="flex gap-1">
-                        {stateFeatureData && (
-                          <AddFeatureCombobox
-                            features={stateFeatureData}
-                            onFeatureSelect={handleMainFeatureSelect}
-                            setIsRemoveProductSize={setIsRemoveProductSize}
-                            isRemoveProductSize={isRemoveProductSize}
-                          />
-                        )}
-                        <Button
-                          onClick={handleAddFeature}
-                          className="bg-white hover:text-white text-blue-400 text-sm border border-blue-500 hover:bg-blue-500 px-4 py-1.5"
-                        >
-                          افزودن
-                        </Button>
-                      </div>
+                      <StatusCombobox selectedStatus={selectedStatus} setSelectedStatus={setSelectedStatus} />
                     </div>
                   </div>
                 </div>
@@ -738,12 +729,6 @@ const ProductForm: React.FC<Props> = (props) => {
                             <div className="w-full">
                               <FeatureCombobox onFeatureSelect={handleFeatureSelect} features={filteredFeature} />
                             </div>
-                            <Button
-                              onClick={() => handleRemoveFeatureToAddOnStateFeatureData(feature)}
-                              className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
-                            >
-                              حذف
-                            </Button>
                           </div>
                         )
                       })}
@@ -757,12 +742,6 @@ const ProductForm: React.FC<Props> = (props) => {
                           sizeList={features.data.sizeDTOs ?? []}
                         />
                       </div>
-                      <Button
-                        onClick={handleRemoveProductSize}
-                        className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
-                      >
-                        حذف
-                      </Button>
                     </div>
                   )}
                   {stateFeatureDataByCategory &&
@@ -782,12 +761,6 @@ const ProductForm: React.FC<Props> = (props) => {
                             <div className="w-full">
                               <FeatureCombobox onFeatureSelect={handleFeatureSelect} features={filteredFeature} />
                             </div>
-                            <Button
-                              onClick={() => handleRemoveFeatureToAddOnStateFeatureData(feature)}
-                              className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
-                            >
-                              حذف
-                            </Button>
                           </div>
                         )
                       })}
@@ -810,12 +783,14 @@ const ProductForm: React.FC<Props> = (props) => {
               </div>
             </div>
             {/* is show product scale  */}
-            {isProductScale && (
+            {isProductScale && productScales && (
               <div className="flex flex-1">
-                <div className="bg-white w-full rounded-md shadow-item  overflow-auto">
+                <div className="bg-white w-full rounded-md shadow-item overflow-auto">
                   <h3 className="border-b p-6 text-gray-600">اندازه ها</h3>
-                  <div className="flex flex-col-reverse md:w-[1000px] lg:w-[1300px] mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
-                    <div className="flex flex-col items-start flex-1 mdx:w-auto w-full overflow-auto">
+                  <div className="flex flex-col-reverse mx-auto overflow-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
+                  
+                   {/* table  */}
+                    <div className="flex flex-col items-start flex-1 pt-3 mdx:w-auto w-full overflow-auto">
                       <table className="table-auto border-collapse w-full">
                         <thead className="bg-[#8fdcff]">
                           <tr>
@@ -855,7 +830,8 @@ const ProductForm: React.FC<Props> = (props) => {
                         </tbody>
                       </table>
                     </div>
-                    <div className=" mdx:w-fit flex justify-center w-full mdx:mb-0 mb-4">
+                    {/* image  */}
+                    <div className=" mdx:w-fit flex justify-center w-full mdx:mb-0 pt-3 mb-4">
                       <div className="rounded-lg  shadow-product w-[240px] h-[240px]">
                         <img
                           className="w-full h-full rounded-lg"
@@ -864,6 +840,7 @@ const ProductForm: React.FC<Props> = (props) => {
                         />
                       </div>
                     </div>
+
                   </div>
                   <div className="bg-gray-100 bottom-0 w-full  rounded-b-lg px-8 flex flex-col pb-2">
                     <span className="font-normal text-[11px] pt-2">
@@ -921,11 +898,7 @@ const ProductForm: React.FC<Props> = (props) => {
         </div>
         <div className="flex justify-end w-full">
           {' '}
-          <Button
-            // disabled={!isValid}
-            type="submit"
-            className={`w-0 px-11 py-3 ${!isValid ? 'bg-gray-300' : 'hover:text-black'}  mb-10 float-start`}
-          >
+          <Button type="submit" className={`w-0 px-11 py-3 hover:text-black mb-10 float-start`}>
             انتشار
           </Button>
         </div>
@@ -951,6 +924,7 @@ const Table: React.FC<PropTable> = (props) => {
   const [currentRowIndex, setCurrentRowIndex] = useState<number | null>(null)
   const [rows, setRows] = useState<CurrentRow[]>([])
   const [defaultRow, setDefaultRow] = useState<CurrentRow>({ id: 11 })
+  const [isEditable, setIsEditable] = useState(false);
 
   const dispatch = useAppDispatch()
 
@@ -1049,12 +1023,12 @@ const Table: React.FC<PropTable> = (props) => {
   const handleCheckboxChange = (field: string, checked: boolean) => {
     const updatedStockItems = stockItems.map((item, index) => ({
       ...item,
-      [field]: checked ? stockItems[0][field] : index === 0 ? item[field] : '',
-    }))
-
-    setStockItems(updatedStockItems)
-  }
-
+      [field]: checked ? stockItems[0][field] : item[field],
+    }));
+  
+    setStockItems(updatedStockItems);
+  };
+  
   useEffect(() => {
     const initialStockItems = rows.map((row) => {
       const dynamicProperties: any = {}
@@ -1168,7 +1142,7 @@ const Table: React.FC<PropTable> = (props) => {
               )}
               <th className="px-4 whitespace-nowrap py-2 font-normal">موجودی</th>
               <th className="px-4 whitespace-nowrap py-2 font-normal">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center justify-center gap-1">
                   <div>
                     قیمت محصول
                     <input
@@ -1180,8 +1154,8 @@ const Table: React.FC<PropTable> = (props) => {
                   <FaArrowDownLong className="text-gray-400" />
                 </div>
               </th>
-              <th className="px-4 whitespace-nowrap py-2 font-normal">
-                <div className="flex items-center gap-1">
+              <th className="px-4 whitespace-nowrap  py-2 font-normal">
+                <div className="flex items-center justify-center gap-1">
                   <div>
                     فروش فوق العاده
                     <input

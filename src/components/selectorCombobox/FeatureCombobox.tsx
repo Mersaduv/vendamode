@@ -6,6 +6,7 @@ import { IoChevronDownCircleOutline } from 'react-icons/io5'
 import { FaCheck } from 'react-icons/fa'
 import { ArrowRight, ArrowRight2 } from '@/icons'
 import { AiOutlineClose } from 'react-icons/ai'
+import { FeatureValue, ProductFeature, SizeDTO } from '@/services/feature/types'
 
 interface Props {
   features?: ProductFeature
@@ -159,25 +160,24 @@ const FeatureCombobox: React.FC<Props> = ({
                     key={feature.id}
                     value={feature}
                     className={({ active }) =>
-                      `relative cursor-pointer select-none py-2 pl-10 pr-4 ${
+                      `relative cursor-pointer select-none py-2 flex pl-10 pr-4 ${
                         active ? 'bg-gray-100 text-white' : 'text-gray-900'
                       }`
                     }
                   >
                     {({ selected, active }) => (
                       <>
+                        <span
+                          className={`${selected ? 'visible' : 'invisible'} inset-y-0 left-0 flex items-center pl-3 ${
+                            active ? 'text-[#e90089]' : 'text-[#e90089]'
+                          }`}
+                        >
+                          <FaCheck className="h-4 w-4" />
+                        </span>
+
                         <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
                           {feature.name}
                         </span>
-                        {selected ? (
-                          <span
-                            className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                              active ? 'text-[#e90089]' : 'text-[#e90089]'
-                            }`}
-                          >
-                            <FaCheck className="h-4 w-4" />
-                          </span>
-                        ) : null}
                       </>
                     )}
                   </Combobox.Option>
@@ -223,25 +223,24 @@ const FeatureCombobox: React.FC<Props> = ({
                     key={size.id}
                     value={size}
                     className={({ active }) =>
-                      `relative cursor-pointer select-none py-2 pl-10 pr-4 ${
+                      `relative cursor-pointer select-none py-2 flex  pl-10 pr-4 ${
                         active ? 'bg-gray-100 text-white' : 'text-gray-900'
                       }`
                     }
                   >
                     {({ selected, active }) => (
                       <>
+                        <span
+                          className={`${selected ? 'visible' : 'invisible'} inset-y-0 left-0 flex items-center pl-3 ${
+                            active ? 'text-[#e90089]' : 'text-[#e90089]'
+                          }`}
+                        >
+                          <FaCheck className="h-4 w-4" />
+                        </span>
+
                         <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
                           {size.name}
                         </span>
-                        {selected ? (
-                          <span
-                            className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                              active ? 'text-[#e90089]' : 'text-[#e90089]'
-                            }`}
-                          >
-                            <FaCheck className="h-4 w-4" />
-                          </span>
-                        ) : null}
                       </>
                     )}
                   </Combobox.Option>

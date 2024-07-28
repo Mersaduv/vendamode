@@ -26,6 +26,8 @@ interface Props {
 const ProductGallery: React.FC<Props> = (props) => {
   // ? Porps
   const { images, discount, inStock, productName } = props
+  console.log(images , "imagesimagesimages");
+  
 
   // ? States
   const [currentImage, setCurrentImage] = useState(0)

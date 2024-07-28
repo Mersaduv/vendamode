@@ -113,7 +113,7 @@ const SingleProduct: NextPage<Props> = (props) => {
       dispatch(
         addToLastSeen({
           productID: product.id,
-          image: product.imagesSrc[0],
+          image: product.mainImageSrc,
           title: product.title,
           slug: product.slug,
           discount: product.stockItems[0].discount ?? 0,
@@ -175,7 +175,7 @@ const SingleProduct: NextPage<Props> = (props) => {
               </div>
             </div>
             <ProductGallery
-              images={product.imagesSrc}
+              images={product.imagesSrc && product.imagesSrc.length > 0 ? product.imagesSrc : [product.mainImageSrc]}
               discount={product.discount}
               inStock={product.inStock}
               productName={product.title}

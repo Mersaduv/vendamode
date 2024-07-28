@@ -1,3 +1,4 @@
+import { SizeDTO } from '@/services/feature/types'
 import { ISizeInfoModel } from '../forms.type'
 import { IBrand } from './IBrand.type'
 import { ICategory } from './ICategory.type'
@@ -10,7 +11,7 @@ export interface IProduct {
     imageUrl: string
     placeholder: string
   }
-  imagesSrc: {
+  imagesSrc?: {
     id: string
     imageUrl: string
     placeholder: string

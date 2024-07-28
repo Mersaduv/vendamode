@@ -100,7 +100,7 @@ const CartOperations: React.FC<Porps> = (props) => {
         color: tempColor,
         size: tempSize,
         features: tempObjectValue,
-        img: product.imagesSrc[0],
+        img: product.mainImageSrc,
         quantity: 1,
         cancelOrder: null,
       })

@@ -83,8 +83,8 @@ const NewSlider: React.FC<Props> = (props) => {
                     <ResponsiveImage
                       dimensions="w-[200px] h-[200px] lg:w-[200px] lg:h-[200px]"
                       className="mx-auto relative"
-                      src={product.imagesSrc[0].imageUrl}
-                      blurDataURL={product.imagesSrc[0].placeholder}
+                      src={product.mainImageSrc.imageUrl}
+                      blurDataURL={product.mainImageSrc.placeholder}
                       alt={product.title}
                       imageStyles="object-center rounded-t-lg"
                     />
@@ -160,8 +160,8 @@ const NewSlider: React.FC<Props> = (props) => {
                       <ResponsiveImage
                         dimensions="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] lg:w-[200px] lg:h-[200px]"
                         className="mx-auto relative"
-                        src={product.imagesSrc[0].imageUrl}
-                        blurDataURL={product.imagesSrc[0].placeholder}
+                        src={product.mainImageSrc.imageUrl}
+                        blurDataURL={product.mainImageSrc.placeholder}
                         alt={product.title}
                         imageStyles="object-center rounded-t-lg"
                       />

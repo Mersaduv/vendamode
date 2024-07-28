@@ -129,3 +129,9 @@ export interface IProductSizeForm {
   thumbnail: File | null
   categoryIds: string[]
 }
+
+
+export interface IProductStatus {
+  id: number
+  name: string
+}

@@ -118,25 +118,12 @@ export const productSchema = Yup.object().shape({
   Title: Yup.string().required('نام محصول الزامی است'),
   IsActive: Yup.boolean(),
   MainThumbnail: Yup.mixed().required('نگاره اول برای محصول الزامی است'),
-  Thumbnail: Yup.mixed().required('حداقل یک عکس در گالری باید اضافه شود'),
   CategoryId: Yup.string().required('دسته بندی برای محصول الزامی است'),
   Description: Yup.string(),
   IsFake: Yup.boolean(),
   BrandId: Yup.string().nullable(),
   FeatureValueIds: Yup.array().of(Yup.string()),
   ProductScale: Yup.object().nullable(),
-  StockItems: Yup.array()
-    .of(
-      Yup.object().shape({
-        id: Yup.string().nullable(),
-        featureValueId: Yup.array().of(Yup.string()),
-        price: Yup.number().nullable().required('تعیین قیمت محصول الزامی است'),
-        discoint: Yup.number().nullable(),
-        sizeId: Yup.string().nullable(),
-        quantity: Yup.string().required('تعیین تعداد محصول الزامی است'),
-      })
-    )
-    .nullable(),
 })
 
 
