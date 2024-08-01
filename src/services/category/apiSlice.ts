@@ -25,6 +25,16 @@ export const categoryApiSlice = baseApi.injectEndpoints({
         url: '/api/categories',
         method: 'GET',
       }),
+      providesTags: (result) =>
+        result?.data?.categoryDTO
+          ? [
+              ...result?.data?.categoryDTO.map(({ id }) => ({
+                type: 'Category' as const,
+                id: id,
+              })),
+              'Category',
+            ]
+          : ['Category'],
     }),
 
     getAllCategories: builder.query<GetAllCategoriesResult, GetCategoriesQuery>({
@@ -35,6 +45,16 @@ export const categoryApiSlice = baseApi.injectEndpoints({
           method: 'GET',
         }
       },
+      providesTags: (result) =>
+        result?.data?.data
+          ? [
+              ...result?.data?.data.map(({ id }) => ({
+                type: 'Category' as const,
+                id: id,
+              })),
+              'Category',
+            ]
+          : ['Category'],
     }),
 
     getCategoriesTree: builder.query<ServiceResponse<ICategory[]>, void>({
@@ -45,6 +65,16 @@ export const categoryApiSlice = baseApi.injectEndpoints({
           Authorization: `Bearer ${getToken()}`,
         },
       }),
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result?.data.map(({ id }) => ({
+                type: 'Category' as const,
+                id: id,
+              })),
+              'Category',
+            ]
+          : ['Category'],
     }),
 
     getSingleCategory: builder.query<GetSingleCategoryResult, IdQuery>({
@@ -52,6 +82,7 @@ export const categoryApiSlice = baseApi.injectEndpoints({
         url: `/api/category/${id}`,
         method: 'GET',
       }),
+      providesTags: (result, error, arg) => [{ type: 'Category', id: arg.id }],
     }),
 
     getSubCategories: builder.query<GetSubCategoriesResult, GetSubCategoriesQuery>({
@@ -62,6 +93,16 @@ export const categoryApiSlice = baseApi.injectEndpoints({
           method: 'GET',
         }
       },
+      providesTags: (result) =>
+        result?.data?.children
+          ? [
+              ...result?.data?.children.map(({ id }) => ({
+                type: 'Category' as const,
+                id: id,
+              })),
+              'Category',
+            ]
+          : ['Category'],
     }),
 
     getParenSubCategories: builder.query<ServiceResponse<ICategory[]>, IdAndQuery>({
@@ -72,6 +113,16 @@ export const categoryApiSlice = baseApi.injectEndpoints({
           method: 'GET',
         }
       },
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result?.data.map(({ id }) => ({
+                type: 'Category' as const,
+                id: id,
+              })),
+              'Category',
+            ]
+          : ['Category'],
     }),
 
     updateCategory: builder.mutation<MsgResult, FormData>({
@@ -83,6 +134,7 @@ export const categoryApiSlice = baseApi.injectEndpoints({
         },
         body,
       }),
+      invalidatesTags: ['Category'],
     }),
 
     createCategory: builder.mutation<MsgResult, FormData>({
@@ -94,6 +146,7 @@ export const categoryApiSlice = baseApi.injectEndpoints({
         },
         body,
       }),
+      invalidatesTags: ['Category'],
     }),
 
     updateCategoryFeature: builder.mutation<ServiceResponse<boolean>, UpdateCategoryFeature>({
@@ -107,6 +160,7 @@ export const categoryApiSlice = baseApi.injectEndpoints({
           },
         }
       },
+      invalidatesTags: ['Features'],
     }),
 
     deleteCategory: builder.mutation<MsgResult, IdQuery>({
@@ -114,6 +168,7 @@ export const categoryApiSlice = baseApi.injectEndpoints({
         url: `/api/category/${id}`,
         method: 'DELETE',
       }),
+      invalidatesTags: ['Category'],
     }),
   }),
 })

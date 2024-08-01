@@ -1,6 +1,15 @@
-import baseApi from '@/services/baseApi';
-import { generateQueryParams, getToken } from '@/utils';
-import { CreateBrandQuery, GetAllBrandsResult, GetBrandsQuery, GetBrandsResult, GetSingleBrandResult, IdQuery, MsgResult, UpdateBrandQuery } from './types';
+import baseApi from '@/services/baseApi'
+import { generateQueryParams, getToken } from '@/utils'
+import {
+  CreateBrandQuery,
+  GetAllBrandsResult,
+  GetBrandsQuery,
+  GetBrandsResult,
+  GetSingleBrandResult,
+  IdQuery,
+  MsgResult,
+  UpdateBrandQuery,
+} from './types'
 
 export const brandApiSlice = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -9,16 +18,36 @@ export const brandApiSlice = baseApi.injectEndpoints({
         url: '/api/allBrands',
         method: 'GET',
       }),
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result?.data.map(({ id }) => ({
+                type: 'Brand' as const,
+                id: id,
+              })),
+              'Brand',
+            ]
+          : ['Brand'],
     }),
 
     getBrands: builder.query<GetBrandsResult, GetBrandsQuery>({
       query: ({ ...params }) => {
-        const queryParams = generateQueryParams(params);
+        const queryParams = generateQueryParams(params)
         return {
           url: `/api/brands?${queryParams}`,
           method: 'GET',
-        };
+        }
       },
+      providesTags: (result) =>
+        result?.data?.data
+          ? [
+              ...result?.data?.data.map(({ id }) => ({
+                type: 'Brand' as const,
+                id: id,
+              })),
+              'Brand',
+            ]
+          : ['Brand'],
     }),
 
     getSingleBrand: builder.query<GetSingleBrandResult, IdQuery>({
@@ -26,6 +55,7 @@ export const brandApiSlice = baseApi.injectEndpoints({
         url: `/api/brand/${id}`,
         method: 'GET',
       }),
+      providesTags: (result, error, arg) => [{ type: 'Brand', id: arg.id }],
     }),
 
     createBrand: builder.mutation<MsgResult, FormData>({
@@ -37,6 +67,7 @@ export const brandApiSlice = baseApi.injectEndpoints({
         },
         body,
       }),
+      invalidatesTags: ['Brand'],
     }),
 
     updateBrand: builder.mutation<MsgResult, FormData>({
@@ -45,6 +76,7 @@ export const brandApiSlice = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['Brand'],
     }),
 
     deleteBrand: builder.mutation<MsgResult, IdQuery>({
@@ -52,9 +84,10 @@ export const brandApiSlice = baseApi.injectEndpoints({
         url: `/api/brand/${id}`,
         method: 'DELETE',
       }),
+      invalidatesTags: ['Brand'],
     }),
   }),
-});
+})
 
 export const {
   useGetAllBrandsQuery,
@@ -63,4 +96,4 @@ export const {
   useCreateBrandMutation,
   useUpdateBrandMutation,
   useDeleteBrandMutation,
-} = brandApiSlice;
+} = brandApiSlice

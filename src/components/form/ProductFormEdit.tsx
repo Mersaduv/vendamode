@@ -16,6 +16,7 @@ import type {
   IStockItem,
   IProductScaleCreate,
   ISizeInfoModel,
+  IProductStatus,
 } from '@/types'
 import { CategorySelector } from '../categories'
 import {
@@ -27,16 +28,23 @@ import {
   useGetSingleCategoryQuery,
 } from '@/services'
 import TextEditor from './TextEditor'
-import { AddFeatureCombobox, BrandCombobox, CategoryCombobox, FeatureCombobox } from '../selectorCombobox'
+import {
+  AddFeatureCombobox,
+  BrandCombobox,
+  CategoryCombobox,
+  FeatureCombobox,
+  StatusCombobox,
+} from '../selectorCombobox'
 import { Button } from '../ui'
 import { useGetSizeByCategoryIdQuery } from '@/services/size/apiSlice'
 import { digitsEnToFa, digitsFaToEn } from '@persian-tools/persian-tools'
 import { useAppDispatch, useAppSelector, useDisclosure } from '@/hooks'
-import { showAlert } from '@/store'
+import { setUpdated, showAlert } from '@/store'
 import Link from 'next/link'
 import { AiFillDelete } from 'react-icons/ai'
 import { MdClose } from 'react-icons/md'
 import { FeatureValue, ProductFeature, SizeDTO } from '@/services/feature/types'
+import dynamic from 'next/dynamic'
 
 const generateUniqueId = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -52,9 +60,11 @@ const fetchImageAsFile = async (url: string): Promise<File> => {
   const fileName = url.split('/').pop()
   return new File([blob], fileName || 'image.jpg', { type: blob.type })
 }
-
+const addCommas = (num: string | number) => {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
 const removeKeys = (item: IStockItem) => {
-  const { featureValueIds, id, imagesSrc, productId, created, idx, lastUpdated, ...rest } = item
+  const { id, imagesSrc, productId, created, idx, lastUpdated, ...rest } = item
   return rest
 }
 
@@ -84,6 +94,9 @@ interface PropTable {
   setProductSizeScale: Dispatch<SetStateAction<IProductSizeInfo>>
   selectedFiles: File[]
   rowsData: CurrentRow[]
+  newRows: CurrentRow[]
+  isSecondRequest: boolean
+  setIsSecondRequest: Dispatch<SetStateAction<boolean>>
 }
 
 interface PropSetStockImage {
@@ -98,13 +111,16 @@ interface PropSetStockImage {
 interface CurrentRow {
   [key: string]: any
   sizeId?: string
-  featureValueIds?: string[]
+  featureValueId?: string[]
+  price?: number
+  quantity?: number
 }
-
+const CustomEditor = dynamic(() => import('@/components/form/TextEditor'), { ssr: false })
 const ProductFormEdit: React.FC<Props> = (props) => {
   // ? Props
   const { mode, isLoadingUpdate, updateHandle, selectedProduct } = props
-
+  const isUpdated = useAppSelector((state) => state.stateUpdate.isUpdated)
+  const dispatch = useAppDispatch()
   // ? States
   const [isDetailsSkip, setIsDetailsSkip] = useState(true)
   const [isProductScale, setIsProductScale] = useState(false)
@@ -131,7 +147,6 @@ const ProductFormEdit: React.FC<Props> = (props) => {
     columns: null,
     imagesSrc: undefined,
   })
-
   // edit state
   const [singleCategoryId, setSingleCategoryId] = useState<string>()
   const [selectedMainCategory, setSelectedMainCategory] = useState<ICategory | null>(null)
@@ -143,9 +158,11 @@ const ProductFormEdit: React.FC<Props> = (props) => {
   const [productScaleCreate, setProductScaleCreate] = useState<IProductScaleCreate>()
   const [shamsiDate, setShamsiDate] = useState('')
   const [updateShamsiDate, setUpdateShamsiDate] = useState('')
-
+  const [selectedStatus, setSelectedStatus] = useState<IProductStatus | null>({ id: 'New', name: 'آکبند' })
+  const [isSecondRequest, setIsSecondRequest] = useState(false)
   const [rowsData, setRowsData] = useState<CurrentRow[]>([])
-
+  const [textEditor, setTextEditor] = useState<any>()
+  const newRows: CurrentRow[] = []
   //state management
   const { userInfo } = useAppSelector((state) => state.auth)
 
@@ -194,7 +211,7 @@ const ProductFormEdit: React.FC<Props> = (props) => {
     }
   }, [selectedProduct])
 
-  const { productScales } = useGetSizeByCategoryIdQuery(
+  const { productScales, refetch: refetchProductScales } = useGetSizeByCategoryIdQuery(
     {
       categoryId: selectedCategories?.categorySelected?.id as string,
     },
@@ -206,18 +223,20 @@ const ProductFormEdit: React.FC<Props> = (props) => {
   )
 
   useEffect(() => {
+    // console.log(productScales, 'productScales  - productScales')
+
     if (productScales) {
-      if (productSizeScale?.columns == null) {
-        setProductSizeScale({
-          sizeType: productScales.sizeType,
-          rows:
-            productScales.productSizeValues?.map((productSizeValue) => ({ productSizeValue: productSizeValue.name })) ||
-            [],
-          columns: [],
-          imagesSrc: productScales.imagesSrc,
-        })
-        // console.log(productSizeScale , "productSizeScale data");
-      }
+      // if (productSizeScale?.columns) {
+      setProductSizeScale({
+        sizeType: productScales.sizeType,
+        rows:
+          productScales.productSizeValues?.map((productSizeValue) => ({ productSizeValue: productSizeValue.name })) ||
+          [],
+        columns: [],
+        imagesSrc: productScales.imagesSrc,
+      })
+      // console.log(productSizeScale , "productSizeScale data");
+      // }
     }
   }, [productScales])
 
@@ -225,8 +244,8 @@ const ProductFormEdit: React.FC<Props> = (props) => {
     // console.log(productSizeScale, 'productSizeScale', productScales, 'productScales')
   }
   //؟ all Features Query
-  const { data: allFeatures } = useGetFeaturesQuery(
-    {},
+  const { data: allFeatures, refetch: refetchAllFeature } = useGetFeaturesQuery(
+    { pageSize: 999999 },
     {
       selectFromResult: ({ data, isLoading }) => ({
         data: data?.data?.data,
@@ -236,20 +255,18 @@ const ProductFormEdit: React.FC<Props> = (props) => {
   )
 
   // ? Get Categories Query
-  const { categoriesData } = useGetCategoriesTreeQuery(undefined, {
+  const { categoriesData, refetch: refetchCategoryData } = useGetCategoriesTreeQuery(undefined, {
     selectFromResult: ({ data }) => ({
       categoriesData: data?.data,
     }),
   })
 
   const singleCategoryQueryEnabled = singleCategoryId !== undefined
-  const { data: singleCategoryData } = useGetSingleCategoryQuery(
+  const { data: singleCategoryData, refetch: refetchSingleCategoryData } = useGetSingleCategoryQuery(
     { id: singleCategoryId! },
     { skip: !singleCategoryQueryEnabled }
   )
-  if (categoriesData) {
-    // console.log(categoriesData)
-  }
+
   useEffect(() => {
     if (categoriesData) {
       const mainCats = categoriesData.filter((category) => category.level === 0)
@@ -259,15 +276,28 @@ const ProductFormEdit: React.FC<Props> = (props) => {
 
   // ? Queries
   //*   Get Details
-  const { data: features } = useGetFeaturesByCategoryQuery(selectedCategories?.categorySelected?.id as string, {
-    skip: isDetailsSkip,
-  })
+  const { data: features, refetch: refetchFeatures } = useGetFeaturesByCategoryQuery(
+    selectedCategories?.categorySelected?.id as string,
+    {
+      skip: isDetailsSkip,
+    }
+  )
 
-  // useEffect(() => {
-  //   if (features?.data?.productFeatures) {
-  //     setStateFeatureDataByCategory(features.data.productFeatures)
-  //   }
-  // }, [features])
+  useEffect(() => {
+    if (isSecondRequest) {
+      console.log(isSecondRequest, features, 'isSecondRequest ,features')
+      setStateFeature([])
+      setStateSizeFeature([])
+      setStateStockItems([])
+      setStateFeatureValueData([])
+      setStateColorData([])
+      setRowsData([])
+      setStateSizeData([])
+      if (features?.data?.productFeatures) {
+        setStateFeatureDataByCategory(features.data.productFeatures)
+      }
+    }
+  }, [features, isSecondRequest])
 
   // if (stateFeatureDataByCategory) {
   //   console.log(stateFeatureDataByCategory)
@@ -275,12 +305,18 @@ const ProductFormEdit: React.FC<Props> = (props) => {
 
   // ? Queries
   //*   Get Brands
-  const { data: brandData } = useGetBrandsQuery({ page: 1, pageSize: 200 })
+  const { data: brandData, refetch: refetchBrandData } = useGetBrandsQuery({ page: 1, pageSize: 200 })
 
   // Queries
   //* Get Feature
-  const { data: featureData, isLoading: isLoadingFeature } = useGetFeaturesQuery(
-    {},
+  const {
+    data: featureData,
+    isLoading: isLoadingFeature,
+    refetch: refetchFeatureData,
+  } = useGetFeaturesQuery(
+    {
+      pageSize: 200,
+    },
     {
       selectFromResult: ({ data, isLoading }) => ({
         data: data?.data?.data,
@@ -290,7 +326,11 @@ const ProductFormEdit: React.FC<Props> = (props) => {
   )
   // Queries
   //* Get Feature Values
-  const { data: featureValueData, isLoading: isLoadingFeatureValue } = useGetFeatureValuesQuery()
+  const {
+    data: featureValueData,
+    isLoading: isLoadingFeatureValue,
+    refetch: refetchFeatureValueData,
+  } = useGetFeatureValuesQuery({ pageSize: 200 })
   // ? Re-Renders
   //*   Select Category To Fetch Details
   useEffect(() => {
@@ -299,23 +339,9 @@ const ProductFormEdit: React.FC<Props> = (props) => {
       // setIsProductScale(false)
       setStateFeature([])
       setStateSizeFeature([])
-      setValue('CategoryId', selectedCategories?.categorySelected?.id, { shouldValidate: true })
+      setValue('CategoryId', selectedCategories?.categorySelected?.id)
     }
   }, [selectedCategories?.categorySelected?.id])
-
-  //*   Set Details
-  // useEffect(() => {
-  //   if (features && getValues('Title') != '') {
-  //     // setValue('info', details.info)
-  //     // setValue('specification', details.specification)
-  //     // setValue('optionsType', details.optionsType)
-  //     var titledata = getValues('Title')
-  //     // console.log(features, titledata)
-  //     setIsFeaturesSkip(true)
-  //   }
-  // }, [features, getValues('Title')])
-
-  //*   Set Product Details On Edit Mode
 
   useEffect(() => {
     const loadImages = async () => {
@@ -334,7 +360,11 @@ const ProductFormEdit: React.FC<Props> = (props) => {
           stockItems: stockItemsData,
           brandData,
         } = selectedProduct
-        console.log(productSizeInfo, 'productSizeInfo - productSizeInfo')
+        if (selectedProduct.status === 0) {
+          setSelectedStatus({ id: 'New', name: 'آکبند' })
+        } else {
+          setSelectedStatus({ id: 'Used', name: 'کارکرده' })
+        }
 
         setProductSizeScaleData(
           productSizeInfo?.rows?.map((row) => ({
@@ -347,12 +377,13 @@ const ProductFormEdit: React.FC<Props> = (props) => {
         )
 
         setSingleCategoryId(categoryId)
+        // console.log(selectedProduct , "selectedProduct");
 
         setRowsData(
           stockItemsData?.map((stock) => {
             const fixedProperties = {
               sizeId: stock.sizeId,
-              featureValueIds: stock.featureValueId,
+              featureValueId: stock.featureValueId,
               id: stock.stockId,
               stockId: stock.stockId,
               imagesSrc: stock.imagesSrc,
@@ -375,36 +406,38 @@ const ProductFormEdit: React.FC<Props> = (props) => {
             }
           }) || []
         )
-        // console.log(stockItemsData, 'stockItemsData', rowsData, 'rowData')
+        console.log(stockItemsData, ' stockItemsData')
 
         const colorDTOsIds = productFeatureInfo?.colorDTOs?.map((color) => color.id) || []
+
         const featureValueIds =
           productFeatureInfo?.featureValueInfos?.flatMap((feature) => feature?.value?.map((val) => val.id)) || []
+
         const featureValuesIds = [...colorDTOsIds, ...featureValueIds]
 
-        const filteredFeatureData = featureData
-          ?.map((featureItem) => {
-            const filteredValues = featureItem?.values?.filter((value) => featureValuesIds.includes(value.id))
-            if (filteredValues?.length === 0) {
-              return null
-            }
-            return {
-              ...featureItem,
-              // values: filteredValues,
-            }
-          })
-          .filter((feature): feature is ProductFeature => feature !== null && feature !== undefined)
-        if (filteredFeatureData) {
-          setStateFeatureDataByCategory(filteredFeatureData)
+        if (features?.data?.productFeatures) {
+          setStateFeatureDataByCategory(features?.data?.productFeatures)
         }
 
-        const filteredFeatureValueData = featureValueData?.data?.filter((featureValue) =>
-          featureValuesIds.includes(featureValue.id)
+        const filteredFeatureValueData = featureValueData?.data?.data?.filter((featureValue) =>
+          featureValueIds.includes(featureValue.id)
         )
 
+        const filteredFeatureValueDataColor = featureValueData?.data?.data?.filter((featureValue) =>
+          colorDTOsIds.includes(featureValue.id)
+        )
+
+        const stockSizeIds = stockItemsData.map((item) => item.sizeId)
+        const filteredSizeDTOs = features?.data?.sizeDTOs?.filter((size) => stockSizeIds.includes(size.id))
+
         if (filteredFeatureValueData) {
-          setStateColorData(filteredFeatureValueData.filter((value) => value.hexCode !== null))
-          setStateFeatureValueData(filteredFeatureValueData.filter((value) => value.hexCode === null))
+          setStateFeatureValueData(filteredFeatureValueData)
+        }
+        if (filteredFeatureValueDataColor) {
+          setStateColorData(filteredFeatureValueDataColor)
+        }
+        if (filteredSizeDTOs) {
+          setStateSizeData(filteredSizeDTOs)
         }
 
         const mainImageFile = await fetchImageAsFile(mainImageSrc.imageUrl)
@@ -412,14 +445,11 @@ const ProductFormEdit: React.FC<Props> = (props) => {
           setMainSelectedFiles([mainImageFile])
         }
 
-        const imageFiles = await Promise.all(imagesSrc.map((image) => fetchImageAsFile(image.imageUrl)))
+        const imageFiles = await Promise.all(imagesSrc!.map((image) => fetchImageAsFile(image.imageUrl)))
         setSelectedFiles(imageFiles)
 
         setSelectedBrand(brandData)
-        if (productSizeInfo?.columns) {
-          setStateSizeData(productSizeInfo.columns)
-        }
-
+        setTextEditor(description)
         reset({
           Id: selectedProduct.id,
           Title: title,
@@ -431,12 +461,20 @@ const ProductFormEdit: React.FC<Props> = (props) => {
           IsFake: isFake,
           MainThumbnail: mainImageFile,
           Thumbnail: imageFiles,
+          status: selectedProduct.status === 0 ? 'New' : 'Used',
         })
       }
     }
+    if (!isSecondRequest) {
+      loadImages()
+    }
+  }, [selectedProduct, features])
 
-    loadImages()
-  }, [selectedProduct, featureData])
+  useEffect(() => {
+    if (selectedStatus) {
+      setValue('status', selectedStatus.id)
+    }
+  }, [selectedStatus])
 
   useEffect(() => {
     // Set selected category
@@ -470,9 +508,13 @@ const ProductFormEdit: React.FC<Props> = (props) => {
         formData.append('Thumbnail', file)
       })
     }
+    if (data) {
+      console.log(data, data.status, 'selectedStatus,data.status')
+    }
+    formData.append('Status', data.status)
 
     formData.append('CategoryId', data.CategoryId)
-    formData.append('Description', data.Description)
+    formData.append('Description', textEditor)
     formData.append('IsFake', data.IsFake.toString())
     if (data.BrandId) {
       formData.append('BrandId', data.BrandId)
@@ -484,12 +526,14 @@ const ProductFormEdit: React.FC<Props> = (props) => {
     }
 
     if (data.StockItems) {
-      const stockItemsWithoutFile = data.StockItems.map((item) => {
-        const { thumbnailsStock, ...rest } = item
-        return rest
-      })
+      console.log(data.StockItems, 'data.StockItems')
 
-      formData.append('StockItems', JSON.stringify(stockItemsWithoutFile))
+      // const stockItemsWithoutFile = data.StockItems.map((item) => {
+      //   const { thumbnailsStock, ...rest } = item
+      //   return rest
+      // })
+
+      formData.append('StockItems', JSON.stringify(data.StockItems))
 
       data.StockItems.forEach((item, index) => {
         if (item.imageStock) {
@@ -666,10 +710,11 @@ const ProductFormEdit: React.FC<Props> = (props) => {
       // console.log(stateFeatureDataByCategory, 'stateFeatureDataByCategory', stateFeatureData, 'stateFeatureData')
     }
   }, [stateFeatureDataByCategory.length])
+
   useEffect(() => {
     if (stateStockItems) {
       const filteredStockItems = stateStockItems.map((item: IStockItem) => removeKeys(item))
-
+      console.log(filteredStockItems, 'filteredStockItems', stateStockItems, 'stateStockItems')
       setValue('StockItems', filteredStockItems)
     }
   }, [stateStockItems])
@@ -734,6 +779,38 @@ const ProductFormEdit: React.FC<Props> = (props) => {
   if (features?.data?.sizeDTOs || stateFeatureDataByCategory) {
     // console.log(stateFeatureDataByCategory, features?.data?.sizeDTOs)
   }
+
+  useEffect(() => {
+    if (isUpdated) {
+      // Ensure that queries have been executed before attempting to refetch them
+      if (productScales) refetchProductScales()
+      if (allFeatures) refetchAllFeature()
+      if (categoriesData) refetchCategoryData()
+      if (features) refetchFeatures()
+      if (brandData) refetchBrandData()
+      if (singleCategoryData) refetchSingleCategoryData()
+      if (featureValueData) refetchFeatureValueData()
+
+      dispatch(setUpdated(false))
+    }
+  }, [
+    isUpdated,
+    dispatch,
+    refetchProductScales,
+    refetchAllFeature,
+    refetchCategoryData,
+    refetchFeatures,
+    refetchBrandData,
+    refetchSingleCategoryData,
+    refetchFeatureValueData,
+    productScales,
+    allFeatures,
+    categoriesData,
+    features,
+    brandData,
+    singleCategoryData,
+    featureValueData,
+  ])
   return (
     <section>
       <form className="flex gap-4 flex-col pt-4 lg:pt-14" onSubmit={handleSubmit(editedCreateHandler)}>
@@ -850,6 +927,7 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                       setSelectedCategories={setSelectedCategories}
                       selectedCategories={selectedCategories}
                       categories={childCategories}
+                      setIsSecondRequest={setIsSecondRequest}
                     />
                   </div>
                 )}
@@ -871,7 +949,7 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                     onChange={handleMainFileChange}
                   />
                   <label htmlFor="MainThumbnail" className="block cursor-pointer p-6  text-sm font-normal">
-                    <h3 className="font-medium text-center mb-6">نگاره اول</h3>
+                    <h3 className="font-bold text-center mb-6">تصویر نگاره</h3>
                     {selectedMainFile.length > 0 ? (
                       selectedMainFile.map((file: any, index: number) => (
                         <div key={index} className="text-sm shadow-item rounded-lg p-2 text-gray-600">
@@ -905,34 +983,33 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                         multiple
                         className="hidden"
                         id="Thumbnail"
-                        accept=".jpg, .jpeg, .png, .gif"
                         onChange={handleFileChange}
                       />
                       <label htmlFor="Thumbnail" className="block cursor-pointer p-6  text-sm font-normal">
-                        عکس و فیلم ها را به اینجا بکشید یا برای انتخاب کلیک کنید{' '}
+                        {selectedFiles.length > 0 ? (
+                          <div className="flex flex-wrap gap-2 mt-0 px-8">
+                            {selectedFiles.map((file, index) => (
+                              <div key={index} className="text-sm text-gray-600 relative">
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={file.name}
+                                  className="w-[80px] h-[88px] object-cover  rounded-lg shadow-product"
+                                />
+                                <button
+                                  type="button"
+                                  className="absolute -top-2 -right-2 shadow-product bg-gray-50 p-0.5 rounded-full text-gray-500"
+                                  onClick={() => handleDelete(index)}
+                                >
+                                  <MdClose className="text-base" /> {/* Add your delete icon here */}
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div> عکس و فیلم ها را به اینجا بکشید یا برای انتخاب کلیک کنید</div>
+                        )}
                       </label>
                     </div>
-
-                    {selectedFiles.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-4 px-8">
-                        {selectedFiles.map((file, index) => (
-                          <div key={index} className="text-sm text-gray-600 relative">
-                            <img
-                              src={URL.createObjectURL(file)}
-                              alt={file.name}
-                              className="w-[80px] h-[88px] object-cover  rounded-lg shadow-product"
-                            />
-                            <button
-                              type="button"
-                              className="absolute -top-2 -right-2 shadow-product bg-gray-50 p-0.5 rounded-full text-gray-500"
-                              onClick={() => handleDelete(index)}
-                            >
-                              <MdClose className="text-base" /> {/* Add your delete icon here */}
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
                   <div className="bg-gray-50 bottom-0 w-full  rounded-b-lg px-8 flex flex-col pb-2">
                     <span className="font-normal text-[11px] pt-2">حجم عکس ها می بایست حداکثر 70 کیلوبایت باشد</span>
@@ -950,7 +1027,7 @@ const ProductFormEdit: React.FC<Props> = (props) => {
             <div className="flex flex-1">
               <div className="bg-white w-full rounded-md shadow-item">
                 <h3 className="border-b p-6 text-gray-600">توضیحات محصول</h3>
-                <TextEditor control={control} />
+                <CustomEditor textEditor={textEditor} setTextEditor={setTextEditor} />
                 <div className="bg-gray-50 bottom-0 w-full  rounded-b-lg px-8 flex flex-col pb-2">
                   <span className="font-normal text-[11px] pt-2">حجم عکس ها می بایست حداکثر 100 کیلوبایت باشد</span>
                 </div>
@@ -989,26 +1066,11 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                       )}
                     </div>
 
-                    <div className="flex flex-col md:flex-row md:items-center md:gap-10 gap-2">
+                    <div className="flex flex-col md:flex-row  md:items-center md:gap-10 gap-2">
                       <label htmlFor="BrandId" className="w-[95px] font-normal  text-gray-600 text-sm  cursor-pointer">
-                        ویژگی محصول{' '}
+                        وضعیت محصول{' '}
                       </label>
-                      <div className="flex gap-1">
-                        {stateFeatureData && (
-                          <AddFeatureCombobox
-                            features={stateFeatureData}
-                            onFeatureSelect={handleMainFeatureSelect}
-                            setIsRemoveProductSize={setIsRemoveProductSize}
-                            isRemoveProductSize={isRemoveProductSize}
-                          />
-                        )}
-                        <Button
-                          onClick={handleAddFeature}
-                          className="bg-white hover:text-white text-blue-400 text-sm border border-blue-500 hover:bg-blue-500 px-4 py-1.5"
-                        >
-                          افزودن
-                        </Button>
-                      </div>
+                      <StatusCombobox selectedStatus={selectedStatus} setSelectedStatus={setSelectedStatus} />
                     </div>
                   </div>
                 </div>
@@ -1022,7 +1084,7 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                 >
                   {stateFeatureDataByCategory &&
                     stateFeatureDataByCategory
-                      ?.filter((feature) => feature.values?.some((value) => value.hexCode !== null))
+                      ?.filter((feature) => feature.name === 'رنگ')
                       .map((feature) => {
                         const filteredFeature = {
                           ...feature,
@@ -1041,12 +1103,6 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                                 features={filteredFeature}
                               />
                             </div>
-                            <Button
-                              onClick={() => handleRemoveFeatureToAddOnStateFeatureData(feature)}
-                              className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
-                            >
-                              حذف
-                            </Button>
                           </div>
                         )
                       })}
@@ -1061,17 +1117,11 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                           stateSizeData={stateSizeData}
                         />
                       </div>
-                      <Button
-                        onClick={handleRemoveProductSize}
-                        className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
-                      >
-                        حذف
-                      </Button>
                     </div>
                   )}
                   {stateFeatureDataByCategory &&
                     stateFeatureDataByCategory
-                      ?.filter((feature) => feature.values?.some((value) => value.hexCode == null))
+                      ?.filter((feature) => feature.name !== 'رنگ')
                       .map((feature) => {
                         const filteredFeature = {
                           ...feature,
@@ -1093,40 +1143,19 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                                 setStateFeatureValueData={setStateFeatureValueData}
                               />
                             </div>
-                            <Button
-                              onClick={() => handleRemoveFeatureToAddOnStateFeatureData(feature)}
-                              className="bg-white hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
-                            >
-                              حذف
-                            </Button>
                           </div>
                         )
                       })}
                 </div>
               </div>
             </div>
-            {/* is show Product features, quantity, price , discount */}
-            <div className="flex flex-1">
-              <div className="bg-white w-full rounded-md shadow-item">
-                <h3 className="border-b p-6 text-gray-600">تعداد و قیمت محصول</h3>
-                <Table
-                  features={stateFeature}
-                  sizeList={stateSizeFeature}
-                  setStateStockItems={setStateStockItems}
-                  selectedFiles={selectedFiles}
-                  setStateFeature={setStateFeature}
-                  setStateSizeFeature={setStateSizeFeature}
-                  setProductSizeScale={setProductSizeScale}
-                  rowsData={rowsData}
-                />
-              </div>
-            </div>
+
             {/* is show product scale  */}
-            {isProductScale && (
+            {isProductScale && productScales && (
               <div className="flex flex-1">
                 <div className="bg-white w-full rounded-md shadow-item  overflow-auto">
                   <h3 className="border-b p-6 text-gray-600">اندازه ها</h3>
-                  <div className="flex flex-col-reverse md:w-[1000px] lg:w-[1300px] mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
+                  <div className="flex flex-col-reverse  mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
                     <div className="flex flex-col items-start flex-1 mdx:w-auto w-full overflow-auto">
                       <table className="table-auto border-collapse w-full overflow-auto">
                         <thead className="bg-[#8fdcff]">
@@ -1151,7 +1180,10 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                                     type="text"
                                     className="appearance-none border border-gray-200 rounded-lg"
                                     value={digitsEnToFa(
-                                      productScaleCreate?.Rows![rowIndex].scaleValues![colIndex] || ''
+                                      (productScaleCreate?.Rows &&
+                                        productScaleCreate?.Rows[rowIndex]?.scaleValues &&
+                                        productScaleCreate?.Rows[rowIndex].scaleValues![colIndex]) ||
+                                        ''
                                     )}
                                     onChange={(e) => handleChange(rowIndex, colIndex, digitsFaToEn(e.target.value))}
                                     onBlur={(e) => {
@@ -1189,6 +1221,26 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                 </div>
               </div>
             )}
+
+            {/* is show Product features, quantity, price , discount */}
+            <div className="flex flex-1">
+              <div className="bg-white w-full rounded-md shadow-item">
+                <h3 className="border-b p-6 text-gray-600">تعداد و قیمت محصول</h3>
+                <Table
+                  features={stateFeature}
+                  sizeList={stateSizeFeature}
+                  setStateStockItems={setStateStockItems}
+                  selectedFiles={selectedFiles}
+                  setStateFeature={setStateFeature}
+                  setStateSizeFeature={setStateSizeFeature}
+                  setProductSizeScale={setProductSizeScale}
+                  rowsData={rowsData}
+                  newRows={newRows}
+                  setIsSecondRequest={setIsSecondRequest}
+                  isSecondRequest={isSecondRequest}
+                />
+              </div>
+            </div>
           </>
         )}
         {/* validation errors */}
@@ -1254,8 +1306,10 @@ const Table: React.FC<PropTable> = (props) => {
     selectedFiles,
     setStateFeature,
     setStateSizeFeature,
-    setProductSizeScale,
     rowsData,
+    newRows,
+    isSecondRequest,
+    setIsSecondRequest,
   } = props
   const [featuresAndSizeSelected, setFeaturesAndSizeSelected] = useState<ProductFeature[]>([])
   const [isShowSetImageStockModal, setImageStockModalHandlers] = useDisclosure()
@@ -1264,17 +1318,27 @@ const Table: React.FC<PropTable> = (props) => {
   const [currentRowIndex, setCurrentRowIndex] = useState<number | null>(null)
   const [defaultRow, setDefaultRow] = useState<CurrentRow>({ id: 11 })
   const [rows, setRows] = useState<CurrentRow[]>([])
+  const [isPriceEditable, setIsPriceEditable] = useState(true)
+  const [isDiscountEditable, setIsDiscountEditable] = useState(true)
+
   const dispatch = useAppDispatch()
 
   let combinedFeatures: ProductFeature[]
-  const newRows: CurrentRow[] = []
   let idCounter = 10
   useEffect(() => {
+    // console.log(
+    //   features,
+    //   'features-features-features-features-features',
+    //   sizeList,
+    //   'sizeList-sizeListsizeList-sizeList-sizeList',
+    //   featuresAndSizeSelected,
+    //   'featuresAndSizeSelected - featuresAndSizeSelected'
+    // )
     if (features.length > 0 || sizeList.length > 0) {
       combinedFeatures =
         sizeList.length > 0
           ? [
-              ...features,
+              ...features.filter((f) => f.values?.length > 0),
               {
                 name: 'سایزبندی',
                 values: sizeList.map((size) => ({
@@ -1288,6 +1352,7 @@ const Table: React.FC<PropTable> = (props) => {
                   created: size.created,
                   updated: size.updated,
                 })),
+                valueCount: 0,
                 count: 0,
                 isDeleted: false,
                 productId: null,
@@ -1297,10 +1362,11 @@ const Table: React.FC<PropTable> = (props) => {
                 updated: '2024-06-30T09:50:46.827222Z',
               },
             ]
-          : [...features]
+          : [...features.filter((f) => f.values?.length > 0)]
       setFeaturesAndSizeSelected(combinedFeatures)
+      // console.log(combinedFeatures , "combinedFeatures--combinedFeatures--combinedFeatures");
 
-      const createRows = (index = 0, currentRow: CurrentRow = { featureValueIds: [] }) => {
+      const createRows = (index = 0, currentRow: CurrentRow = { featureValueId: [] }) => {
         if (index === combinedFeatures.length) {
           newRows.push({ id: idCounter++, ...currentRow })
           return
@@ -1312,7 +1378,7 @@ const Table: React.FC<PropTable> = (props) => {
           if (combinedFeatures[index].name === 'سایزبندی') {
             updatedRow.sizeId = value.id
           } else {
-            updatedRow.featureValueIds = [...(updatedRow.featureValueIds || []), value.id]
+            updatedRow.featureValueId = [...(updatedRow.featureValueId || []), value.id]
           }
 
           createRows(index + 1, updatedRow)
@@ -1320,11 +1386,20 @@ const Table: React.FC<PropTable> = (props) => {
       }
 
       if (combinedFeatures.length > 0) {
+        // const allValuesEmpty = combinedFeatures.every((feature) => feature.values.length > 1)
+        // const allRowsData = rowsData.every((feature) => feature.price === 0 && feature.quantity === 0)
+        // console.log(allValuesEmpty, 'allValuesEmpty')
+
+        // if (allValuesEmpty && rowsData.length === 1) {
+        //   newRows.push(defaultRow)
+        // }
         createRows()
       } else {
         newRows.push(defaultRow)
       }
+
       // console.log(newRows, 'inline new rows')
+      // console.log(combinedFeatures, 'combinedFeatures-combinedFeatures-combinedFeatures')
 
       setRows(newRows)
     } else {
@@ -1337,7 +1412,7 @@ const Table: React.FC<PropTable> = (props) => {
   useEffect(() => {
     if (rowsData) {
       // newRows.push(rowsData)
-      // console.log('rowsData', rowsData)
+      console.log('rowsData', rowsData)
       setStockItems(rowsData.sort((a, b) => a.id - b.id))
     }
   }, [rowsData])
@@ -1360,12 +1435,11 @@ const Table: React.FC<PropTable> = (props) => {
   ///................
 
   const handleInputChange = (index: number, field: string, value: any) => {
-    const numericValue = Number(digitsFaToEn(value))
-    if (!isNaN(value) || value === '') {
+    const numericValue = Number(digitsFaToEn(value.replace(/,/g, '')))
+    if (!isNaN(numericValue) || value === '') {
       const updatedStockItems = [...stockItems]
       const item = updatedStockItems[index]
-
-      const itemPrice = Number(item != undefined ? item.price : 0)
+      const itemPrice = Number(item.price)
 
       if (field === 'discount' && numericValue > itemPrice) {
         dispatch(
@@ -1376,9 +1450,10 @@ const Table: React.FC<PropTable> = (props) => {
         )
         return
       }
+
       updatedStockItems[index] = {
         ...item,
-        [field]: value,
+        [field]: numericValue,
       }
 
       setStockItems(updatedStockItems)
@@ -1386,9 +1461,15 @@ const Table: React.FC<PropTable> = (props) => {
   }
 
   const handleCheckboxChange = (field: string, checked: boolean) => {
+    if (field === 'price') {
+      setIsPriceEditable(!checked)
+    } else if (field === 'discount') {
+      setIsDiscountEditable(!checked)
+    }
+
     const updatedStockItems = stockItems.map((item, index) => ({
       ...item,
-      [field]: checked ? stockItems[0][field] : index === 0 ? item[field] : '',
+      [field]: checked ? stockItems[0][field] : item[field],
     }))
 
     setStockItems(updatedStockItems)
@@ -1398,20 +1479,29 @@ const Table: React.FC<PropTable> = (props) => {
     const initialStockItems = rows.map((row) => {
       const dynamicProperties: any = {}
       for (const key in row) {
-        if (key !== 'id' && key !== 'featureValueIds' && key !== 'sizeId') {
+        if (key !== 'id' && key !== 'featureValueId' && key !== 'sizeId') {
           dynamicProperties[key] = row[key]
         }
       }
+      // Find matching rowData by stockId
+      const matchingRowData = rowsData.find((data) => data.id === row.id)
+
       return {
         stockId: row.id,
-        featureValueId: row.featureValueIds || [],
+        featureValueId: row.featureValueId || [],
         sizeId: row.sizeId || undefined,
+        price: matchingRowData ? matchingRowData.price : null,
+        discount: matchingRowData ? matchingRowData.discount : null,
+        quantity: matchingRowData ? matchingRowData.quantity : null,
         ...dynamicProperties,
       }
     })
-    if (stockItems.length < 0) {
-      setStockItems(initialStockItems)
-    }
+    console.log(initialStockItems, 'initialStockItems', stockItems, 'stockItems', rows, 'rows', rowsData, 'rowsData')
+
+    // if (stockItems.length < 0) {
+
+    setStockItems(initialStockItems)
+    // }
   }, [rows, featuresAndSizeSelected])
 
   useEffect(() => {
@@ -1470,7 +1560,7 @@ const Table: React.FC<PropTable> = (props) => {
     const updatedRows = rows.filter((_, i) => i !== index)
     setRows(updatedRows)
 
-    const remainingFeatureValueIds = updatedRows.flatMap((row) => row.featureValueIds || [])
+    const remainingFeatureValueIds = updatedRows.flatMap((row) => row.featureValueId || [])
     const remainingSizeIds = updatedRows.map((row) => row.sizeId).filter((sizeId) => sizeId)
 
     const updatedFeaturesAndSizeSelected = featuresAndSizeSelected
@@ -1647,7 +1737,7 @@ const Table: React.FC<PropTable> = (props) => {
                           id="floatingInput"
                           placeholder="قیمت محصول"
                           onChange={(e) => handleInputChange(idx, 'price', digitsFaToEn(e.target.value))}
-                          value={digitsEnToFa(stockItems[idx]?.price || '')}
+                          value={digitsEnToFa(addCommas(stockItems[idx]?.price || ''))}
                         />
                         <label
                           htmlFor="floatingInput"
@@ -1661,9 +1751,10 @@ const Table: React.FC<PropTable> = (props) => {
                         dir="ltr"
                         type="text"
                         placeholder=""
-                        value={digitsEnToFa(stockItems[idx]?.price || '')}
+                        value={digitsEnToFa(addCommas(stockItems[idx]?.price || ''))}
                         onChange={(e) => handleInputChange(idx, 'price', digitsFaToEn(e.target.value))}
                         className="w-36 h-9 rounded-lg text-center border border-gray-300"
+                        disabled={!isPriceEditable}
                       />
                     )}
                   </td>
@@ -1677,7 +1768,7 @@ const Table: React.FC<PropTable> = (props) => {
                           id="floatingInput"
                           placeholder="فروش فوق العاده"
                           onChange={(e) => handleInputChange(idx, 'discount', digitsFaToEn(e.target.value))}
-                          value={digitsEnToFa(stockItems[idx]?.discount || '')}
+                          value={digitsEnToFa(addCommas(stockItems[idx]?.discount || ''))}
                         />
                         <label
                           htmlFor="floatingInput"
@@ -1691,9 +1782,10 @@ const Table: React.FC<PropTable> = (props) => {
                         dir="ltr"
                         type="text"
                         placeholder=""
-                        value={digitsEnToFa(stockItems[idx]?.discount || '')}
+                        value={digitsEnToFa(addCommas(stockItems[idx]?.discount || ''))}
                         onChange={(e) => handleInputChange(idx, 'discount', digitsFaToEn(e.target.value))}
                         className="w-36 h-9 rounded-lg text-center border border-gray-300"
+                        disabled={!isDiscountEditable}
                       />
                     )}
                   </td>

@@ -14,6 +14,8 @@ import { Resolver, SubmitHandler, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { categorySchema } from '@/utils'
 import { SelectParentCategoryCombobox } from '../selectorCombobox'
+import { useAppDispatch } from '@/hooks'
+import { setUpdated } from '@/store'
 
 interface Props {
   title: string
@@ -34,6 +36,7 @@ const fetchImageAsFile = async (url: string): Promise<File> => {
 
 const SubCategoryUpdateModal: React.FC<Props> = (props) => {
   const { isShow, onClose, refetch, title, categoryList, category , categoryParent } = props
+  const dispatch = useAppDispatch()
   const [stateCategoryData, setStateCategoryData] = useState<ICategoryForm>({
     level: 0,
     name: '',
@@ -152,6 +155,7 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
       updateCategory(formData)
       formData.append('Id', data.id)
     }
+    dispatch(setUpdated(true))
   }
   return (
     <>

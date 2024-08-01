@@ -42,7 +42,7 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
         <div className="">
           <DashboardAdminAside setOpenRight={setOpenRight} openRight={openRight} />
         </div>
-        <div className="w-full flex flex-col items-start max-w-screen-xl mx-auto">{children}</div>
+        <div className="w-full flex flex-col items-start max-w-screen-2xl mx-auto">{children}</div>
       </div>
     </ProtectedRouteWrapper>
   )

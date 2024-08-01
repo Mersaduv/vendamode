@@ -6,6 +6,8 @@ import { Resolver, SubmitHandler, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { brandSchema } from '@/utils'
 import { IBrand, IBrandForm } from '@/types'
+import { useAppDispatch } from '@/hooks'
+import { setUpdated } from '@/store'
 
 interface Props {
   title: string
@@ -27,7 +29,7 @@ const BrandModal: React.FC<Props> = (props) => {
   const [isActive, setIsActive] = useState(false)
   const [isSlider, setIsSlider] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File[]>([])
-
+  const dispatch = useAppDispatch()
   // ? Assets
   const defaultValues: Partial<IBrandForm> = {
     inSlider: false,
@@ -120,6 +122,7 @@ const BrandModal: React.FC<Props> = (props) => {
     } else {
       createBrand(formData)
     }
+    dispatch(setUpdated(true))
   }
 
   const handleIsActiveChange = (e: React.ChangeEvent<HTMLInputElement>) => {

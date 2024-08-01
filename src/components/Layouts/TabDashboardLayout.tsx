@@ -46,7 +46,7 @@ const TabDashboardLayout: React.FC<TabDashboardLayoutProps> = ({ children }) => 
   );
 
   return (
-    <div className="min-h-screen max-w-screen-xl flex flex-col mx-auto w-full pt-7 md:p-7">
+    <div className="min-h-screen max-w-screen-2xl flex flex-col mx-auto w-full pt-7 md:p-7">
       {/* Tab Navigation */}
       <div className="py-4 overflow-auto flex gap-4 p-2 shadow-item mx-2 bg-white rounded-lg border-gray-200">
         {renderedTabs}

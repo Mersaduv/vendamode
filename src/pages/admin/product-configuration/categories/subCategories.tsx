@@ -180,7 +180,7 @@ const ParentSubCategoriesTree: NextPage = () => {
                     onClick={() => handlerEditFeaturesModal(category)}
                     className="text-white text-xs font-medium bg-sky-500 rounded-md px-2 py-1"
                   >
-                    ویژگی {digitsEnToFa(category.featureCount)}
+                    ویژگی {digitsEnToFa(category.hasSizeProperty ? category.featureCount + 1 : category.featureCount)}
                   </Button>
                   <Button
                     onClick={() => handlerEditSizeModal(category)}

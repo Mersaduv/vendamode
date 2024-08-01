@@ -22,6 +22,16 @@ export const productFeatureApi = baseApi.injectEndpoints({
           method: 'GET',
         }
       },
+      providesTags: (result) =>
+        result?.data?.data
+          ? [
+              ...result?.data?.data.map(({ id }) => ({
+                type: 'Features' as const,
+                id: id,
+              })),
+              'Features',
+            ]
+          : ['Features'],
     }),
 
     getFeatureValues: builder.query<ServiceResponse<IPagination<FeatureValue[]>>, QueryParams>({
@@ -32,6 +42,16 @@ export const productFeatureApi = baseApi.injectEndpoints({
           method: 'GET',
         }
       },
+      providesTags: (result) =>
+        result?.data?.data
+          ? [
+              ...result?.data?.data.map(({ id }) => ({
+                type: 'FeatureValues' as const,
+                id: id,
+              })),
+              'FeatureValues',
+            ]
+          : ['FeatureValues'],
     }),
 
     createFeature: builder.mutation<ServiceResponse<boolean>, ProductFeatureCreateDTO>({
@@ -40,6 +60,7 @@ export const productFeatureApi = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['Features'],
     }),
 
     createFeatureValue: builder.mutation<ServiceResponse<boolean>, FeatureValueDTO>({
@@ -48,6 +69,7 @@ export const productFeatureApi = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['FeatureValues'],
     }),
 
     updateFeature: builder.mutation<ServiceResponse<boolean>, ProductFeatureUpdateDTO>({
@@ -56,6 +78,7 @@ export const productFeatureApi = baseApi.injectEndpoints({
         method: 'PUT',
         body,
       }),
+      invalidatesTags: ['Features'],
     }),
 
     updateFeatureValue: builder.mutation<ServiceResponse<boolean>, FeatureValueDTO>({
@@ -64,6 +87,7 @@ export const productFeatureApi = baseApi.injectEndpoints({
         method: 'PUT',
         body,
       }),
+      invalidatesTags: ['FeatureValues'],
     }),
 
     getFeature: builder.query<ServiceResponse<ProductFeature>, string>({
@@ -85,6 +109,7 @@ export const productFeatureApi = baseApi.injectEndpoints({
         url: `/api/feature/${id}`,
         method: 'DELETE',
       }),
+      invalidatesTags: ['Features'],
     }),
 
     deleteFeatureValue: builder.mutation<ServiceResponse<boolean>, string>({
@@ -92,6 +117,7 @@ export const productFeatureApi = baseApi.injectEndpoints({
         url: `/api/feature/value/${id}`,
         method: 'DELETE',
       }),
+      invalidatesTags: ['FeatureValues'],
     }),
 
     getFeaturesByCategory: builder.query<ServiceResponse<GetCategoryFeaturesByCategory>, string>({
@@ -99,6 +125,16 @@ export const productFeatureApi = baseApi.injectEndpoints({
         url: `/api/feature/by-category/${id}`,
         method: 'GET',
       }),
+      providesTags: (result) =>
+        result?.data?.productFeatures
+          ? [
+              ...result.data.productFeatures.map(({ id }) => ({
+                type: 'Features' as const,
+                id: id,
+              })),
+              'Features',
+            ]
+          : ['Features'],
     }),
   }),
 })

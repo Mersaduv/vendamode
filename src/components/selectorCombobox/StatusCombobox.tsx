@@ -2,12 +2,7 @@ import { Dispatch, SetStateAction, useState } from 'react'
 import { Combobox } from '@headlessui/react'
 import { FaCheck } from 'react-icons/fa'
 import { ArrowRight2 } from '@/icons'
-
-// اینترفیس برای وضعیت محصول
-interface IProductStatus {
-  id: number
-  name: string
-}
+import { IProductStatus } from '@/types'
 
 interface Props {
   selectedStatus: IProductStatus | null
@@ -15,9 +10,10 @@ interface Props {
 }
 
 const statusOptions: IProductStatus[] = [
-  { id: 1, name: 'آکبند' },
-  { id: 2, name: 'کارکرده' }
-]
+  { id: 'New', name: 'آکبند' },
+  { id: 'Used', name: 'کارکرده' }
+];
+
 
 const StatusCombobox: React.FC<Props> = ({ selectedStatus, setSelectedStatus }) => {
   const [query, setQuery] = useState('')

@@ -2,39 +2,61 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Combobox } from '@headlessui/react'
 import { FaCheck } from 'react-icons/fa'
 import { AiOutlineClose } from 'react-icons/ai'
+import { FeatureValue, ProductFeature } from '@/services/feature/types'
+import { ICategory } from '@/types'
 
 interface Props {
   featureList?: ProductFeature[]
   onFeatureSelect: (features: ProductFeature[]) => void
   stateFeatureData?: ProductFeature[] | undefined
+  category?: ICategory | undefined
+  setStateFeature: (value: SetStateAction<ProductFeature[]>) => void
+  hasSizeProperty: ProductFeature
 }
-
-const ProductFeatureCombobox: React.FC<Props> = ({ onFeatureSelect, featureList, stateFeatureData }) => {
-  const [query, setQuery] = useState('');
-  const [selectedFeatures, setSelectedFeatures] = useState<ProductFeature[]>([]);
+const ProductFeatureCombobox: React.FC<Props> = ({
+  onFeatureSelect,
+  featureList,
+  stateFeatureData,
+  category,
+  setStateFeature,
+  hasSizeProperty
+}) => {
+  const [query, setQuery] = useState('')
+  const [selectedFeatures, setSelectedFeatures] = useState<ProductFeature[]>([])
 
   useEffect(() => {
     if (stateFeatureData) {
       handleSelectFeature(stateFeatureData)
     }
-  }, [stateFeatureData?.length]);
+  }, [stateFeatureData?.length])
 
-  const filteredFeatures = featureList && featureList.length > 0 
-    ? query === '' 
-      ? featureList 
-      : featureList.filter(featureItem => featureItem.name.toLowerCase().includes(query.toLowerCase())) 
-    : [];
+  useEffect(() => {
+    if (category?.hasSizeProperty) {
+      console.log(hasSizeProperty, 'hasSizeProperty exist')
+      const featureList: ProductFeature[] = [hasSizeProperty]
+
+      setSelectedFeatures((prevFeatures: ProductFeature[]) => [...prevFeatures, ...featureList])
+      setStateFeature((prevFeatures: ProductFeature[]) => [...prevFeatures, ...featureList])
+    }
+  }, [category])
+
+  const filteredFeatures =
+    featureList && featureList.length > 0
+      ? query === ''
+        ? featureList
+        : featureList.filter((featureItem) => featureItem.name.toLowerCase().includes(query.toLowerCase()))
+      : []
 
   const handleSelectFeature = (features: ProductFeature[]) => {
-    setSelectedFeatures(features);
-    onFeatureSelect(features);
-  };
+    setSelectedFeatures(features)
+    onFeatureSelect(features)
+  }
 
   const handleRemoveFeature = (item: ProductFeature) => {
-    const newSelectedFeatures = selectedFeatures.filter(feature => feature.id !== item.id);
-    setSelectedFeatures(newSelectedFeatures);
-    onFeatureSelect(newSelectedFeatures);
-  };
+    const newSelectedFeatures = selectedFeatures.filter((feature) => feature.id !== item.id)
+    setSelectedFeatures(newSelectedFeatures)
+    onFeatureSelect(newSelectedFeatures)
+  }
   return (
     <div className="flex items-center gap-2">
       <div className="w-full relative">

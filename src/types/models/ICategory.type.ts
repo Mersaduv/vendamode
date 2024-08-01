@@ -22,6 +22,7 @@ export interface ICategory {
   brandCount: number
   isActive: boolean
   isDeleted: boolean
+  hasSizeProperty: boolean
   parentCategory?: ICategory
   parentCategories?: ICategory[]
   parentCategoriesTree?: ICategory[]

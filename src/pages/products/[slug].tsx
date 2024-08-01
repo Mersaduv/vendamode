@@ -13,7 +13,6 @@ import {
   ProductGallery,
   ProductColorSelector,
   ProductSizeSelector,
-  ProductOutOfStockMessage,
   ProductObjectValueSelector,
 } from '@/components/product'
 import { ReviewsList } from '@/components/review'
@@ -21,7 +20,7 @@ import { RecentVisitedSlider, SmilarProductsSlider } from '@/components/sliders'
 import { AddToCartButton } from '@/components/cart'
 
 import type { GetServerSideProps, NextPage } from 'next'
-import type { IObjectValue, IProduct, IProductSizeInfo } from '@/types'
+import type { EntityImage, IObjectValue, IProduct, IProductSizeInfo } from '@/types'
 import { getProductByCategory, getProductBySlug } from '@/services'
 import { Button } from '@/components/ui'
 import { ProductScaleModal } from '@/components/modals'
@@ -148,6 +147,10 @@ const SingleProduct: NextPage<Props> = (props) => {
 
     return stars
   }
+  const addMainImageToList = (mainImageSrc: EntityImage, imagesSrcList: EntityImage[]) => {
+    return [mainImageSrc, ...imagesSrcList]
+  }
+  const updatedImagesSrcList = addMainImageToList(product.mainImageSrc, product.imagesSrc ?? [])
 
   // ? Render(s)
   return (
@@ -175,7 +178,7 @@ const SingleProduct: NextPage<Props> = (props) => {
               </div>
             </div>
             <ProductGallery
-              images={product.imagesSrc && product.imagesSrc.length > 0 ? product.imagesSrc : [product.mainImageSrc]}
+              images={product.imagesSrc && product.imagesSrc.length > 0 ? updatedImagesSrcList : [product.mainImageSrc]}
               discount={product.discount}
               inStock={product.inStock}
               productName={product.title}
@@ -251,7 +254,7 @@ const SingleProduct: NextPage<Props> = (props) => {
                 {product.inStock > 0 ? (
                   <AddToCartButton product={product} />
                 ) : (
-                  <div className="w-full bg-red-100 flex justify-center pt-20">
+                  <div className="w-full flex justify-center pt-20">
                     {' '}
                     <Button className="btn bg-gray-300 text-sm xs:px-12 whitespace-nowrap xs:text-base md:w-1/2 ">
                       اتمام موجودی
@@ -260,36 +263,12 @@ const SingleProduct: NextPage<Props> = (props) => {
                 )}
               </div>
             </div>
-            {product.inStock === 0 && <ProductOutOfStockMessage />}
             <ProductScaleModal
               isShow={isShowModal}
               productSizeInfo={product.productSizeInfo ?? ({} as IProductSizeInfo)}
               onClose={modalHandlers.close}
             />
-            {/* 
-            <div className="lg:col-span-4 ">
-              <h2 className="p-3 text-base font-semibold leading-8 tracking-wide text-black/80 ">{product.title}</h2>
-          
-              <div className="section-divide-y" />
-
-              {product.inStock > 0 && product.optionsType === 'colors' && (
-                <ProductColorSelector colors={product.colors} />
-              )}
-
-              {product.inStock > 0 && product.optionsType === 'sizes' && <ProductSizeSelector sizes={product.sizes} />}
-
-              {product.inStock === 0 && <ProductOutOfStockMessage />}
-
-              <ProductInfo infos={product?.info} />
-
-              <FreeShippingIndicator />
-            </div> */}
           </div>
-
-          {/* <ServiceList /> */}
-
-          {/* {product.description.length > 0 && <ProductDescription description={product.description} />} */}
-
           <div className="relative w-full flex pt-28">
             <div className="bg-[#dee2e6] w-full h-[410px] xs:h-[330px] sm:h-[360px] relative">
               <SmilarProductsSlider smilarProducts={smilarProducts} />

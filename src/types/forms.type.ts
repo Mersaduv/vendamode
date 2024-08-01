@@ -5,7 +5,9 @@ export interface ICategoryForm {
   name: string
   isActive: boolean
   thumbnail?: File | null
+  hasSizeProperty?: boolean
   mainCategoryId?: string
+  mainId?: string
   parentCategoryId?: string
   level: number
 }
@@ -50,6 +52,7 @@ export interface IProductForm {
   CategoryId: string
   Description: string
   IsFake: boolean
+  status:  'New' | 'Used';
   BrandId?: string
   FeatureValueIds?: string[]
   StockItems?: IStockItem[]
@@ -130,8 +133,7 @@ export interface IProductSizeForm {
   categoryIds: string[]
 }
 
-
 export interface IProductStatus {
-  id: number
-  name: string
+  id: 'New' | 'Used';
+  name: string;
 }

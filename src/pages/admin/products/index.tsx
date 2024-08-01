@@ -91,6 +91,7 @@ const Products: NextPage = () => {
       featureValueIds: featureValueIds,
       sizes: sizes,
       brands: brands,
+      isAdmin: true,
     },
     {
       selectFromResult: (data) => ({

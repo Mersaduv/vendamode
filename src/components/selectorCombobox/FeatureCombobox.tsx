@@ -32,6 +32,7 @@ const FeatureCombobox: React.FC<Props> = ({
   const [selectedSizes, setSelectedSizes] = useState<SizeDTO[]>([])
 
   let filteredFeatures: (FeatureValue | SizeDTO)[] = []
+console.log(features , "featuresfeaturesfeatures");
 
   useEffect(() => {
     if (stateColorData) {
@@ -52,7 +53,7 @@ const FeatureCombobox: React.FC<Props> = ({
     }
   }, [stateSizeData])
 
-  if (features?.values && features?.values?.length > 0) {
+  if (features?.values) {
     filteredFeatures =
       query === ''
         ? features?.values
@@ -152,7 +153,7 @@ const FeatureCombobox: React.FC<Props> = ({
               </Combobox.Button>
             </div>
             <Combobox.Options className="absolute z-[60] mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {filteredFeatures.length === 0 && query !== '' ? (
+              {filteredFeatures.length === 0 ? (
                 <div className="relative cursor-default select-none py-2 px-4 text-gray-700">هیچ ویژگی یافت نشد.</div>
               ) : (
                 filteredFeatures.map((feature) => (

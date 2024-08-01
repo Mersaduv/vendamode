@@ -7,6 +7,8 @@ import { HandleResponse } from '../shared'
 import { CategoryFeatureForm } from '@/services/category/types'
 import { ProductFeatureCombobox } from '../selectorCombobox'
 import { ProductFeature } from '@/services/feature/types'
+import { setUpdated } from '@/store'
+import { useAppDispatch } from '@/hooks'
 
 interface Props {
   category: ICategory | undefined
@@ -14,17 +16,37 @@ interface Props {
   onClose: () => void
   refetch: () => void
 }
-
+const generateUniqueId = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0,
+      v = c === 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
+}
+const hasSizeProperty: ProductFeature = {
+  name: 'سایزبندی',
+  values: [],
+  count: 0,
+  valueCount: 0,
+  isDeleted: false,
+  productId: null,
+  categoryId: null,
+  id: generateUniqueId(),
+  created: new Date().toISOString(),
+  updated: new Date().toISOString(),
+}
 const FeaturesModal: React.FC<Props> = (props) => {
   // States
   const [stateFeature, setStateFeature] = useState<ProductFeature[]>([])
   const [featureDb, setFeatureDb] = useState<ProductFeature[]>()
-
+  const dispatch = useAppDispatch()
   // ? Props
   const { category, isShow, onClose, refetch } = props
-
+  if (category) {
+    console.log(category, 'category')
+  }
   const { data, isLoading } = useGetFeaturesQuery(
-    {},
+    { pageSize: 9999 },
     {
       selectFromResult: ({ data, isLoading }) => ({
         data: data?.data?.data,
@@ -45,7 +67,12 @@ const FeaturesModal: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (data) {
-      setFeatureDb(data)
+      const updatedData = [...data]
+
+      const newFeatureIndex = 1
+      updatedData.splice(newFeatureIndex, 0, hasSizeProperty)
+
+      setFeatureDb(updatedData)
     }
   }, [data])
 
@@ -62,12 +89,24 @@ const FeaturesModal: React.FC<Props> = (props) => {
   }
 
   const onConfirm = () => {
-    const featureListIds = stateFeature.map((feature) => feature.id)
+    const hasSizeFeature = stateFeature.some((feature) => feature.name === 'سایزبندی')
+    if (!hasSizeFeature) {
+      const featureListIds = stateFeature.map((feature) => feature.id)
 
-    updateCategoryFeature({
-      categoryId: category!.id,
-      featureIds: featureListIds,
-    })
+      updateCategoryFeature({
+        categoryId: category!.id,
+        featureIds: featureListIds,
+      })
+    } else {
+      const featureListIds = stateFeature.filter((feature) => feature.name !== 'سایزبندی').map((feature) => feature.id)
+
+      updateCategoryFeature({
+        categoryId: category!.id,
+        featureIds: featureListIds,
+        hasSizeProperty: hasSizeFeature,
+      })
+    }
+    dispatch(setUpdated(true))
   }
 
   // ? Render(s)
@@ -106,9 +145,12 @@ const FeaturesModal: React.FC<Props> = (props) => {
                 <span>ویژگی ها</span>
                 <div className="w-full">
                   <ProductFeatureCombobox
+                  hasSizeProperty={hasSizeProperty}
                     onFeatureSelect={handleFeatureSelect}
-                    featureList={data ?? []}
+                    setStateFeature={setStateFeature}
+                    featureList={featureDb ?? []}
                     stateFeatureData={featureDb?.filter((feature) => category?.featureIds?.includes(feature.id))}
+                    category={category}
                   />
                 </div>
               </div>

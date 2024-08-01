@@ -14,6 +14,8 @@ import { Resolver, SubmitHandler, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { categorySchema } from '@/utils'
 import { SelectParentCategoryCombobox } from '../selectorCombobox'
+import { useAppDispatch } from '@/hooks'
+import { setUpdated } from '@/store'
 
 interface Props {
   title: string
@@ -27,6 +29,7 @@ interface Props {
 
 const SubCategoryModal: React.FC<Props> = (props) => {
   const { isShow, onClose, refetch, title, categoryList, categoryParent } = props
+  const dispatch = useAppDispatch()
   const [stateCategoryData, setStateCategoryData] = useState<ICategoryForm>({
     level: 0,
     name: '',
@@ -103,12 +106,14 @@ const SubCategoryModal: React.FC<Props> = (props) => {
     } else {
       if (data.parentCategoryId) formData.append('ParentCategoryId', data.parentCategoryId)
     }
+      formData.append('MainId', categoryParent.id)
 
     if (data.id != undefined) {
       formData.append('Id', data.id)
     } else {
       createCategory(formData)
     }
+    dispatch(setUpdated(true))
   }
 
   return (

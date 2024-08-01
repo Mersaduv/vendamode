@@ -3,6 +3,7 @@ import { PayloadAction, createSlice, nanoid } from '@reduxjs/toolkit'
 import { exsitItem, getTotal } from '@/utils'
 
 import type { ICart, IColorDTO, IObjectValue } from '@/types'
+import { SizeDTO } from '@/services/feature/types'
 
 interface CartState {
   cartItems: ICart[]

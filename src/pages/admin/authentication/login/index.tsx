@@ -24,11 +24,7 @@ const LoginPage: NextPage = () => {
 
   // ? Handlers
   const submitHander: SubmitHandler<ILoginForm> = ({ mobileNumber, password }) => {
-    const mobile = digitsFaToEn(mobileNumber)
-    const passCode = digitsFaToEn(password)
-    console.log(mobile , "mobile" , passCode , "passCode");
-    
-    // login({ mobileNumber, password })
+    login({ mobileNumber, password })
   }
   const onSuccess = () => replace(query?.redirectTo?.toString() || '/admin')
 

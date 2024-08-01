@@ -18,7 +18,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { productSizeSchema } from '@/utils'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useAppDispatch } from '@/hooks'
-import { showAlert } from '@/store'
+import { setUpdated, showAlert } from '@/store'
 
 interface Props {
   category: ICategory | undefined
@@ -184,7 +184,6 @@ const SubCategorySizesModal: React.FC<Props> = (props) => {
   }
 
   const onConfirm: SubmitHandler<IProductSizeForm> = (data) => {
-    console.log(productSizeCategoryData, 'sub data')
 
     const formData = new FormData()
 
@@ -207,7 +206,6 @@ const SubCategorySizesModal: React.FC<Props> = (props) => {
     if (data.thumbnail) {
       formData.append('Thumbnail', data.thumbnail)
     }
-    console.log(productSizeCategoryData, 'productSizeCategoryDataproductSizeCategoryDataproductSizeCategoryData')
 
     if (
       category?.productSizeId?.length! > 0 ) {
@@ -215,6 +213,7 @@ const SubCategorySizesModal: React.FC<Props> = (props) => {
     } else {
       createSizeCategoryFeature(formData)
     }
+    dispatch(setUpdated(true))
   }
 
   const handleFormKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {

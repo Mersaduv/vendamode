@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 
 import { useGetCategoriesQuery, useGetCategoriesTreeQuery } from '@/services'
 
@@ -7,10 +7,12 @@ import { SelectBox } from '@/components/ui'
 import type { ICategory, IProductForm } from '@/types'
 import { SelectedCategories } from '../form/ProductForm'
 import { UseFormRegister } from 'react-hook-form'
+import { ProductFeature } from '@/services/feature/types'
 
 interface Props {
   selectedCategories: SelectedCategories
   setSelectedCategories: React.Dispatch<React.SetStateAction<SelectedCategories>>
+  setIsSecondRequest?: Dispatch<SetStateAction<boolean>>
   categories: ICategory[]
 }
 
@@ -21,7 +23,8 @@ interface Prop {
 }
 
 const CategorySelector: React.FC<Props> = (props) => {
-  const { selectedCategories, setSelectedCategories, categories } = props
+  const { selectedCategories, setSelectedCategories, categories, setIsSecondRequest } =
+    props
 
   const CategoryTree: React.FC<Prop> = (prop) => {
     const { categories, selectedCategories, setSelectedCategories } = prop
@@ -33,7 +36,7 @@ const CategorySelector: React.FC<Props> = (props) => {
       }))
     }
 
-    const hasSelectedChild = (category: ICategory) : boolean => {
+    const hasSelectedChild = (category: ICategory): boolean => {
       if (category.childCategories) {
         return category.childCategories.some(
           (childCategory) =>
@@ -46,7 +49,15 @@ const CategorySelector: React.FC<Props> = (props) => {
     return (
       <ul className="space-y-1">
         {categories.map((category) => (
-          <li key={category.id} className={` space-y-1.5  ${category.level > 1 ? ' mr-5' : ''}`}>
+          <li
+          onClick={() => {
+            if (setIsSecondRequest) {
+              setIsSecondRequest(true)
+            }
+          }}
+            key={category.id}
+            className={` space-y-1.5  ${category.level > 1 ? ' mr-5' : ''}`}
+          >
             <label className="flex items-center whitespace-nowrap cursor-pointer">
               <input
                 className={`checked:text-2xl cursor-pointer pt-1 ${
@@ -72,7 +83,6 @@ const CategorySelector: React.FC<Props> = (props) => {
                 categories={category.childCategories}
                 selectedCategories={selectedCategories}
                 setSelectedCategories={setSelectedCategories}
-                
               />
             )}
           </li>
@@ -88,7 +98,6 @@ const CategorySelector: React.FC<Props> = (props) => {
           selectedCategories={selectedCategories}
           setSelectedCategories={setSelectedCategories}
           categories={categories}
-          
         />
       )}
     </div>

@@ -120,3 +120,67 @@ border-radius: 6px;
 .custom-z4 {
     z-index:9;
 }
+
+@media print {
+	body {
+		margin: 0 !important;
+	}
+}
+
+.main-container {
+	width: fit-content;
+	margin-left: auto;
+	margin-right: auto;
+    width: 100%;
+    padding: 18px;
+}
+
+.ck-content {
+	font-family: 'Lato';
+	line-height: 1.6;
+	word-break: break-word;
+    direction: rtl;
+}
+
+.ck-content p{
+  direction: rtl;
+  text-align: start;
+}
+
+.editor-container_classic-editor .editor-container__editor {
+    width: 100%;
+}
+.ck .ck-toolbar__items {
+direction: rtl;
+}
+
+.ck .ck-editor__main div{
+    height: 450px;
+}
+
+.ck-rounded-corners .ck.ck-editor__top .ck-sticky-panel .ck-sticky-panel__content, .ck.ck-editor__top .ck-sticky-panel .ck-sticky-panel__content.ck-rounded-corners {
+    border:none ;
+}
+
+.ck.ck-editor__top .ck-sticky-panel .ck-sticky-panel__content .ck-toolbar {
+    border: 1px solid rgb(196, 194, 194) !important;
+    margin-bottom: 10px;
+    border-radius: 6px !important;
+}
+
+.ck.ck-editor__main > .ck-editor__editable:not(.ck-focused) {
+    border-color: var(--ck-color-base-border);
+    border-radius: 6px !important;
+}
+.ck.ck-editor__editable.ck-focused:not(.ck-editor__nested-editable) {
+    outline: none !important;
+    border: 1px blue solid;
+    border-radius: 6px !important;
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px !important; 
+}
+
+.ck.ck-balloon-panel {
+    display: none;
+    position: static !important;
+    z-index: var(--ck-z-panel);
+}

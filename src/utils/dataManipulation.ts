@@ -1,3 +1,4 @@
+import { SizeDTO } from '@/services/feature/types';
 import type { ICart, IColorDTO, IObjectValue } from '@/types';
 
 export function exsitItem(cartItems: ICart[], productID: string, color: IColorDTO | null, size: SizeDTO | null, features: IObjectValue | null) {

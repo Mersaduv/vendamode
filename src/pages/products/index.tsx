@@ -19,8 +19,6 @@ const ProductsHome: NextPage = () => {
   // ? Assets
   const { query } = useRouter()
   const category = query?.category?.toString() ?? ''
-  const sortBy = query?.sortBy?.toString()
-  const discount = query?.discount
 
   // ? Querirs
   //*    Get Products Data

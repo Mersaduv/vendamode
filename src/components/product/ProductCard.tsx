@@ -22,7 +22,11 @@ const ProductCard: React.FC<Props> = (props) => {
 
   const stockItemWithDiscount = product.stockItems.find((stockItem) => stockItem.discount! > 0)
   const stockItemWithOutDiscount = product.stockItems.find((stockItem) => stockItem.discount === null)
-  const hasStock = product.stockItems.some((stockItem) => stockItem.quantity! > 0 && stockItem.price !== undefined)
+  const stockItemPrice = product.stockItems.find( (stockItem) => stockItem.quantity! > 0 && (stockItem.price !== undefined || stockItem.price > 0))
+  const hasStock = product.stockItems.some(
+    (stockItem) => stockItem.quantity! > 0 && (stockItem.price !== undefined || stockItem.price > 0)
+  )
+  console.log(product.stockItems, 'product.stockItems')
 
   // ? Render(s)
   return (
@@ -54,10 +58,10 @@ const ProductCard: React.FC<Props> = (props) => {
                 <ProductPriceDisplay
                   inStock={product.inStock}
                   discount={0}
-                  price={stockItemWithOutDiscount?.price ?? stockItemWithDiscount?.price ?? 0}
+                  price={stockItemPrice?.price!}
                 />
               ) : (
-                <div className='text-gray-400 font-semibold mb-1'>ناموجود</div>
+                <div className="text-gray-400 font-semibold mb-1">ناموجود</div>
               )}
             </div>
           </div>

@@ -21,19 +21,20 @@ export interface IProduct {
   price: number
   isFake: boolean
   isActive: boolean
+  status: number
   brandId?: string
   brandName?: string
-  brandData : IBrand
+  brandData: IBrand
   inStock: number
   productSizeInfo?: IProductSizeInfo
   productFeatureInfo?: IProductFeatureInfo
-  // productScale?: 
+  // productScale?:
   description: string
   discount: number
   categoryList?: string[]
   categoryLevels?: ICategoryLevel[]
-  parentCategories: CategoryWithAllParents;
-  stockItems : GetStockItems[]
+  parentCategories: CategoryWithAllParents
+  stockItems: GetStockItems[]
   categoryId: string
   size?: string[]
   sold?: number
@@ -47,17 +48,17 @@ export interface GetStockItems {
   id?: string
   stockId?: string
   imagesSrc?: {
-    id:string
+    id: string
     imageUrl: string
-    placeholder : string
+    placeholder: string
   }[]
   featureValueId?: string[]
   sizeId?: string
   idx?: string
   quantity?: number
-  price?: number
+  price: number
   discount?: number
-   [key: string]: any;
+  [key: string]: any
 }
 
 export interface CategoryWithAllParents {
@@ -106,4 +107,10 @@ export interface ICategoryLevel {
   }[]
   parentCategoryId?: number
   level: number
+}
+
+export interface EntityImage {
+  id: string
+  imageUrl: string
+  placeholder: string
 }

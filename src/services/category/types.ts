@@ -16,6 +16,7 @@ export type CategoryFeatureForm = {
   categoryId: string
   featureIds?: string[] | null
   categorySizes?: CategorySizeDTO
+  hasSizeProperty?: boolean
 }
 export type CategorySizeDTO = {
   ids?: string[] | null

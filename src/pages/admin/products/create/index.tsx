@@ -26,7 +26,7 @@ const Create: NextPage<Props> = () => {
 
   const onSuccess = () => {
     dispatch(setUpdated(true))
-    push('/admin/products')
+    push(`/admin/products/edit/${data?.data}`)
   }
 
   return (

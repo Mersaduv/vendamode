@@ -85,8 +85,10 @@ const Features: NextPage = () => {
   }
 
   const handlerEditFeatureModal = (feature: ProductFeature) => {
-    setStateFeature(feature)
-    editFeatureModalHandlers.open()
+    if (feature.name !== 'رنگ') {
+      setStateFeature(feature)
+      editFeatureModalHandlers.open()
+    }
   }
 
   //*   Delete Handlers
