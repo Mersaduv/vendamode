@@ -1,3 +1,4 @@
+import { SizeDTO } from "@/services/feature/types"
 import { IColorDTO, IObjectValue } from "./models/IProduct.type"
 
 export default interface ICart {

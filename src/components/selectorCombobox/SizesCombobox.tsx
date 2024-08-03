@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Combobox } from '@headlessui/react'
 import { FaCheck } from 'react-icons/fa'
 import { AiOutlineClose } from 'react-icons/ai'
+import { FeatureValue, SizeDTO } from '@/services/feature/types'
 
 interface Props {
   sizeList?: SizeDTO[]

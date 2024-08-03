@@ -222,7 +222,7 @@ const ParentSubCategoriesTree: NextPage = () => {
     <>
       <SubCategoryModal
         categoryParent={categoryParent?.data ?? ({} as ICategory)}
-        title="افزودن زیر دسته"
+        title="افزودن زیر"
         categoryList={subCategories?.data ?? []}
         refetch={subRefetch}
         isShow={isShowSubCategoryModal}
@@ -234,7 +234,7 @@ const ParentSubCategoriesTree: NextPage = () => {
 
       <SubCategoryUpdateModal
         categoryParent={categoryParent?.data ?? ({} as ICategory)}
-        title="ویرایش زیر دسته"
+        title="ویرایش زیر"
         categoryList={subCategories?.data ?? []}
         refetch={subRefetch}
         category={stateSubCategory}

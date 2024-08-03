@@ -4,6 +4,7 @@ import { SubmitHandler, useForm, Resolver } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { FaArrowDownLong } from 'react-icons/fa6'
 import { Modal } from '@/components/ui'
+import dynamic from 'next/dynamic'
 
 import { productSchema } from '@/utils'
 
@@ -19,6 +20,7 @@ import type {
 } from '@/types'
 import { CategorySelector } from '../categories'
 import {
+  useGetAllCategoriesQuery,
   useGetBrandsQuery,
   useGetCategoriesTreeQuery,
   useGetFeaturesByCategoryQuery,
@@ -96,7 +98,6 @@ interface CurrentRow {
   sizeId?: string
   featureValueIds?: string[]
 }
-import dynamic from 'next/dynamic'
 const CustomEditor = dynamic(() => import('@/components/form/TextEditor'), { ssr: false })
 const ProductForm: React.FC<Props> = (props) => {
   // ? Props
@@ -134,7 +135,7 @@ const ProductForm: React.FC<Props> = (props) => {
   const [selectedBrand, setSelectedBrand] = useState<IBrand | null>(null)
   const [productScaleCreate, setProductScaleCreate] = useState<IProductScaleCreate>()
   const [selectedStatus, setSelectedStatus] = useState<IProductStatus | null>({ id: 'New', name: 'آکبند' })
-  const [textEditor, setTextEditor] = useState<any>()
+  const [textEditor, setTextEditor] = useState<any>("")
   // ? Form Hook
   const {
     handleSubmit,
@@ -195,11 +196,14 @@ const ProductForm: React.FC<Props> = (props) => {
   )
 
   // ? Get Categories Query
-  const { categoriesData, refetch: refetchCategoryData } = useGetCategoriesTreeQuery(undefined, {
-    selectFromResult: ({ data }) => ({
-      categoriesData: data?.data,
-    }),
-  })
+  const { categoriesData, refetch: refetchCategoryData } = useGetAllCategoriesQuery(
+    { pageSize: 999999, isActive: true },
+    {
+      selectFromResult: ({ data }) => ({
+        categoriesData: data?.data?.data,
+      }),
+    }
+  )
 
   useEffect(() => {
     if (categoriesData) {
@@ -587,8 +591,8 @@ const ProductForm: React.FC<Props> = (props) => {
         </div>
         {/*register image and category  */}
         <div className="flex flex-col md:flex-row gap-4  h-auto ">
-          <div className="flex flex-1 md:max-w-[370px] h-[583px] overflow-auto bg-white">
-            <div className="bg-white w-full rounded-md shadow-item overflow-auto h-fit">
+          <div className="flex flex-1 md:max-w-[370px]  rounded-md shadow-item h-[583px] overflow-auto bg-white">
+            <div className="bg-white w-full overflow-auto h-full ">
               <h3 className="border-b p-6 text-gray-600">دسته بندی محصول</h3>
               <div className="flex px-6 py-10 pt-6">
                 {mode === 'create' && (

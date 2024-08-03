@@ -20,6 +20,7 @@ import type {
 } from '@/types'
 import { CategorySelector } from '../categories'
 import {
+  useGetAllCategoriesQuery,
   useGetBrandsQuery,
   useGetCategoriesTreeQuery,
   useGetFeatureValuesQuery,
@@ -255,11 +256,14 @@ const ProductFormEdit: React.FC<Props> = (props) => {
   )
 
   // ? Get Categories Query
-  const { categoriesData, refetch: refetchCategoryData } = useGetCategoriesTreeQuery(undefined, {
-    selectFromResult: ({ data }) => ({
-      categoriesData: data?.data,
-    }),
-  })
+  const { categoriesData, refetch: refetchCategoryData } = useGetAllCategoriesQuery(
+    { pageSize: 999999, isActive: true },
+    {
+      selectFromResult: ({ data }) => ({
+        categoriesData: data?.data?.data,
+      }),
+    }
+  )
 
   const singleCategoryQueryEnabled = singleCategoryId !== undefined
   const { data: singleCategoryData, refetch: refetchSingleCategoryData } = useGetSingleCategoryQuery(
@@ -1338,7 +1342,7 @@ const Table: React.FC<PropTable> = (props) => {
       combinedFeatures =
         sizeList.length > 0
           ? [
-              ...features.filter((f) => f.values?.length > 0),
+              ...features.filter((f) => f.values?.length ?? 0 > 0),
               {
                 name: 'سایزبندی',
                 values: sizeList.map((size) => ({
@@ -1362,7 +1366,7 @@ const Table: React.FC<PropTable> = (props) => {
                 updated: '2024-06-30T09:50:46.827222Z',
               },
             ]
-          : [...features.filter((f) => f.values?.length > 0)]
+          : [...features.filter((f) => f.values?.length ?? 0 > 0)]
       setFeaturesAndSizeSelected(combinedFeatures)
       // console.log(combinedFeatures , "combinedFeatures--combinedFeatures--combinedFeatures");
 

@@ -35,7 +35,7 @@ const fetchImageAsFile = async (url: string): Promise<File> => {
 }
 
 const SubCategoryUpdateModal: React.FC<Props> = (props) => {
-  const { isShow, onClose, refetch, title, categoryList, category , categoryParent } = props
+  const { isShow, onClose, refetch, title, categoryList, category, categoryParent } = props
   const dispatch = useAppDispatch()
   const [stateCategoryData, setStateCategoryData] = useState<ICategoryForm>({
     level: 0,
@@ -80,6 +80,7 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
     const loadData = async () => {
       if (category) {
         var parentCategory = categoryList.filter((c) => c.id === category.parentCategoryId)[0]
+        setParentCategory(parentCategory)
         setStateCategoryData({
           id: category.id,
           name: category.name,
@@ -146,6 +147,8 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
     }
 
     if (parentCategory === undefined) {
+      console.log('ParentCategoryId', data.parentCategoryId);
+      
       formData.append('ParentCategoryId', categoryParent.id)
     } else {
       if (data.parentCategoryId) formData.append('ParentCategoryId', data.parentCategoryId)
@@ -157,6 +160,16 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
     }
     dispatch(setUpdated(true))
   }
+
+  const handleIsActiveChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    var isActive = e.target.checked
+    setStateCategoryData({
+      ...stateCategoryData,
+      isActive,
+    })
+    setValue('isActive', isActive)
+  }
+
   return (
     <>
       {(isSuccessUpdate || isErrorUpdate) && (
@@ -207,6 +220,18 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
                     نام دسته
                   </label>
                 </div>
+              </div>
+
+              <div className="flex py-3 items-center gap-x-12 border mx-6 rounded-lg px-2">
+                <label htmlFor="isActive" className="flex items-center gap-x-2">
+                  <CustomCheckbox
+                    name="isActive"
+                    checked={stateCategoryData.isActive}
+                    onChange={handleIsActiveChange}
+                    label="وضعیت نمایش"
+                    customStyle="bg-sky-500"
+                  />
+                </label>
               </div>
 
               <div className="flex py-3 pt-2 items-start gap-x-12 border mx-6 rounded-lg px-2">

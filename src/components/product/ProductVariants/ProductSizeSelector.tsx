@@ -3,6 +3,7 @@ import { setTempSize } from '@/store'
 import { formatNumber } from '@/utils'
 
 import { useAppDispatch, useAppSelector } from '@/hooks'
+import { SizeDTO } from '@/services/feature/types'
 
 interface Props {
   sizes: SizeDTO[]

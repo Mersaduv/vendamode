@@ -1,3 +1,4 @@
+import { SizeDTO } from '@/services/feature/types'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface SizesState {

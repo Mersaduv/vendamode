@@ -16,7 +16,7 @@ import { categorySchema } from '@/utils'
 
 interface Props {
   title: string
-  mode: 'create' | 'edit'
+  mode?: 'create' | 'edit'
   category?: ICategory
   isShow: boolean
   onClose: () => void

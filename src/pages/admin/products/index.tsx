@@ -25,6 +25,7 @@ import { setUpdated } from '@/store'
 import { ConfirmDeleteModal } from '@/components/modals'
 import { LuSearch } from 'react-icons/lu'
 import { Pagination } from '@/components/navigation'
+import { ProductBreadcrumb } from '@/components/product'
 
 interface SelectedCategories {
   categorySelected?: ICategory
@@ -471,8 +472,17 @@ const Products: NextPage = () => {
                                       </Link>
                                     </td>
                                     <td className="text-center text-sm text-gray-600">{digitsEnToFa(product.code)}</td>
-                                    <td className="text-sm text-gray-600 text-center">
+                                    {/* <td
+                                      title={`${product.parentCategories.category.name}`}
+                                      className="text-sm text-gray-600 text-center"
+                                    >
                                       {product.parentCategories.category.name}
+                                    </td> */}
+                                    <td className="tooltip-container text-sm text-gray-600 text-center cursor-pointer">
+                                      {product.parentCategories.category.name}
+                                      <span className="tooltip-text">
+                                        <ProductBreadcrumb categoryLevels={product.parentCategories} />
+                                      </span>
                                     </td>
                                     <td className="text-center text-sm text-gray-600">
                                       {handleIsChangeable(product) ? 'متغیر' : 'ساده'}

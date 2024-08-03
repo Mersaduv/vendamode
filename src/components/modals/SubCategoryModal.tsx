@@ -106,7 +106,7 @@ const SubCategoryModal: React.FC<Props> = (props) => {
     } else {
       if (data.parentCategoryId) formData.append('ParentCategoryId', data.parentCategoryId)
     }
-      formData.append('MainId', categoryParent.id)
+    formData.append('MainId', categoryParent.id)
 
     if (data.id != undefined) {
       formData.append('Id', data.id)
@@ -114,6 +114,14 @@ const SubCategoryModal: React.FC<Props> = (props) => {
       createCategory(formData)
     }
     dispatch(setUpdated(true))
+  }
+  const handleIsActiveChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    var isActive = e.target.checked
+    setStateCategoryData({
+      ...stateCategoryData,
+      isActive,
+    })
+    setValue('isActive', isActive)
   }
 
   return (
@@ -167,6 +175,18 @@ const SubCategoryModal: React.FC<Props> = (props) => {
                     نام دسته
                   </label>
                 </div>
+              </div>
+
+              <div className="flex py-3 items-center gap-x-12 border mx-6 rounded-lg px-2">
+                <label htmlFor={`isActive-subCreate`} className="flex items-center gap-x-2">
+                  <CustomCheckbox
+                    name={`isActive-subCreate`}
+                    checked={stateCategoryData.isActive}
+                    onChange={handleIsActiveChange}
+                    label="وضعیت نمایش"
+                    customStyle="bg-sky-500"
+                  />
+                </label>
               </div>
 
               <div className="flex py-3 pt-2 items-start gap-x-12 border mx-6 rounded-lg px-2">
