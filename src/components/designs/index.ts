@@ -1,0 +1,5 @@
+export { default as DesignItemForm } from './DesignItemForm'
+export { default as StoreCategoryForm } from './StoreCategoryForm'
+export { default as SloganFooterForm } from './SloganFooterForm'
+export { default as SupportForm } from './SupportForm'
+export { default as RedirectForm } from './RedirectForm'

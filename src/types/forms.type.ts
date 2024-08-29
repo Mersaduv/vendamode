@@ -1,11 +1,15 @@
 import type { ICart, ICategory, IProduct, IReview, IUser } from '@/types'
+import { strict } from 'assert'
 
 export interface ICategoryForm {
   id?: string | undefined
   name: string
   isActive: boolean
-  thumbnail?: File | undefined
+  isActiveProduct: boolean
+  thumbnail?: File | null
+  hasSizeProperty?: boolean
   mainCategoryId?: string
+  mainId?: string
   parentCategoryId?: string
   level: number
 }
@@ -34,22 +38,23 @@ export type AddressFormBody = {
 export interface IBrandForm {
   id?: string
   name: string
-  Thumbnail: FileList
+  Thumbnail: File
   inSlider: boolean
   isActive: boolean
-  Description: number
-  description: string
+  description?: string
+  isDeleted?: boolean
 }
 
 export interface IProductForm {
-  Id : string
+  Id: string
   Title: string
   IsActive: boolean
-  MainThumbnail?: File | null
+  MainThumbnail: File | null
   Thumbnail?: File[] | null
   CategoryId: string
   Description: string
   IsFake: boolean
+  status: 'New' | 'Used'
   BrandId?: string
   FeatureValueIds?: string[]
   StockItems?: IStockItem[]
@@ -59,12 +64,16 @@ export interface IProductForm {
 export interface IStockItem {
   id?: string
   stockId?: string
-  ImageStock?: File 
+  isHidden?: boolean
+  ImageStock?: File
   featureValueId?: string[]
   sizeId?: string
   quantity?: number
   price?: number
   discount?: number
+  offerTime?: number | null
+  minuteTime?: number
+  secondTime?: number
   [key: string]: any
 }
 
@@ -80,11 +89,12 @@ export interface ISizeIds {
 }
 
 export interface ISizeInfoModel {
-  id: string
-  idx: string
-  scaleValues?: any[]
-  productSizeValue: string
-  productSizeValueId: string
+  id?: string
+  idx?: string
+  modelSizeId?: string
+  scaleValues?: string[]
+  productSizeValue?: string
+  productSizeValueId?: string
 }
 
 export type IReviewForm = {
@@ -119,4 +129,94 @@ export type IOrderForm = {
   delivered: boolean
   paid: boolean
   purchaseInvoice?: FileList
+}
+
+export interface IProductSizeForm {
+  id?: string | null
+  sizeType: '0' | '1'
+  productSizeValues: string[]
+  thumbnail: File | null
+  categoryIds: string[]
+}
+
+export interface IProductStatus {
+  id: 'New' | 'Used'
+  name: string
+}
+
+export interface IProductIsFake {
+  id: 'true' | 'false'
+  name: string
+}
+
+export interface ITextMarqueeForm {
+  name?: string
+  isActive: boolean
+}
+
+export interface ISliderForm {
+  id?: string
+  thumbnail?: File | null
+  link: string
+  category: string
+  type: string
+  isActive?: boolean
+}
+export interface IBannerForm {
+  id?: string
+  index: number
+  thumbnail?: File | null
+  link: string
+  category: string
+  type: string
+  isActive?: boolean
+}
+export interface IArticleBannerForm {
+  id?: string
+  index: number
+  articleId?: string
+  isActive: boolean
+}
+export interface IFooterBannerForm {
+  id?: string
+  thumbnail?: File | null
+  link: string
+  category: string
+  type: string
+  isActive?: boolean
+}
+
+export interface IArticleForm {
+  id?: string | undefined
+  title: string
+  isActive: boolean
+  thumbnail: File
+  place: number
+  description: string
+  categoryId: string
+}
+
+export interface IGeneralSettingForm {
+  id?: string | undefined
+  title: string
+  shortIntroduction: string
+  googleTags: string
+}
+
+export interface ILogosForm {
+  id?: string
+  orgThumbnail?: File | null
+  faviconThumbnail?: File | null
+}
+
+export interface IDesignItemForm {
+  id?: string
+  title: string
+  thumbnail?: File | null
+  link: string
+  type: string
+  isActive?: boolean
+  index: number
+  created?: string
+  lastUpdated?: string
 }

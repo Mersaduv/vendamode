@@ -1,5 +1,5 @@
 module.exports = {
-  content: ['./src/pages/**/*.{js,ts,jsx,tsx}', './src/components/**/*.{js,ts,jsx,tsx}' , "./node_modules/flowbite/**/*.js"],
+  content: ['./src/pages/**/*.{js,ts,jsx,tsx}', './src/components/**/*.{js,ts,jsx,tsx}'],
   theme: {
     screens: {
       'sm': '640px',
@@ -8,6 +8,7 @@ module.exports = {
       'lg': '1024px',
       'lg2': '1170px',
       'xl': '1280px',
+      'xl2': '1400px',
       '2xl': '1536px',
       'xs': '450px', 
     },

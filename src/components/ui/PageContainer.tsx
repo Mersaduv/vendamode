@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { profilePaths } from '../shared/UserProfileAside'
 import { LogoutButton } from '../user'
 import { useGetUserInfoMeQuery } from '@/services'
-import { Person } from '@/icons'
+import { Person, user2, user3 } from '@/icons'
 
 interface Props {
   title: string
@@ -19,7 +19,11 @@ const PageContainer: React.FC<Props> = (props) => {
     <div className='pb-1 mb-2'>
       <div className="flex items-center bg-gree flex-col py-1 ml-3 mr-4">
         <div className="md:hidden flex items-center w-full  rounded-lg shadow-item justify-between px-4">
-          <Person className="h-12 w-12" />
+        {data?.data?.userSpecification.gender === 'آقا' ? (
+          <img className="w-10" src={user3.src} alt="user3" />
+        ) : (
+          <img className="w-10" src={user2.src} alt="user2" />
+        )}
           <div className="flex flex-col gap-y-1">
             {isLoading ? (
               <>

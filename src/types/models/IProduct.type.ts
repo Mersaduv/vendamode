@@ -1,3 +1,5 @@
+import { SizeDTO } from '@/services/feature/types'
+import { ISizeInfoModel } from '../forms.type'
 import { IBrand } from './IBrand.type'
 import { ICategory } from './ICategory.type'
 
@@ -9,7 +11,7 @@ export interface IProduct {
     imageUrl: string
     placeholder: string
   }
-  imagesSrc: {
+  imagesSrc?: {
     id: string
     imageUrl: string
     placeholder: string
@@ -19,19 +21,21 @@ export interface IProduct {
   price: number
   isFake: boolean
   isActive: boolean
+  isDeleted: boolean
+  status: number
   brandId?: string
   brandName?: string
-  brandData : IBrand
+  brandData: IBrand
   inStock: number
   productSizeInfo?: IProductSizeInfo
   productFeatureInfo?: IProductFeatureInfo
-  // productScale?: 
+  // productScale?:
   description: string
   discount: number
   categoryList?: string[]
   categoryLevels?: ICategoryLevel[]
-  parentCategories: CategoryWithAllParents;
-  stockItems : GetStockItems[]
+  parentCategories: CategoryWithAllParents
+  stockItems: GetStockItems[]
   categoryId: string
   size?: string[]
   sold?: number
@@ -44,18 +48,20 @@ export interface IProduct {
 export interface GetStockItems {
   id?: string
   stockId?: string
+  isHidden: boolean
   imagesSrc?: {
-    id:string
+    id: string
     imageUrl: string
-    placeholder : string
+    placeholder: string
   }[]
   featureValueId?: string[]
   sizeId?: string
   idx?: string
   quantity?: number
-  price?: number
+  price: number
   discount?: number
-   [key: string]: any;
+  discountRemainingTime?: string
+  [key: string]: any
 }
 
 export interface CategoryWithAllParents {
@@ -72,14 +78,6 @@ export interface IProductSizeInfo {
     imageUrl: string
     placeholder: string
   }
-}
-export interface ISizeInfoModel {
-  id?: string
-  idx?: string
-  modelSizeId? :string
-  scaleValues?: string[]
-  productSizeValue?: string
-  productSizeValueId?: string
 }
 
 export interface IProductFeatureInfo {
@@ -112,4 +110,10 @@ export interface ICategoryLevel {
   }[]
   parentCategoryId?: number
   level: number
+}
+
+export interface EntityImage {
+  id: string
+  imageUrl: string
+  placeholder: string
 }

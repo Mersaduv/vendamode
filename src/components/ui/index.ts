@@ -4,6 +4,7 @@
 // serving as the building blocks for the
 export { default as FullScreenLoading } from './loading/FullScreenLoading'
 export { default as InlineLoading } from './loading/InlineLoading'
+export { default as FullInlineLoading } from './loading/FullInlineLoading'
 export { default as PageTransitionLoading } from './loading/PageTransitionLoading'
 
 export { default as Skeleton } from './Skeleton'

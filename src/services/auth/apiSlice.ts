@@ -15,6 +15,7 @@ import type {
 import { setCredentials, clearCredentials, setCredentialsToken } from '@/store'
 import { getToken } from '@/utils'
 import { ApiError } from '@/types'
+import { digitsFaToEn } from '@persian-tools/persian-tools'
 
 export const authApiSlice = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -50,15 +51,19 @@ export const authApiSlice = baseApi.injectEndpoints({
     }),
 
     login: builder.mutation<LoginResult, LoginQuery>({
-      query: (body) => ({
-        url: '/api/auth/login',
-        method: 'POST',
-        body,
-      }),
+      query: ({ mobileNumber, password }) => {
+        const mobile = digitsFaToEn(mobileNumber)
+        const passCode = digitsFaToEn(password)
+        const body: LoginQuery = { mobileNumber: mobile, password: passCode }
+        return {
+          url: '/api/auth/login',
+          method: 'POST',
+          body,
+        }
+      },
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled
-          console.log(data)
           if (data && data.data!.token && data.data!.refreshToken) {
             dispatch(
               setCredentials({
@@ -90,7 +95,6 @@ export const authApiSlice = baseApi.injectEndpoints({
           await queryFulfilled
           // Clear credentials in redux store
           dispatch(clearCredentials())
-          console.log("success" , (await queryFulfilled).data)
         } catch (error) {
           console.error('Failed to logout:', error)
         }
@@ -107,7 +111,6 @@ export const authApiSlice = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled
           if (data && data.data!.token && data.data!.refreshToken) {
-            console.log('generateNewToken -----------', data)
             dispatch(
               setCredentialsToken({
                 token: data.data!.token,
@@ -139,7 +142,6 @@ export const authApiSlice = baseApi.injectEndpoints({
         } catch (error) {
           const err = error as ApiError
           if (err.error.status === 401) {
-            console.log('try to getting new token ------------', err.error.status)
             // if 401 unauthorize
             const token = window.localStorage.getItem('token')
             const refreshToken = window.localStorage.getItem('refreshToken')
@@ -158,7 +160,6 @@ export const authApiSlice = baseApi.injectEndpoints({
 
               // try again to getting new data of user by new token
               const { data } = await dispatch(authApiSlice.endpoints.getUserInfo.initiate(mobileNumber)).unwrap()
-              console.log('save new data into local storage ------------', data)
               // save new data on localStorage
               window.localStorage.setItem('userInfo', JSON.stringify(data))
             } catch (error) {
@@ -184,11 +185,10 @@ export const authApiSlice = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled
           // save new data localStorage
-          console.log('getUserInfo ------------', data)
-          window.localStorage.setItem('userInfo', JSON.stringify(data.data))    } catch (error) {
+          window.localStorage.setItem('userInfo', JSON.stringify(data.data))
+        } catch (error) {
           const err = error as ApiError
           if (err.error.status === 401) {
-            console.log('try to getting new token ------------', err.error.status)
             // if 401 unauthorize
             const token = window.localStorage.getItem('token')
             const refreshToken = window.localStorage.getItem('refreshToken')
@@ -206,8 +206,9 @@ export const authApiSlice = baseApi.injectEndpoints({
               )
 
               // try again to getting new data of user by new token
-              const { data } = await dispatch(authApiSlice.endpoints.getUserInfo.initiate(newTokenData?.mobileNumber!)).unwrap()
-              console.log('save new data into local storage ------------', data)
+              const { data } = await dispatch(
+                authApiSlice.endpoints.getUserInfo.initiate(newTokenData?.mobileNumber!)
+              ).unwrap()
               // save new data on localStorage
               window.localStorage.setItem('userInfo', JSON.stringify(data))
             } catch (error) {

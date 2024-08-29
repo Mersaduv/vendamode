@@ -30,18 +30,18 @@ const ReviewsTable: React.FC<Props> = (props) => {
             reviews.map((review) => (
               <tr
                 className="border-b border-gray-100 text-center text-xs transition-colors hover:bg-gray-50 md:text-sm"
-                key={review._id}
+                key={review.id}
               >
                 <td className="p-2">
-                  <ResponsiveImage
+                  {/* <ResponsiveImage
                     dimensions="w-7 h-7"
                     className="mx-auto"
                     src={review.product.images[0].url}
                     blurDataURL={review.product.images[0].placeholder}
                     alt="تصویر محصول"
-                  />
+                  /> */}
                 </td>
-                <td className="p-2">{review._id}</td>
+                <td className="p-2">{review.id}</td>
                 <td className="p-2 font-bold">
                   <span
                     className={`inline-block rounded-lg px-2 py-1.5 font-bold
@@ -57,10 +57,10 @@ const ReviewsTable: React.FC<Props> = (props) => {
                     {review.status === 1 ? 'در انتظار تایید' : review.status === 2 ? 'تایید شده' : 'رد شده'}
                   </span>
                 </td>
-                <td className="p-2">{review.user.name}</td>
+                <td className="p-2">{review.userName}</td>
 
                 <td className="p-2">
-                  <Link href={`/admin/reviews/${review._id}`}>
+                  <Link href={`/admin/reviews/${review.id}`}>
                     <EditIconButton />
                   </Link>
                 </td>

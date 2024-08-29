@@ -1,22 +1,6 @@
-import { IBrandForm, IPagination, QueryParams, ServiceResponse } from '@/types'
+import { IBrand, IBrandForm, IPagination, QueryParams, ServiceResponse } from '@/types'
 
-export interface IBrand {
-  id: string
-  name: string
-  imagesSrc: {
-    url: string
-    placeholder: string
-  }
-  inSlider: boolean
-  isActive: boolean
-  count: number
-  description: string
-  isDelete: boolean
-  created: string
-  updated: string
-}
-
-export type MsgResult = { msg: string }
+export type MsgResult = ServiceResponse<boolean>
 export type IdQuery = { id: string }
 export type GetBrandsQuery = QueryParams
 

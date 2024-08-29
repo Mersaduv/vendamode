@@ -1,10 +1,9 @@
 export function formatNumber(n: number): string {
   if (n) {
-    const newNumber = n.toString()
-
-    return newNumber.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+    const newNumber = n.toString();
+    return newNumber.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
-  return ''
+  return '';
 }
 
 export function makeSlug(titleStr: string) {

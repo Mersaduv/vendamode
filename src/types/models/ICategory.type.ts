@@ -1,4 +1,4 @@
-import { CategorySizeDTO } from "@/services/category/types"
+import { CategorySizeDTO } from '@/services/category/types'
 
 export interface ICategory {
   id: string
@@ -14,11 +14,16 @@ export interface ICategory {
   count: number
   subCategoryCount: number
   featureCount: number
+  featureIds: string[]
   sizeCount: number
+  productSizeCount: number
+  productSizeId: string[]
   categorySizes?: CategorySizeDTO
   brandCount: number
   isActive: boolean
+  isActiveProduct: boolean
   isDeleted: boolean
+  hasSizeProperty: boolean
   parentCategory?: ICategory
   parentCategories?: ICategory[]
   parentCategoriesTree?: ICategory[]

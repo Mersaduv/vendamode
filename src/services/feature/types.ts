@@ -1,18 +1,21 @@
-interface BaseClass<T> {
+import { QueryParams } from '@/types'
+
+export interface BaseClass<T> {
   id: T
   created: string
   updated: string
 }
+export type GetFeaturesQuery = QueryParams
 
-interface SizeDTO extends BaseClass<string> {
+export interface SizeDTO extends BaseClass<string> {
   name: string
   count: number | null
   description: string | null
-  isDeleted: boolean | null
+  isDeleted?: boolean | null
 }
 
-interface ProductSizeDTO extends BaseClass<string> {
-  sizeType: string 
+export interface ProductSizeDTO extends BaseClass<string> {
+  sizeType: string
   productSizeValues: ProductSizeValuesDTO[] | null
   imagesSrc: {
     id: string
@@ -20,24 +23,23 @@ interface ProductSizeDTO extends BaseClass<string> {
     placeholder: string | null
   }
 }
-interface BaseClass<T> {
+export interface BaseClass<T> {
   id: T
   created: string
   updated: string
 }
 
-interface ProductFeature extends BaseClass<string> {
+export interface ProductFeature extends BaseClass<string> {
   name: string
   values: FeatureValue[] | undefined
   count: number
+  valueCount: number
   isDeleted: boolean
   productId: string | null
   categoryId: string | null
 }
 
-
-
-interface FeatureValue extends BaseClass<string> {
+export interface FeatureValue extends BaseClass<string> {
   name: string
   hexCode: string | null
   count: number | null
@@ -46,31 +48,35 @@ interface FeatureValue extends BaseClass<string> {
   productFeatureId: string | null
 }
 
-interface GetCategoryFeaturesByCategory {
+export interface GetCategoryFeaturesByCategory {
   productFeatures: ProductFeature[] | null
   productSizes: ProductSizeDTO[] | null
   sizeDTOs: SizeDTO[] | null
 }
 
-interface ProductFeatureUpdateDTO {
+export interface ProductFeatureUpdateDTO {
   id: string
   name: string
-  description: string
-  hexCode: string | null
 }
-
-interface FeatureValueCreateDTO {
+export interface ProductFeatureValueUpdateDTO {
+  id: string
   name: string
-  description: string
-  hexCode: string | null
-  productFeatureId: string
+  hexCode?: string
 }
 
-interface ProductFeatureCreateDTO {
+export interface FeatureValueDTO {
+  id?: string
+  name: string
+  description?: string
+  hexCode?: string
+  productFeatureId?: string
+}
+
+export interface ProductFeatureCreateDTO {
   name: string
 }
 
-interface ProductSizeValuesDTO {
+export interface ProductSizeValuesDTO {
   id: string
   name: string
   productSizeId: string

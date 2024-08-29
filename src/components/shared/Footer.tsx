@@ -1,6 +1,6 @@
 const Footer = () => {
   return (
-    <footer className="w-full bg-gray-100 text-gray-800 py-8 mt-56">
+    <footer className="w-full bg-gray-100 text-gray-800 py-8 mt-20">
       <div className="container mx-auto flex flex-col px-4">
         <div className="flex flex-col  justify-between items-center lg:items-center">
           <div className=" text-center mb-8 lg:mb-0">
@@ -100,7 +100,7 @@ const Footer = () => {
             <p className="text-sm">کلیه حقوق این سایت متعلق به شرکت توسعه خلاقیت مدیسا می باشد</p>
           </div>
           <div className="flex items-center space-x-4">
-            <img src="logo-samandehi.png" alt="Samandehi Logo" className="w-12 h-12" />
+            {/* <img src="logo-samandehi.png" alt="Samandehi Logo" className="w-12 h-12" /> */}
             <p className="text-sm">پشتیبانی 24/7 - 021-91692410</p>
           </div>
         </div>

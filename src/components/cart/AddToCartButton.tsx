@@ -47,8 +47,8 @@ const AddToCartButton: React.FC<Props> = (props) => {
             <div className="flex gap-x-4 py-3 ">
               <ResponsiveImage
                 dimensions="w-28 h-28"
-                src={product.imagesSrc[0].imageUrl}
-                blurDataURL={product.imagesSrc[0].placeholder}
+                src={product.mainImageSrc.imageUrl}
+                blurDataURL={product.mainImageSrc.placeholder}
                 alt={product.title}
                 imageStyles="object-contain"
               />

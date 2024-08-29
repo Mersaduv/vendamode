@@ -1,20 +1,57 @@
 import baseApi from '@/services/baseApi'
-import { ServiceResponse } from '@/types';
+import { IPagination, QueryParams, ServiceResponse } from '@/types'
+import {
+  FeatureValue,
+  FeatureValueDTO,
+  GetCategoryFeaturesByCategory,
+  GetFeaturesQuery,
+  ProductFeature,
+  ProductFeatureCreateDTO,
+  ProductFeatureUpdateDTO,
+  ProductFeatureValueUpdateDTO,
+} from './types'
+import { generateQueryParams } from '@/utils'
 
-export const productFeatureApi  = baseApi.injectEndpoints({
-    endpoints: (builder) => ({
-    getFeatures: builder.query<ServiceResponse<ProductFeature[]>, void>({
-      query: () => ({
-        url: '/api/features',
-        method: 'GET',
-      }),
+export const productFeatureApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    getFeatures: builder.query<ServiceResponse<IPagination<ProductFeature[]>>, GetFeaturesQuery>({
+      query: ({ ...params }) => {
+        const queryParams = generateQueryParams(params)
+        return {
+          url: `/api/features?${queryParams}`,
+          method: 'GET',
+        }
+      },
+      providesTags: (result) =>
+        result?.data?.data
+          ? [
+              ...result?.data?.data.map(({ id }) => ({
+                type: 'Features' as const,
+                id: id,
+              })),
+              'Features',
+            ]
+          : ['Features'],
     }),
 
-    getFeatureValues: builder.query<ServiceResponse<FeatureValue[]>, void>({
-      query: () => ({
-        url: '/api/feature/values',
-        method: 'GET',
-      }),
+    getFeatureValues: builder.query<ServiceResponse<IPagination<FeatureValue[]>>, QueryParams>({
+      query: ({ ...params }) => {
+        const queryParams = generateQueryParams(params)
+        return {
+          url: `/api/feature/values?${queryParams}`,
+          method: 'GET',
+        }
+      },
+      providesTags: (result) =>
+        result?.data?.data
+          ? [
+              ...result?.data?.data.map(({ id }) => ({
+                type: 'FeatureValues' as const,
+                id: id,
+              })),
+              'FeatureValues',
+            ]
+          : ['FeatureValues'],
     }),
 
     createFeature: builder.mutation<ServiceResponse<boolean>, ProductFeatureCreateDTO>({
@@ -23,14 +60,16 @@ export const productFeatureApi  = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['Features'],
     }),
 
-    createFeatureValue: builder.mutation<ServiceResponse<boolean>, FeatureValueCreateDTO>({
+    createFeatureValue: builder.mutation<ServiceResponse<boolean>, FeatureValueDTO>({
       query: (body) => ({
         url: '/api/feature/value',
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['FeatureValues'],
     }),
 
     updateFeature: builder.mutation<ServiceResponse<boolean>, ProductFeatureUpdateDTO>({
@@ -39,14 +78,16 @@ export const productFeatureApi  = baseApi.injectEndpoints({
         method: 'PUT',
         body,
       }),
+      invalidatesTags: ['Features'],
     }),
 
-    updateFeatureValue: builder.mutation<ServiceResponse<boolean>, ProductFeatureUpdateDTO>({
+    updateFeatureValue: builder.mutation<ServiceResponse<boolean>, FeatureValueDTO>({
       query: (body) => ({
         url: '/api/feature/value',
         method: 'PUT',
         body,
       }),
+      invalidatesTags: ['FeatureValues'],
     }),
 
     getFeature: builder.query<ServiceResponse<ProductFeature>, string>({
@@ -68,6 +109,7 @@ export const productFeatureApi  = baseApi.injectEndpoints({
         url: `/api/feature/${id}`,
         method: 'DELETE',
       }),
+      invalidatesTags: ['Features'],
     }),
 
     deleteFeatureValue: builder.mutation<ServiceResponse<boolean>, string>({
@@ -75,6 +117,7 @@ export const productFeatureApi  = baseApi.injectEndpoints({
         url: `/api/feature/value/${id}`,
         method: 'DELETE',
       }),
+      invalidatesTags: ['FeatureValues'],
     }),
 
     getFeaturesByCategory: builder.query<ServiceResponse<GetCategoryFeaturesByCategory>, string>({
@@ -82,9 +125,19 @@ export const productFeatureApi  = baseApi.injectEndpoints({
         url: `/api/feature/by-category/${id}`,
         method: 'GET',
       }),
+      providesTags: (result) =>
+        result?.data?.productFeatures
+          ? [
+              ...result.data.productFeatures.map(({ id }) => ({
+                type: 'Features' as const,
+                id: id,
+              })),
+              'Features',
+            ]
+          : ['Features'],
     }),
   }),
-});
+})
 
 export const {
   useGetFeaturesQuery,
@@ -98,4 +151,4 @@ export const {
   useDeleteFeatureMutation,
   useDeleteFeatureValueMutation,
   useGetFeaturesByCategoryQuery,
-} = productFeatureApi;
+} = productFeatureApi

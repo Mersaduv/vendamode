@@ -86,7 +86,6 @@ const OrderCard: React.FC<Props> = (props) => {
 
   const handleToggleReturnedSubmit = () => {
     
-    console.log(order)
   }
   const handleGeneratePdf = (order: IOrderDTO) => {
     return (
@@ -112,9 +111,6 @@ const OrderCard: React.FC<Props> = (props) => {
       ...prevSelectedProducts,
       [itemID]: checked,
     }))
-  }
-  if (selectedProducts) {
-    console.log(selectedProducts)
   }
 
   const handleSelectCanceled = (e: React.ChangeEvent<HTMLSelectElement>) => {

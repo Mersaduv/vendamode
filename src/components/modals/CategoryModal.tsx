@@ -1,54 +1,32 @@
 import { Modal, Button, CustomCheckbox } from '@/components/ui'
 import { ICategory, ICategoryForm } from '@/types'
-import SizesCombobox from '../selectorCombobox/SizesCombobox'
-import {
-  useCreateCategoryMutation,
-  useGetSizesQuery,
-  useUpdateCategoryFeatureMutation,
-  useUpdateCategoryMutation,
-} from '@/services'
+import { useCreateCategoryMutation } from '@/services'
 import { useEffect, useState } from 'react'
 import { HandleResponse } from '../shared'
-import { CategoryFeatureForm } from '@/services/category/types'
 import { Resolver, SubmitHandler, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { categorySchema } from '@/utils'
+import { useAppDispatch } from '@/hooks'
+import { showAlert } from '@/store'
 
 interface Props {
   title: string
+  mode?: 'create' | 'edit'
   category?: ICategory
   isShow: boolean
   onClose: () => void
   refetch: () => void
 }
 
-const fetchImageAsFile = async (url: string): Promise<File> => {
-  const response = await fetch(url)
-  const blob = await response.blob()
-  const fileName = url.split('/').pop()
-  return new File([blob], fileName || 'image.jpg', { type: blob.type })
-}
-
 const CategoryModal: React.FC<Props> = (props) => {
   const [stateCategoryData, setStateCategoryData] = useState<ICategoryForm>({
     level: 0,
     name: '',
-    isActive: false, // Initialize isActive
+    isActive: true,
   } as ICategoryForm)
-  const [selectedMainFile, setSelectedMainFile] = useState<File[]>([])
+  const [selectedFile, setSelectedFile] = useState<File[]>([])
 
-  const { category, isShow, onClose, refetch, title } = props
-
-  const [
-    updateCategory,
-    {
-      data: dataUpdate,
-      isSuccess: isSuccessUpdate,
-      isError: isErrorUpdate,
-      error: errorUpdate,
-      isLoading: isLoadingUpdate,
-    },
-  ] = useUpdateCategoryMutation()
+  const { isShow, onClose, refetch, title, mode } = props
 
   const [
     createCategory,
@@ -65,74 +43,80 @@ const CategoryModal: React.FC<Props> = (props) => {
   const defaultValues: Partial<ICategoryForm> = {
     name: '',
     level: 0,
-    isActive: false, // Add default value for isActive
-    // Add other fields with default values if needed
+    isActive: true, // Add default value for isActive
   }
-
+  const dispatch = useAppDispatch()
   // ? Form Hook
   const {
     handleSubmit,
-    control,
-    formState: { errors: formErrors },
-    reset,
+    formState: { errors: formErrors, isValid },
     register,
-    watch,
-    getValues,
     setValue,
+    reset,
   } = useForm<ICategoryForm>({
     resolver: yupResolver(categorySchema) as unknown as Resolver<ICategoryForm>,
     defaultValues,
   })
 
-  useEffect(() => {
-    const loadData = async () => {
-      onClose()
-      setStateCategoryData({} as ICategoryForm)
-      reset()
-      setSelectedMainFile([])
-      if (category) {
-        setStateCategoryData({
-          id: category.id,
-          name: category.name,
-          isActive: category.isActive ?? false, // Ensure isActive has a boolean value
-          level: category.level,
-          parentCategoryId: category.parentCategoryId,
-          mainCategoryId: category.parentCategoryId,
-          thumbnail: undefined,
-        })
-        if (category.imagesSrc) {
-          const imageFile = await fetchImageAsFile(category.imagesSrc.imageUrl)
-          if (imageFile) {
-            setSelectedMainFile([imageFile])
-          }
+  const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // if (e.target.files) {
+    //   setSelectedFile([...Array.from(e.target.files)])
+    //   if ([...Array.from(e.target.files)].length > 0) {
+    //     var ffff = e.target.files[0]
+    //     setValue('thumbnail', ffff)
+    //   } else {
+    //     setValue('thumbnail', null)
+    //   }
+    // }
+    const files = e.target.files
+    if (files) {
+      const validFiles: any[] = []
+      const maxFileSize = 30 * 1024 // 40 KB
+      const exactWidth = 200
+      const exactHeight = 200
 
-          console.log(category, imageFile)
-
-          reset({
-            id: category.id,
-            name: category.name,
-            isActive: category.isActive ?? false, // Ensure isActive has a boolean value
-            parentCategoryId: category.parentCategoryId,
-            mainCategoryId: category.parentCategoryId,
-            level: category.level,
-            thumbnail: imageFile,
-          })
+      // تبدیل FileList به آرایه
+      Array.from(files).forEach((file) => {
+        if (file.type !== 'image/png') {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'فرمت عکس ها می بایست png باشد',
+            })
+          )
+          return
         }
-      }
-    }
-    loadData()
-  }, [category])
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files)
-      if (files.length > 0) {
-        setValue('thumbnail', files[0])
-        setSelectedMainFile(files)
-      } else {
-        setValue('thumbnail', undefined)
-        setSelectedMainFile([])
-      }
+        if (file.size > maxFileSize) {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'حجم عکس ها می بایست حداکثر 30 کیلوبایت باشد',
+            })
+          )
+          return
+        }
+
+        const img = new Image()
+        img.src = URL.createObjectURL(file)
+
+        img.onload = () => {
+          URL.revokeObjectURL(img.src)
+
+          if (img.width !== exactWidth || img.height !== exactHeight) {
+            dispatch(
+              showAlert({
+                status: 'error',
+                title: 'سایز عکس ها می بایست 200*200 پیکسل باشد',
+              })
+            )
+          } else {
+            validFiles.push(file)
+            setValue('thumbnail', file)
+            setSelectedFile([...validFiles])
+          }
+        }
+      })
     }
   }
 
@@ -146,8 +130,6 @@ const CategoryModal: React.FC<Props> = (props) => {
   }
 
   const onConfirm: SubmitHandler<ICategoryForm> = (data) => {
-    console.log(data, 'data--data')
-
     const formData = new FormData()
 
     formData.append('Name', data.name)
@@ -162,34 +144,13 @@ const CategoryModal: React.FC<Props> = (props) => {
     }
     if (data.id != undefined) {
       formData.append('Id', data.id)
-      console.log('formData', stateCategoryData, 'stateCategoryData', data.id)
-
-      updateCategory(formData)
     } else {
       createCategory(formData)
     }
   }
 
-  if (formErrors) {
-    console.log(formErrors, 'formErrors')
-  }
-
   return (
     <>
-      {(isSuccessUpdate || isErrorUpdate) && (
-        <HandleResponse
-          isError={isErrorUpdate}
-          isSuccess={isSuccessUpdate}
-          error={errorUpdate}
-          message={dataUpdate?.message}
-          onSuccess={() => {
-            onClose()
-            refetch()
-            setStateCategoryData({} as ICategoryForm)
-            setSelectedMainFile([])
-          }}
-        />
-      )}
       {(isSuccessCreate || isErrorCreate) && (
         <HandleResponse
           isError={isErrorCreate}
@@ -197,10 +158,11 @@ const CategoryModal: React.FC<Props> = (props) => {
           error={errorCreate}
           message={dataCreate?.message}
           onSuccess={() => {
+            reset()
             onClose()
             refetch()
-            setStateCategoryData({} as ICategoryForm)
-            setSelectedMainFile([])
+            setStateCategoryData({isActive : true} as ICategoryForm)
+            setSelectedFile([])
           }}
         />
       )}
@@ -209,19 +171,19 @@ const CategoryModal: React.FC<Props> = (props) => {
         onClose={() => {
           onClose()
           // setStateCategoryData({} as ICategoryForm)
-          // setSelectedMainFile([])
+          setSelectedFile([])
         }}
         effect="bottom-to-top"
       >
         <Modal.Content
           onClose={onClose}
-          className="flex h-full flex-col z-[199] gap-y-5 bg-white py-5 pb-0 md:rounded-lg"
+          className="flex h-full flex-col z-[199] gap-y-5 bg-white py-5 pb-0 md:rounded-lg w-full"
         >
           <Modal.Header notBar onClose={onClose}>
             <div className="text-start text-base">{title} دسته بندی</div>
           </Modal.Header>
           <Modal.Body>
-            <form onSubmit={handleSubmit(onConfirm)} className="space-y-4 bg-white text-center md:rounded-lg">
+            <form onSubmit={handleSubmit(onConfirm)} className="space-y-4 bg-white text-center md:rounded-lg w-full">
               <div className="flex items-center w-full gap-x-12 px-6">
                 <div className="relative mb-3 w-full">
                   <input
@@ -241,9 +203,9 @@ const CategoryModal: React.FC<Props> = (props) => {
               </div>
 
               <div className="flex py-3 items-center gap-x-12 border mx-6 rounded-lg px-2">
-                <label htmlFor="isActive" className="flex items-center gap-x-2">
-                <CustomCheckbox
-                    name="isActive"
+                <label htmlFor={`isActive-${mode}`} className="flex items-center gap-x-2">
+                  <CustomCheckbox
+                    name={`isActive-${mode}`}
                     checked={stateCategoryData.isActive}
                     onChange={handleIsActiveChange}
                     label="وضعیت نمایش"
@@ -253,42 +215,55 @@ const CategoryModal: React.FC<Props> = (props) => {
               </div>
 
               <div className=" flex flex-col items-center justify-center">
-                <input type="file" className="hidden" id="Thumbnail" onChange={handleFileChange} />
-                <label htmlFor="Thumbnail" className="block w-fit  rounded-lg cursor-pointer text-sm font-normal">
-                  {selectedMainFile.length === 0 ? (
+                <input
+                  type="file"
+                  className="hidden"
+                  id={`thumbnailCategory-${mode}`}
+                  onChange={handleMainFileChange}
+                />
+                <label
+                  htmlFor={`thumbnailCategory-${mode}`}
+                  className="block w-fit  rounded-lg cursor-pointer text-sm font-normal"
+                >
+                  {selectedFile.length === 0 ? (
                     <img
                       className="w-[125px] h-[125px] rounded-md"
                       src="/images/other/product-placeholder.png"
                       alt="product-placeholder"
                     />
                   ) : (
-                    selectedMainFile.map((file, index) => (
-                      <div key={index} className="text-sm shadow-item rounded-lg p-2 text-gray-600">
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={file.name}
-                          className="w-[125px] object-contain h-[125px] rounded-md"
-                        />
-                      </div>
-                    ))
+                    <div className="text-sm shadow-item rounded-lg p-2 text-gray-600">
+                      <img
+                        src={URL.createObjectURL(selectedFile[0])}
+                        alt={selectedFile[0].name}
+                        className="w-[125px] object-contain h-[125px] rounded-md"
+                      />
+                    </div>
                   )}
                 </label>
                 <div className="text-xs mt-3">تصویر</div>
               </div>
 
-              <div className="flex px-5 py-3 justify-between items-center gap-x-20 bg-[#f5f8fa]">
+              <div className="flex flex-col md:flex-row gap-y-4 px-5 py-3 justify-between items-center gap-x-20 bg-[#f5f8fa]">
                 <div className="flex flex-col items-start">
-                  <p className="text-xs text-gray-500 ">سایز عکس میبایست 200*200 پیکسل باشد</p>
-                  <p className="text-xs text-gray-500 ">حجم عکس میبایست حداکثر 30 کیلوبایت باشد</p>
-                  <p className="text-xs text-gray-500 ">نوع عکس میبایست png باشد</p>
+                  <p className="text-xs text-gray-500 whitespace-nowrap ">سایز عکس میبایست 200*200 پیکسل باشد</p>
+                  <p className="text-xs text-gray-500 whitespace-nowrap ">حجم عکس میبایست حداکثر 30 کیلوبایت باشد</p>
+                  <p className="text-xs text-gray-500 whitespace-nowrap ">نوع عکس میبایست png باشد</p>
+                </div>
+                {/* validation errors */}
+                <div className="flex flex-col">
+                  {formErrors.name && <p className="text-red-500 px-10">{formErrors.name.message}</p>}
+
+                  {formErrors.thumbnail && <p className="text-red-500 px-10">{formErrors.thumbnail?.message}</p>}
                 </div>
                 <Button
                   type="submit"
-                  className="bg-sky-500 px-5 py-2.5 hover:bg-sky-600"
-                  // onClick={onConfirm}
-                  isLoading={isLoadingCreate || isLoadingUpdate}
+                  className={`bg-sky-500 px-5 py-2.5 hover:bg-sky-600 ${
+                    !isValid ? 'bg-gray-300' : 'hover:text-black'
+                  } `}
+                  isLoading={isLoadingCreate}
                 >
-                  {stateCategoryData.id ? 'به‌روزرسانی' : 'انتشار'}
+                  {'انتشار'}
                 </Button>
               </div>
             </form>

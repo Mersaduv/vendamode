@@ -5,9 +5,10 @@ import { useGetSizesQuery, useUpdateCategoryFeatureMutation } from '@/services'
 import { useEffect, useState } from 'react'
 import { HandleResponse } from '../shared'
 import { CategoryFeatureForm } from '@/services/category/types'
+import { SizeDTO } from '@/services/feature/types'
 
 interface Props {
-  category: ICategory
+  category: ICategory | undefined
   isShow: boolean
   onClose: () => void
   refetch: () => void
@@ -16,12 +17,12 @@ interface Props {
 const SizesModal: React.FC<Props> = (props) => {
   // States
   const [stateSizeFeature, setStateSizeFeature] = useState<SizeDTO[]>([])
-  const [stateSizeData, setStateSizeData] = useState<SizeDTO[]>()
+  const [sizeDb, setSizeDb] = useState<SizeDTO[]>()
 
   // ? Props
   const { category, isShow, onClose, refetch } = props
 
-  const { data } = useGetSizesQuery()
+  const { data, isLoading } = useGetSizesQuery({ page: 1, pageSize: 9999 })
   const [
     updateCategoryFeature,
     {
@@ -34,10 +35,10 @@ const SizesModal: React.FC<Props> = (props) => {
   ] = useUpdateCategoryFeatureMutation()
 
   useEffect(() => {
-    if (data?.data) {
-      setStateSizeData(data?.data.filter((size) => category.categorySizes?.sizeIds?.includes(size.id)))
+    if (data?.data?.data) {
+      setSizeDb(data?.data.data)
     }
-  }, [data])
+  }, [data?.data])
 
   const handleFeatureSelect = (sizes: SizeDTO[]) => {
     setStateSizeFeature((prevState) => {
@@ -53,11 +54,11 @@ const SizesModal: React.FC<Props> = (props) => {
 
   const onConfirm = () => {
     const sizeListIds = stateSizeFeature.map((size) => size.id)
-    console.log(sizeListIds, 'sizeListIds', category.id)
 
     updateCategoryFeature({
-      categoryId: category.id,
-      categorySizes: { ids: category.categorySizes?.ids ?? null, sizeIds: sizeListIds ?? null },
+      categoryId: category!.id,
+      categorySizes: { ids: category?.categorySizes?.ids ?? null, sizeIds: sizeListIds ?? null },
+      hasSizeProperty: category?.hasSizeProperty,
     })
   }
 
@@ -77,34 +78,42 @@ const SizesModal: React.FC<Props> = (props) => {
           }}
         />
       )}
-      <Modal isShow={isShow} onClose={onClose} effect="bottom-to-top">
+      <Modal
+        isShow={isShow}
+        onClose={() => {
+          onClose()
+        }}
+        effect="bottom-to-top"
+      >
         <Modal.Content
           onClose={onClose}
           className="flex h-full flex-col z-[199] gap-y-5 bg-white  py-5 pb-0 md:rounded-lg "
         >
           <Modal.Header notBar onClose={onClose}>
-            <div className="text-start text-base">انتخاب سایزبندی برای {category.name}</div>
+          <div className="text-start text-base flex gap-2">
+              انتخاب سایز برای <div className="text-sky-500"> {category?.name}</div>
+            </div>
           </Modal.Header>
           <Modal.Body>
-            <div className="space-y-4 bg-white   text-center md:rounded-lg">
+            <div className="space-y-4 bg-white   text-center md:rounded-lg w-full">
               <div className="flex items-center w-full gap-x-12 px-6">
                 <span>مقدار</span>
                 <div className="w-full">
                   <SizesCombobox
                     onFeatureSelect={handleFeatureSelect}
-                    sizeList={data?.data ?? []}
-                    stateSizeData={stateSizeData}
+                    sizeList={data?.data?.data ?? []}
+                    stateSizeData={sizeDb?.filter((size) => category?.categorySizes?.sizeIds?.includes(size.id))}
                   />
                 </div>
               </div>
               <div className="flex px-5 py-3 justify-between items-center gap-x-20 bg-[#f5f8fa]">
-                <span className="text-xs">سایزبندی های مربوط به این دسته بندی را وارد کنید</span>
+                <span className="text-xs">سایز های مربوط به این دسته بندی را وارد کنید</span>
                 <Button
                   className="bg-sky-500 px-5 py-3 hover:bg-sky-600"
                   onClick={onConfirm}
                   isLoading={isLoadingUpdate}
                 >
-                  ذخیره
+                  بروزرسانی
                 </Button>
               </div>
             </div>

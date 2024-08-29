@@ -22,7 +22,6 @@ interface Props {
 const HandleResponse: React.FC<Props> = (props) => {
   // ? Porps
   const { isSuccess, isError, error, message, onSuccess, onError, isLogin } = props
-  console.log(message)
   // ? Assets
   const dispatch = useAppDispatch()
 

@@ -19,7 +19,7 @@ import { BsTelephoneOutboundFill } from 'react-icons/bs'
 import { IAddress } from '@/types'
 import { ArrowLeft, Cart, Location2, LogoPersian, Rule, Wallet } from '@/icons'
 import { CartSummary } from '@/components/cart'
-import { HandleResponse, Header } from '@/components/shared'
+import { HandleResponse, Header, MetaTags } from '@/components/shared'
 import { ResponsiveImage, Button } from '@/components/ui'
 import Head from 'next/head'
 import type { NextPage } from 'next'
@@ -38,7 +38,7 @@ const ShippingPage: NextPage = () => {
 
   // ? Assets
   const dispatch = useAppDispatch()
-
+  const { generalSetting } = useAppSelector((state) => state.design)
   // ? States
   const [paymentMethod, setPaymentMethod] = useState('پرداخت در محل')
   const [orderCreated, setOrderCreated] = useState(false)
@@ -62,7 +62,6 @@ const ShippingPage: NextPage = () => {
   ] = usePlaceOrderMutation()
 
   const saveIncompleteOrder = () => {
-    console.log(address , '    console.log(address)')
     if (!address?.city && !address?.province && !address?.fullAddress && !address?.postalCode) {
       return dispatch(
         showAlert({
@@ -71,7 +70,6 @@ const ShippingPage: NextPage = () => {
         })
       )
     }else {
-      console.log(address)
       const formData = new FormData()
       formData.append('address', address.id)
       formData.append('status', '1')
@@ -85,12 +83,9 @@ const ShippingPage: NextPage = () => {
       postData(formData)
         .unwrap()
         .then((d) => {
-          console.log('Order saved successfully:', d)
           dispatch(clearCart())
-          console.log('clearCart dispatched')
         })
         .catch((error) => {
-          console.error('Error saving order:', error)
         })
     }
    
@@ -110,7 +105,6 @@ const ShippingPage: NextPage = () => {
       setOrderCreated(true)
     }
     if (isProcessPayment) {
-      console.log(placeOrderId)
       placeOrder({ id: placeOrderId })
       setOrderCreated(true)
       dispatch(clearIsProcessPayment())
@@ -134,9 +128,6 @@ const ShippingPage: NextPage = () => {
     }
   }, [orderCreated , address])
 
-  console.log(updateIsSuccess, updateError, updateData, updateIsError)
-
-  console.log(totalItems, totalDiscount, totalPrice, totalPrice - totalDiscount)
   // ? Render(s)
   return (
     <ProtectedRouteWrapper allowedRoles={[roles.ADMIN, roles.SUPERADMIN, roles.USER]}>
@@ -170,9 +161,11 @@ const ShippingPage: NextPage = () => {
 
       <Header />
       <main className="mt-[220px]">
-        <Head>
-          <title>وندامد | پرداخت</title>
-        </Head>
+        <MetaTags
+          title={generalSetting?.title + ' | ' + 'پرداخت' || 'فروشگاه اینترنتی'}
+          description={generalSetting?.shortIntroduction || 'توضیحاتی فروشگاه اینترنتی'}
+          keywords={generalSetting?.googleTags || ' اینترنتی, فروشگاه'}
+        />
         {/* steps header  */}
         <div className="flex flex-col items-center px-4 md:px-8">
           <div className="flex justify-between w-[300px]">

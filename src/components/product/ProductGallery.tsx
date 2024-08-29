@@ -26,6 +26,8 @@ interface Props {
 const ProductGallery: React.FC<Props> = (props) => {
   // ? Porps
   const { images, discount, inStock, productName } = props
+  console.log(images , "imagesimagesimages");
+  
 
   // ? States
   const [currentImage, setCurrentImage] = useState(0)
@@ -73,7 +75,7 @@ const ProductGallery: React.FC<Props> = (props) => {
           />
         </div>
 
-        <div className="mt-5 flex lg:justify-start justify-center gap-x-5 overflow-auto">
+        <div className="mt-5 flex lg:justify-start justify-center gap-x-5 overflow-auto max-w-lg">
           {images.map((image, index) => (
            <div
            key={index}

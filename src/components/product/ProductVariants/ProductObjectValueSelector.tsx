@@ -19,7 +19,6 @@ const ProductObjectValueSelector: React.FC<Props> = (props) => {
     id: string,
     title: string
   ) => {
-    console.log(val, id, title)
     dispatch(setTempObjectValue({ id, title, value: [val] } as IObjectValue))
   }
 
@@ -32,7 +31,7 @@ const ProductObjectValueSelector: React.FC<Props> = (props) => {
               type="button"
               onClick={() => handleClicked(val, item.id, item.title)}
               key={val.id}
-              className={`border cursor-pointer font-medium flex pt-0.5 items-center justify-center rounded-md text-gray-500 border-gray-400 w-16 h-8 ${
+              className={`border cursor-pointer font-medium flex pt-0.5 items-center justify-center rounded-md text-gray-500 border-gray-400 h-8 ${
                 tempObjectValue?.value?.[0]?.id === val.id ? 'bg-[#686868] text-white' : ''
               }`}
             >

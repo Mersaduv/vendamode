@@ -1,3 +1,4 @@
+import { FeatureValue } from '@/services/feature/types'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 

@@ -1,7 +1,8 @@
 import type { ICategoriesList, ICategory, ICategoryForm, IPagination, QueryParams, ServiceResponse } from '@/types'
 
 export type MsgResult = ServiceResponse<boolean>
-export type IdQuery = { id: string }
+export type IdQuery = { id: string | undefined }
+export type IdAndQuery = { id: string | undefined; query: QueryParams }
 export type GetCategoriesQuery = QueryParams
 export type CategoriesResult = {
   categoryDTO: ICategory[]
@@ -15,6 +16,7 @@ export type CategoryFeatureForm = {
   categoryId: string
   featureIds?: string[] | null
   categorySizes?: CategorySizeDTO
+  hasSizeProperty?: boolean
 }
 export type CategorySizeDTO = {
   ids?: string[] | null

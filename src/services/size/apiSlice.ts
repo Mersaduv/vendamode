@@ -1,27 +1,42 @@
 // sizeApiSlice.ts
-import baseApi from '@/services/baseApi';
-import { getToken } from '@/utils';
+import baseApi from '@/services/baseApi'
+import { generateQueryParams, getToken } from '@/utils'
 import type {
   GetSizesResult,
   GetSizeResult,
   GetProductSizeResult,
-  CreateSizeResult,
   DeleteSizeResult,
   IdQuery,
   CreateSizeQuery,
-  CreateProductSizeQuery
-} from './types';
+  IdsQuery,
+  SizeUpdateDTO,
+  SizeResult,
+} from './types'
+import { QueryParams, ServiceResponse } from '@/types'
 
 export const sizeApiSlice = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getSizes: builder.query<GetSizesResult, void>({
-      query: () => ({
-        url: '/api/sizes',
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      }),
+    getSizes: builder.query<GetSizesResult, QueryParams>({
+      query: ({ ...params }) => {
+        const queryParams = generateQueryParams(params)
+        return {
+          url: `/api/sizes?${queryParams}`,
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      },
+      providesTags: (result) =>
+        result?.data?.data
+          ? [
+              ...result?.data?.data.map(({ id }) => ({
+                type: 'Size' as const,
+                id: id,
+              })),
+              'Size',
+            ]
+          : ['Size'],
     }),
 
     getSize: builder.query<GetSizeResult, IdQuery>({
@@ -34,9 +49,20 @@ export const sizeApiSlice = baseApi.injectEndpoints({
       }),
     }),
 
-    getSizeByCategoryId: builder.query<GetProductSizeResult, IdQuery>({
-      query: ({ id }) => ({
-        url: `/api/size/category-sizes/${id}`,
+    getSizeByCategoryId: builder.query<GetProductSizeResult, IdsQuery>({
+      query: (ids) => ({
+        url: `/api/size/category-sizes/${ids.categoryId}`,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      }),
+      providesTags: (result, error, arg) => [{ type: 'ProductSize', id: arg.productSizeId }],
+    }),
+
+    getSizeByProductSizeId: builder.query<GetProductSizeResult, IdsQuery>({
+      query: (ids) => ({
+        url: `/api/size/category-productSizes/${ids.productSizeId}`,
         method: 'GET',
         headers: {
           Authorization: `Bearer ${getToken()}`,
@@ -44,7 +70,7 @@ export const sizeApiSlice = baseApi.injectEndpoints({
       }),
     }),
 
-    createSize: builder.mutation<CreateSizeResult, CreateSizeQuery>({
+    createSize: builder.mutation<SizeResult, CreateSizeQuery>({
       query: (body) => ({
         url: '/api/size',
         method: 'POST',
@@ -53,9 +79,22 @@ export const sizeApiSlice = baseApi.injectEndpoints({
         },
         body,
       }),
+      invalidatesTags: ['Size'],
     }),
 
-    createCategorySize: builder.mutation<CreateSizeResult, CreateProductSizeQuery>({
+    updateSize: builder.mutation<SizeResult, SizeUpdateDTO>({
+      query: (body) => ({
+        url: '/api/size',
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body,
+      }),
+      invalidatesTags: ['ProductSize'],
+    }),
+
+    createCategorySize: builder.mutation<ServiceResponse<boolean>, FormData>({
       query: (body) => ({
         url: '/api/size/category',
         method: 'POST',
@@ -64,6 +103,19 @@ export const sizeApiSlice = baseApi.injectEndpoints({
         },
         body,
       }),
+      invalidatesTags: ['ProductSize'],
+    }),
+
+    updateCategorySize: builder.mutation<ServiceResponse<boolean>, FormData>({
+      query: (body) => ({
+        url: '/api/size/category-update',
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body,
+      }),
+      invalidatesTags: ['ProductSize'],
     }),
 
     deleteSize: builder.mutation<DeleteSizeResult, IdQuery>({
@@ -74,15 +126,19 @@ export const sizeApiSlice = baseApi.injectEndpoints({
           Authorization: `Bearer ${getToken()}`,
         },
       }),
+      invalidatesTags: ['Size'],
     }),
   }),
-});
+})
 
 export const {
   useGetSizesQuery,
   useGetSizeQuery,
   useGetSizeByCategoryIdQuery,
+  useGetSizeByProductSizeIdQuery,
   useCreateSizeMutation,
+  useUpdateSizeMutation,
+  useUpdateCategorySizeMutation,
   useCreateCategorySizeMutation,
   useDeleteSizeMutation,
-} = sizeApiSlice;
+} = sizeApiSlice

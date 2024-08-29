@@ -12,6 +12,7 @@ interface Props {
 
 const ProductSubCategoriesList: React.FC<Props> = (props) => {
   const { category } = props
+  console.log(category, 'categorycategory')
 
   const { childCategories, isLoading } = useGetSubCategoriesQuery(
     { slug: category },
@@ -23,10 +24,6 @@ const ProductSubCategoriesList: React.FC<Props> = (props) => {
       }),
     }
   )
-
-  if (childCategories) {
-    console.log(childCategories)
-  }
 
   // ? Render(s)
   return (
@@ -41,14 +38,15 @@ const ProductSubCategoriesList: React.FC<Props> = (props) => {
               <Link
                 key={item.id}
                 href={`/products?${generateQueryParams({
-                  category: item.slug,
+                  categorySlug: item.slug,
+                  categoryId: item.id,
                   sort: '',
                 })}`}
                 className="rounded-md border-4 border-gray-100 px-3 pb-2 pt-4 text-center"
               >
                 <ResponsiveImage
                   dimensions="w-24 h-24 md:h-32 md:w-32 xl:w-40 xl:h-40"
-                  src={item.imagesSrc?.imageUrl}
+                  src={item.imagesSrc?.imageUrl!}
                   blurDataURL={item.imagesSrc?.placeholder}
                   alt={item.name}
                   imageStyles="object-contain"

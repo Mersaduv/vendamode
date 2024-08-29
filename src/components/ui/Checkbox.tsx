@@ -9,33 +9,31 @@ interface CustomCheckboxProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   customStyle?: string
   register?: UseFormRegister<ICategoryForm>
+  isNormal?: boolean
+  inLabel?: boolean
 }
 
 export const CustomCheckbox = forwardRef(function CustomCheckboxComponent(
   props: CustomCheckboxProps,
   ref: ForwardedRef<HTMLInputElement>
 ) {
-  const { label, name, checked, onChange, customStyle } = props
+  const { label, name, checked = false, onChange, customStyle, isNormal, inLabel } = props
 
   return (
-    <div className={`flex items-center justify-between ${customStyle ? ""  :"py-2.5"} w-full`}>
-      <span className="w-3/4 font-medium text-gray-700">{label}</span>
-      <div className="relative mr-2 inline-block w-11 select-none align-middle">
-        <input
-          type="checkbox"
-          name={name}
-          id={name}
-          checked={checked}
-          onChange={onChange}
-          ref={ref}
-          className="absolute right-[17px] md:right-5 top-1 border-none block h- w-4 cursor-pointer appearance-none rounded-full bg-white duration-200 ease-in checked:right-1 checked:bg-white"
-        />
-        <label
-          htmlFor={name}
-          className={`block h-6 cursor-pointer overflow-hidden rounded-full ${
-            checked ? `  ${customStyle ? customStyle : "bg-[#e90089]" } ` : 'bg-gray-200'
-          }`}
-        ></label>
+    <div className={`flex items-center justify-between ${customStyle ? '' : 'py-2.5'} ${inLabel ? '' : 'w-full'}`}>
+      {inLabel ? null : <span className="w-3/4 font-medium text-gray-700">{label}</span>}
+      <div dir="ltr" className="flex justify-center">
+        <label title={label || ''} htmlFor={`switch-${name}`} className="h-6 relative inline-block">
+          <input
+            id={`switch-${name}`}
+            type="checkbox"
+            name={name}
+            checked={checked}
+            onChange={onChange}
+            ref={ref}
+            className="w-11 h-0 cursor-pointer inline-block focus:outline-0 dark:focus:outline-0 border-0 dark:border-0 focus:ring-offset-transparent dark:focus:ring-offset-transparent focus:ring-transparent dark:focus:ring-transparent focus-within:ring-0 dark:focus-within:ring-0 focus:shadow-none dark:focus:shadow-none after:absolute before:absolute after:top-0 before:top-0 after:block before:inline-block before:rounded-full after:rounded-full after:content-[''] after:w-5 after:h-5 after:mt-0.5 after:ml-0.5 after:shadow-md after:duration-100 before:content-[''] before:w-10 before:h-full before:shadow-[inset_0_0_#000] after:bg-white dark:after:bg-gray-50 before:bg-gray-300 dark:before:bg-gray-600 before:checked:bg-sky-500 checked:after:duration-300 checked:after:translate-x-4 disabled:after:bg-opacity-75 disabled:cursor-not-allowed disabled:checked:before:bg-opacity-40"
+          />
+        </label>
       </div>
     </div>
   )
@@ -45,10 +43,11 @@ interface ControlledCheckboxProps {
   name: string
   control: Control<any>
   label: string
+  inLabel?: boolean
 }
 
-export const ControlledCheckbox: React.FC<ControlledCheckboxProps> = ({ name, control, ...restProps }) => {
+export const ControlledCheckbox: React.FC<ControlledCheckboxProps> = ({ name, control, inLabel, ...restProps }) => {
   const { field } = useController({ name, control })
 
-  return <CustomCheckbox checked={field.value} name={field.name} onChange={field.onChange} {...restProps} />
+  return <CustomCheckbox inLabel checked={field.value} name={field.name} onChange={field.onChange} {...restProps} />
 }

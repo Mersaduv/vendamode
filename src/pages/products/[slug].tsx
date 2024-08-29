@@ -1,39 +1,36 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { useAppDispatch, useAppSelector, useDisclosure, useDisclosureWithData } from '@/hooks'
 import { Tab } from '@headlessui/react'
 import { Fragment } from 'react'
 import { setTempColor, setTempSize, addToLastSeen, setTempObjectValue } from '@/store'
+import parse from 'html-react-parser'
 
 import { ClientLayout } from '@/components/Layouts'
 import {
   ProductBreadcrumb,
   ProductGallery,
-  ProductInfo,
-  ProductDescription,
-  ProductSpecificationList,
   ProductColorSelector,
   ProductSizeSelector,
-  ProductOutOfStockMessage,
   ProductObjectValueSelector,
 } from '@/components/product'
 import { ReviewsList } from '@/components/review'
 import { RecentVisitedSlider, SmilarProductsSlider } from '@/components/sliders'
-import { AddToCartButton, FreeShippingIndicator } from '@/components/cart'
-import { ServiceList } from '@/components/services'
+import { AddToCartButton } from '@/components/cart'
 
 import type { GetServerSideProps, NextPage } from 'next'
-import type { IObjectValue, IProduct, IProductSizeInfo } from '@/types'
+import type { EntityImage, IObjectValue, IProduct, IProductSizeInfo } from '@/types'
 import { getProductByCategory, getProductBySlug } from '@/services'
 import { Button } from '@/components/ui'
 import { ProductScaleModal } from '@/components/modals'
-import { BsHeart, BsHeartHalf } from 'react-icons/bs'
-import { BiShare, BiShareAlt } from 'react-icons/bi'
+import { BsHeart } from 'react-icons/bs'
+import { BiShareAlt } from 'react-icons/bi'
 import { TfiMenuAlt, TfiRulerAlt2 } from 'react-icons/tfi'
-import { FaRegStar, FaStar } from 'react-icons/fa'
+import { FaStar } from 'react-icons/fa'
 import { RiMenu5Fill } from 'react-icons/ri'
 import { digitsEnToFa } from '@persian-tools/persian-tools'
+import { MetaTags } from '@/components/shared'
 
 interface Props {
   product: IProduct
@@ -56,7 +53,6 @@ export const getServerSideProps: GetServerSideProps<Props, { slug: string }> = a
 
   const { data } = await getProductByCategory(productCategoryID)
   const similarProduct = data?.filter((p: any) => p.id !== product.id)
-
   return {
     props: {
       product: JSON.parse(JSON.stringify(product)),
@@ -76,7 +72,7 @@ const SingleProduct: NextPage<Props> = (props) => {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const { lastSeen } = useAppSelector((state) => state.lastSeen)
-
+  const { generalSetting } = useAppSelector((state) => state.design)
   // ? initial color or size
   // useEffect(() => {
   //   if (product?.productSizeInfo?.columns != undefined) {
@@ -117,11 +113,11 @@ const SingleProduct: NextPage<Props> = (props) => {
       dispatch(
         addToLastSeen({
           productID: product.id,
-          image: product.imagesSrc[0],
+          image: product.mainImageSrc,
           title: product.title,
           slug: product.slug,
-          discount: product.discount,
-          price: product.price,
+          discount: product.stockItems[0].discount ?? 0,
+          price: product.stockItems[0].price ?? 0,
           inStock: product.inStock,
         })
       )
@@ -152,22 +148,24 @@ const SingleProduct: NextPage<Props> = (props) => {
 
     return stars
   }
-
-  console.log(product)
+  const addMainImageToList = (mainImageSrc: EntityImage, imagesSrcList: EntityImage[]) => {
+    return [mainImageSrc, ...imagesSrcList]
+  }
+  const updatedImagesSrcList = addMainImageToList(product.mainImageSrc, product.imagesSrc ?? [])
 
   // ? Render(s)
   return (
     <>
-      <Head>
-        <title>{`خرید ${product.title}`}</title>
-        <meta name="description" content={product.title} />
-      </Head>
-
+      <MetaTags
+        title={generalSetting?.title + ' | ' + `خرید ${product.title}` || 'فروشگاه اینترنتی'}
+        description={generalSetting?.shortIntroduction + product.title || 'توضیحاتی فروشگاه اینترنتی'}
+        keywords={generalSetting?.googleTags || ' اینترنتی, فروشگاه'}
+      />
       <ClientLayout>
         <main className="mx-auto space-y-4 py-4 lg:max-w-[1550px] lg:mt-4 sm:mt-4 md:mt-6  -mt-20">
           <div className="flex items-center mr-6">
             <div className="text-sm text-gray-400">دسته بندی محصول:</div>{' '}
-            <ProductBreadcrumb categoryLevels={product.categoryLevels ?? []} />
+            <ProductBreadcrumb categoryLevels={product.parentCategories ?? []} />
           </div>
           <div className="flex flex-col lg:flex-row">
             <div className="flex lg:justify-start justify-end ml-4 lg:ml-0 mb-4 lg:mb-0">
@@ -181,7 +179,7 @@ const SingleProduct: NextPage<Props> = (props) => {
               </div>
             </div>
             <ProductGallery
-              images={product.imagesSrc}
+              images={product.imagesSrc && product.imagesSrc.length > 0 ? updatedImagesSrcList : [product.mainImageSrc]}
               discount={product.discount}
               inStock={product.inStock}
               productName={product.title}
@@ -253,38 +251,25 @@ const SingleProduct: NextPage<Props> = (props) => {
                   </div>
                 </div>
               )}
-              <div className="z-[99]">{product.inStock > 0 && <AddToCartButton product={product} />}</div>
+              <div className="z-[99]">
+                {product.inStock > 0 ? (
+                  <AddToCartButton product={product} />
+                ) : (
+                  <div className="w-full flex justify-center pt-20">
+                    {' '}
+                    <Button className="btn bg-gray-300 text-sm xs:px-12 whitespace-nowrap xs:text-base md:w-1/2 ">
+                      اتمام موجودی
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-            {product.inStock === 0 && <ProductOutOfStockMessage />}
             <ProductScaleModal
               isShow={isShowModal}
               productSizeInfo={product.productSizeInfo ?? ({} as IProductSizeInfo)}
               onClose={modalHandlers.close}
             />
-            {/* 
-            <div className="lg:col-span-4 ">
-              <h2 className="p-3 text-base font-semibold leading-8 tracking-wide text-black/80 ">{product.title}</h2>
-          
-              <div className="section-divide-y" />
-
-              {product.inStock > 0 && product.optionsType === 'colors' && (
-                <ProductColorSelector colors={product.colors} />
-              )}
-
-              {product.inStock > 0 && product.optionsType === 'sizes' && <ProductSizeSelector sizes={product.sizes} />}
-
-              {product.inStock === 0 && <ProductOutOfStockMessage />}
-
-              <ProductInfo infos={product?.info} />
-
-              <FreeShippingIndicator />
-            </div> */}
           </div>
-
-          {/* <ServiceList /> */}
-
-          {product.description.length > 0 && <ProductDescription description={product.description} />}
-
           <div className="relative w-full flex pt-28">
             <div className="bg-[#dee2e6] w-full h-[410px] xs:h-[330px] sm:h-[360px] relative">
               <SmilarProductsSlider smilarProducts={smilarProducts} />
@@ -366,61 +351,76 @@ const SingleProduct: NextPage<Props> = (props) => {
                         ))}
                       </div>
                     )}
+                    {product.inStock > 0 &&
+                      product.productFeatureInfo?.featureValueInfos?.length! > 0 &&
+                      product.productFeatureInfo?.featureValueInfos?.map((item, index) => (
+                        <div key={item.id} className="w-full flex mt-6">
+                          <div className="text-[#9e9e9e]  sm:text-base w-[150px]">{item.title}</div>
+                          {item.value?.map((itemValue, index) => (
+                            <div key={itemValue.id} className="flex items-center">
+                              <div className=" whitespace-nowrap text-sm">{itemValue.name}</div>
+                              {index < item.value?.length! - 1 && <div className="text-red-600 mx-1">|</div>}
+                            </div>
+                          ))}
+                        </div>
+                      ))}
                   </div>
                 </Tab.Panel>
                 <Tab.Panel className={classNames('bg-white rounded-xl p-3', 'bg-opacity-100')}>
                   {/* محتوای توضیحات */}
-                  <div className="text-gray-700">توضیحات محصول در اینجا قرار می‌گیرد.</div>
+                  <div className="text-gray-700"> {parse(product.description)}</div>
                 </Tab.Panel>
 
                 <Tab.Panel className={classNames('bg-white rounded-xl p-3', 'bg-opacity-100')}>
-                  <div className="flex flex-col-reverse  items-center sm:flex-row gap-x-6 pb-4 px-5">
-                    <div className="flex flex-col flex-1">
-                      <div className="text-center sm:text-start">
-                        <span className="font-normal">
-                          - تلورانس اندازه گیری تا {digitsEnToFa('5%')} طبیعی است <br /> - اعداد بر حسب{' '}
-                          <span className="text-red-600">
-                            {product.productSizeInfo?.sizeType == '0' ? 'سانتیمتر' : 'میلیمتر'}
-                          </span>{' '}
-                          میباشد
-                        </span>
-                      </div>
-                      <Button className="bg-white mt-1.5 text-gray-800 font-semibold border rounded">سایز</Button>
-                      <table className="table-auto mt-4 border-collapse w-full">
-                        <thead className="bg-[#8fdcff]">
-                          <tr>
-                            <th className=" px-4 py-2"></th>
-                            {product.productSizeInfo?.columns?.map((column) => (
-                              <th key={column.id} className="px-4 py-2 w-[135px] font-normal">
-                                {column.name}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {product.productSizeInfo?.rows?.map((row, rowIndex) => (
-                            <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-gray-100' : ''}>
-                              <td className="px-4 py-2">{row.productSizeValue}</td>
-                              {product.productSizeInfo?.columns?.map((column, colIndex) => (
-                                <td key={colIndex} className="px-4 py-2 font-normal">
-                                  <div className="border h-9 w-full flex justify-start  items-center pr-1 rounded-md bg-white">
-                                    {row.scaleValues![colIndex] || ''}
-                                  </div>
-                                </td>
+                  {product.productSizeInfo?.columns?.length! > 0 && (
+                    <div className="flex flex-col-reverse  items-center sm:flex-row gap-x-6 pb-4 px-5">
+                      <div className="flex flex-col flex-1">
+                        <div className="text-center sm:text-start">
+                          <span className="font-normal">
+                            - تلورانس اندازه گیری تا {digitsEnToFa('5%')} طبیعی است <br /> - اعداد بر حسب{' '}
+                            <span className="text-red-600">
+                              {product.productSizeInfo?.sizeType === '0' ? 'سانتیمتر' : 'میلیمتر'}
+                            </span>{' '}
+                            میباشد
+                          </span>
+                        </div>
+                        <Button className="bg-white mt-1.5 text-gray-800 font-semibold border rounded">سایز</Button>
+                        <table className="table-auto mt-4 border-collapse w-full">
+                          <thead className="bg-[#8fdcff]">
+                            <tr>
+                              <th className=" px-4 py-2"></th>
+                              {product.productSizeInfo?.columns?.map((column) => (
+                                <th key={column.id} className="px-4 py-2 w-[135px] font-normal">
+                                  {column.name}
+                                </th>
                               ))}
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {product.productSizeInfo?.rows?.map((row, rowIndex) => (
+                              <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-gray-100' : ''}>
+                                <td className="px-4 py-2">{row.productSizeValue}</td>
+                                {product.productSizeInfo?.columns?.map((column, colIndex) => (
+                                  <td key={colIndex} className="px-4 py-2 font-normal">
+                                    <div className="border h-9 w-full flex justify-start  items-center pr-1 rounded-md bg-white">
+                                      {row.scaleValues![colIndex] || ''}
+                                    </div>
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div className="rounded-lg shadow-product w-[240px] h-[240px]">
+                        <img
+                          className="w-full h-full rounded-lg"
+                          src={product.productSizeInfo?.imagesSrc?.imageUrl}
+                          alt="عکس اندازه محصول"
+                        />
+                      </div>
                     </div>
-                    <div className="rounded-lg shadow-product w-[240px] h-[240px]">
-                      <img
-                        className="w-full h-full rounded-lg"
-                        src={product.productSizeInfo?.imagesSrc?.imageUrl}
-                        alt="عکس اندازه محصول"
-                      />
-                    </div>
-                  </div>{' '}
+                  )}
                 </Tab.Panel>
               </Tab.Panels>
             </Tab.Group>
@@ -439,7 +439,9 @@ const SingleProduct: NextPage<Props> = (props) => {
                       )}
                     >
                       دیدگاه کاربران{' '}
-                      <span className="text-white mr-0.5">({digitsEnToFa(`${product.reviewCount}`)} نظر)</span>
+                      <span className={`${selected ? 'text-white' : ' text-[#6b6b6b]'} mr-0.5`}>
+                        ({digitsEnToFa(`${product.reviewCount}`)} نظر)
+                      </span>
                     </button>
                   )}
                 </Tab>

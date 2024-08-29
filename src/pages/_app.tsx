@@ -5,11 +5,11 @@ import { ComponentType, FC, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { Provider, useDispatch } from 'react-redux'
 import { AppProps } from 'next/app'
-import { store } from '@/store'
+import { setGeneralSetting, setLogoImages, store } from '@/store'
 import { setCredentials, clearCredentials } from '@/store'
 import { PageTransitionLoading, Alert } from '@/components/ui'
-import { authApiSlice, useGenerateNewTokenMutation } from '@/services'
-import { checkTokenValidity, useAppSelector } from '@/hooks'
+import { authApiSlice, useGenerateNewTokenMutation, useGetGeneralSettingQuery, useGetLogoImagesQuery } from '@/services'
+import { checkTokenValidity, useAppDispatch, useAppSelector } from '@/hooks'
 import { UserInfo } from '@/types'
 interface AppContentProps {
   Component: ComponentType<any>
@@ -18,6 +18,32 @@ interface AppContentProps {
 const AppContent: FC<AppContentProps> = ({ Component, pageProps }) => {
   const { asPath } = useRouter()
   const { userInfo } = useAppSelector((state) => state.auth)
+  const { generalSetting, logoImages } = useAppSelector((state) => state.design)
+  const { data: generalSettingData } = useGetGeneralSettingQuery()
+  const { data: logoImagesData } = useGetLogoImagesQuery()
+  const dispatch = useAppDispatch()
+  useEffect(() => {
+    if (generalSettingData?.data) {
+      dispatch(setGeneralSetting(generalSettingData.data))
+    }
+    if (logoImagesData?.data) {
+      dispatch(setLogoImages(logoImagesData.data[0]))
+    }
+  }, [generalSettingData, logoImagesData, dispatch])
+
+  useEffect(() => {
+    const faviconUrl = logoImages?.faviconImage?.imageUrl || ""
+    const existingLink = document.querySelector("link[rel='icon']") as HTMLLinkElement | null;
+    if (existingLink) {
+      existingLink.href = faviconUrl;
+    } else {
+      const link = document.createElement("link") as HTMLLinkElement;
+      link.rel = "icon";
+      link.href = faviconUrl;
+      document.head.appendChild(link);
+    }
+  }, [logoImages]);
+
   // Fix Hydration
   const [showChild, setShowChild] = useState<boolean>(false)
   useEffect(() => {
@@ -28,14 +54,6 @@ const AppContent: FC<AppContentProps> = ({ Component, pageProps }) => {
     return null
   }
 
-  // ? Get user in initial
-  if (typeof window !== 'undefined') {
-    const info = JSON.parse(localStorage.getItem('userInfo') as string)
-    if (info) {
-      const loggedIn = localStorage.getItem('loggedIn')
-      if (loggedIn) store.dispatch(authApiSlice.endpoints.getUserInfo.initiate(info.mobileNumber))
-    }
-  }
   return (
     <>
       <Component {...pageProps} />

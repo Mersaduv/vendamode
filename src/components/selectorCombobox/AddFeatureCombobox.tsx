@@ -5,6 +5,7 @@ import { ArrowDown, CheckCircleOutline } from 'heroicons-react'
 import { IoChevronDownCircleOutline } from 'react-icons/io5'
 import { FaCheck } from 'react-icons/fa'
 import { ArrowRight, ArrowRight2 } from '@/icons'
+import { ProductFeature } from '@/services/feature/types'
 
 interface Props {
   features: ProductFeature[]

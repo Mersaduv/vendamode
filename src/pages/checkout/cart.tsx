@@ -4,12 +4,12 @@ import { useRouter } from 'next/router'
 
 import { clearCart } from '@/store'
 
-import { Delete, EmptyCart, More, Toman } from '@/icons'
-import { Menu, Tab, Transition } from '@headlessui/react'
-import { CartItemDisplay, CartSummary, FreeShippingIndicator } from '@/components/cart'
+import { Delete, EmptyCart, More } from '@/icons'
+import { Menu, Transition } from '@headlessui/react'
+import { CartItemDisplay, CartSummary } from '@/components/cart'
 import { RedirectToLogin } from '@/components/modals'
 import { Button } from '@/components/ui'
-import { Header } from '@/components/shared'
+import { Header, MetaTags } from '@/components/shared'
 import { formatNumber } from '@/utils'
 import { Cart as CartIcon } from '@/icons'
 import { TbTruck } from 'react-icons/tb'
@@ -18,9 +18,8 @@ import { useDisclosure, useAppSelector, useAppDispatch } from '@/hooks'
 
 import type { NextPage } from 'next'
 import { Fragment } from 'react'
-import { TfiRulerAlt2 } from 'react-icons/tfi'
-import { BiCart } from 'react-icons/bi'
 import { IoLogoUsd } from 'react-icons/io5'
+import { digitsEnToFa } from '@persian-tools/persian-tools'
 
 const classNames = (...classes: string[]) => {
   return classes.filter(Boolean).join(' ')
@@ -30,7 +29,7 @@ const Cart: NextPage = () => {
   // ? Assets
   const dispatch = useAppDispatch()
   const { push } = useRouter()
-
+  const { generalSetting } = useAppSelector((state) => state.design)
   const [isShowRedirectModal, redirectModalHandlers] = useDisclosure()
 
   // ? Get UserInfo
@@ -80,9 +79,11 @@ const Cart: NextPage = () => {
       <>
         <Header />
         <section className="mx-auto mb-20 space-y-3 py-2 lg:mb-0 lg:mt-6 lg:max-w-7xl lg:space-y-0 lg:rounded-md lg:border lg:border-gray-200 lg:px-5 lg:py-4 xl:mt-36">
-          <Head>
-            <title>وندامد | سبد خرید</title>
-          </Head>
+        <MetaTags
+          title={generalSetting?.title + ' | ' + 'سبد خرید' || 'فروشگاه اینترنتی'}
+          description={generalSetting?.shortIntroduction || 'توضیحاتی فروشگاه اینترنتی'}
+          keywords={generalSetting?.googleTags || ' اینترنتی, فروشگاه'}
+        />
           <div className="section-divide-y" />
 
           <div className="py-20">
@@ -109,50 +110,56 @@ const Cart: NextPage = () => {
         </Head>
 
         <div className=" flex flex-col items-center px-4 md:px-8">
-        <div className="flex flex-col items-center px-4 md:px-8">
-          <div className="flex justify-between w-[300px]">
-            <button className=" bg-white  w-[93px]  ring-0 border-none outline-none">
-              <div className="flex flex-col items-center ring-0 border-none outline-none">
-                <div
-                  className={classNames(
-                    'rounded-[10px] flex border-2 relative text-white border-red-500 bg-red-500 shadow items-center justify-center p-1.5  sm:text-base  font-light'
-                  )}
-                >
-                  <CartIcon className={`icon h-8 w-8 text-white`} />
-                  <div className="w-[56px] h-[2px] bg-[#f1f1f1] absolute -left-[58px] top-[22px]" />
+          <div className="flex flex-col items-center px-4 md:px-8">
+            <div className="flex justify-between w-[300px]">
+              <button className=" bg-white  w-[93px]  ring-0 border-none outline-none">
+                <div className="flex flex-col items-center ring-0 border-none outline-none">
+                  <div
+                    className={classNames(
+                      'rounded-[10px] flex border-2 relative text-white border-red-500 bg-red-500 shadow items-center justify-center p-1.5  sm:text-base  font-light'
+                    )}
+                  >
+                    <CartIcon className={`icon h-8 w-8 text-white`} />
+                    <div className="w-[56px] h-[2px] bg-[#f1f1f1] absolute -left-[58px] top-[22px]" />
+                  </div>
+                  <div className={classNames('rounded-[10px] text-sm font-semibold text-red-500')}>سبد خرید</div>
                 </div>
-                <div className={classNames('rounded-[10px] text-sm font-semibold text-red-500')}>سبد خرید</div>
-              </div>
-            </button>
+              </button>
 
-            <button className=" bg-white w-[93px] ring-0 border-none outline-none">
-              <div className="flex flex-col items-center  ring-0 border-none outline-none">
-                <div
-                  className={classNames(
-                    'rounded-[10px] relative flex border-2  items-center justify-center p-1.5  sm:text-base  font-light  text-[#6b6b6b] border-[#f1f1f1]'
-                  )}
-                >
-                  <TbTruck className={`icon h-8 w-8 text-[#3F3A42]`} />
-                  <div className="w-[56px] h-[2px] bg-[#f1f1f1] absolute -left-[58px] top-[22px]" />
+              <button className=" bg-white w-[93px] ring-0 border-none outline-none">
+                <div className="flex flex-col items-center  ring-0 border-none outline-none">
+                  <div
+                    className={classNames(
+                      'rounded-[10px] relative flex border-2  items-center justify-center p-1.5  sm:text-base  font-light  text-[#6b6b6b] border-[#f1f1f1]'
+                    )}
+                  >
+                    <TbTruck className={`icon h-8 w-8 text-[#3F3A42]`} />
+                    <div className="w-[56px] h-[2px] bg-[#f1f1f1] absolute -left-[58px] top-[22px]" />
+                  </div>
+                  <div className={classNames('rounded-[10px] text-sm font-semibold text-[#6b6b6b]')}>
+                    {' '}
+                    اطلاعات ارسال
+                  </div>
                 </div>
-                <div className={classNames('rounded-[10px] text-sm font-semibold text-[#6b6b6b]')}> اطلاعات ارسال</div>
-              </div>
-            </button>
-            
-            <button className=" bg-white w-[93px] ring-0 border-none outline-none">
-              <div className="flex flex-col items-center  ring-0 border-none outline-none">
-                <div
-                  className={classNames(
-                    'rounded-[10px] relative flex border-2  items-center justify-center p-1.5  sm:text-base  font-light  text-[#6b6b6b] border-[#f1f1f1]'
-                  )}
-                >
-                  <IoLogoUsd className={`icon h-8 w-8 text-[#3F3A42]`} />
+              </button>
+
+              <button className=" bg-white w-[93px] ring-0 border-none outline-none">
+                <div className="flex flex-col items-center  ring-0 border-none outline-none">
+                  <div
+                    className={classNames(
+                      'rounded-[10px] relative flex border-2  items-center justify-center p-1.5  sm:text-base  font-light  text-[#6b6b6b] border-[#f1f1f1]'
+                    )}
+                  >
+                    <IoLogoUsd className={`icon h-8 w-8 text-[#3F3A42]`} />
+                  </div>
+                  <div className={classNames('rounded-[10px] text-sm font-semibold text-[#6b6b6b]')}>
+                    {' '}
+                    اطلاعات پرداخت
+                  </div>
                 </div>
-                <div className={classNames('rounded-[10px] text-sm font-semibold text-[#6b6b6b]')}> اطلاعات پرداخت</div>
-              </div>
-            </button>
+              </button>
+            </div>
           </div>
-        </div>
           <div className="mt-[75px] w-full flex justify-center">
             <div className="flex flex-col sm:flex-row  gap-6 max-w-6xl justify-center w-full">
               {/* cart content */}
@@ -160,7 +167,7 @@ const Cart: NextPage = () => {
                 {/* title */}
                 <section className="flex justify-between px-4">
                   <div>
-                    <span className="farsi-digits">{formatNumber(totalItems)} کالا</span>
+                    <span className="farsi-digits">{digitsEnToFa(formatNumber(totalItems))} کالا</span>
                   </div>
                   <DeleteAllDropDown />
                 </section>

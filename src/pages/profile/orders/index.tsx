@@ -1,6 +1,6 @@
 import { ProfileLayout } from '@/components/Layouts'
 import { EmptyOrdersList } from '@/components/emptyList'
-import { DataStateDisplay, Header } from '@/components/shared'
+import { DataStateDisplay, Header, MetaTags } from '@/components/shared'
 import { PageContainer } from '@/components/ui'
 import { NextPage } from 'next'
 import Head from 'next/head'
@@ -12,6 +12,7 @@ import { OrderSkeleton } from '@/components/skeleton'
 import { OrderCard } from '@/components/order'
 import { Pagination } from '@/components/navigation'
 import { IPagination } from '@/types'
+import { useAppSelector } from '@/hooks'
 
 const classNames = (...classes: string[]) => {
   return classes.filter(Boolean).join(' ')
@@ -20,17 +21,19 @@ const classNames = (...classes: string[]) => {
 const OrderPage: NextPage = () => {
   // ? Assets
   const { query } = useRouter()
+  const { generalSetting } = useAppSelector((state) => state.design)
   // ? Get Orders Data
   const { data, ...ordersQueryProps } = useGetOrdersQuery({
-    pageSize: 5,
+    pageSize: 20,
     page: query.page ? +query.page : 1,
   })
-  console.log(data)
   return (
     <main id="profileOrders">
-      <Head>
-        <title>پروفایل | تاریخچه سفارشات</title>
-      </Head>
+      <MetaTags
+        title={'پروفایل' + ' | ' + 'تاریخچه سفارشات'}
+        description={generalSetting?.shortIntroduction || 'توضیحاتی فروشگاه اینترنتی'}
+        keywords={generalSetting?.googleTags || ' اینترنتی, فروشگاه'}
+      />
       <Header />
       <ProfileLayout>
         <PageContainer title="">
@@ -120,7 +123,7 @@ const OrderPage: NextPage = () => {
                       <div className="space-y-3">
                         {data?.data?.pagination?.data &&
                           data?.data?.pagination?.data
-                            .filter((item) => item.paid == false && item.status == 1)
+                            .filter((item) => item.paid === false && item.status === 1)
                             .map((item) => <OrderCard isProcessPay key={item.id} order={item} />)}
                       </div>
                     </DataStateDisplay>
@@ -138,7 +141,7 @@ const OrderPage: NextPage = () => {
                       <div className="space-y-3">
                         {data?.data?.pagination?.data &&
                           data?.data?.pagination?.data
-                            .filter((item) => item.paid == true && item.status == 2)
+                            .filter((item) => item.paid === true && item.status === 2)
                             .map((item) => <OrderCard isCurrently key={item.id} order={item} />)}
                       </div>
                     </DataStateDisplay>
@@ -157,7 +160,7 @@ const OrderPage: NextPage = () => {
                       <div className="space-y-3">
                         {data?.data?.pagination?.data &&
                           data?.data?.pagination?.data
-                            .filter((item) => item.delivered == true && item.status == 3)
+                            .filter((item) => item.delivered === true && item.status === 3)
                             .map((item) => <OrderCard isDelivered key={item.id} order={item} />)}
                       </div>
                     </DataStateDisplay>
@@ -175,7 +178,7 @@ const OrderPage: NextPage = () => {
                       <div className="space-y-3">
                         {data?.data?.pagination?.data &&
                           data?.data?.pagination?.data
-                            .filter((item) => item.status == 4)
+                            .filter((item) => item.status === 4)
                             .map((item) => <OrderCard isReturned key={item.id} order={item} />)}
                       </div>
                     </DataStateDisplay>
@@ -193,7 +196,7 @@ const OrderPage: NextPage = () => {
                       <div className="space-y-3">
                         {data?.data?.pagination?.data &&
                           data?.data?.pagination?.data
-                            .filter((item) => item.status == 5)
+                            .filter((item) => item.status === 5)
                             .map((item) => <OrderCard isCanceled key={item.id} order={item} />)}
                       </div>
                     </DataStateDisplay>

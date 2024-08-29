@@ -3,91 +3,48 @@ import ClientLayout from '@/components/Layouts/ClientLayout'
 import { siteDescription } from '@/utils'
 import type { GetStaticProps, InferGetStaticPropsType, NextPage } from 'next'
 import { IBanner, ICategory, ISlider } from '@/types'
-import { getCategories, getSliders } from '@/services'
+import { getAllBanners, getCategories, getFooterBanner, getHeaderText, getSliders } from '@/services'
 import config from '@/configs'
 import { DiscountSlider, MainSlider, NewSlider } from '@/components/sliders'
 import { Button } from '@/components/ui'
 import { CategoryList } from '@/components/categories'
-import { LargeBanner } from '@/components/banners'
+import { ArticleBanners, FooterBanner, LargeBanner } from '@/components/banners'
 import { PriceRange } from '@/components/product'
+import { IHeaderText } from '@/types/IHeaderText.type'
+import { useAppSelector } from '@/hooks'
+import { MetaTags } from '@/components/shared'
 
 interface Props {
   sliders: ISlider[]
+  banners: IBanner[]
+  footerBanners: IBanner[]
+  headerText: IHeaderText | null
   childCategories: {
     title: string
     categories: ICategory[]
   }
 }
 
-const bannerAds: IBanner[] = [
-  {
-    id: '87789902000',
-    categoryId: '98762544333333',
-    image: {
-      url: '/images/Tab/tabimg1.jpg',
-      placeholder: '/images/Tab/tabimg1.jpg',
-    },
-    uri: 'wwww.wwwwwwwwww.com',
-    title: 'بنر تبلیغاتی',
-    isPublic: true,
-    type: 'بزرگ',
-    created: '',
-    updated: '',
-  },
-  {
-    id: '877289902000',
-    categoryId: '987654423333233',
-    image: {
-      url: '/images/Tab/tabimg2.jpg',
-      placeholder: '/images/Tab/tabimg1.jpg',
-    },
-    uri: 'wwww.wwwwwwwwww.com',
-    title: 'بنر تبلیغاتی',
-    isPublic: true,
-    type: 'بزرگ',
-    created: '',
-    updated: '',
-  },
-  {
-    id: '877899020020',
-    categoryId: '982765443323333',
-    image: {
-      url: '/images/Tab/tabimg3.jpg',
-      placeholder: '/images/Tab/tabimg1.jpg',
-    },
-    uri: 'wwww.wwwwwwwwww.com',
-    title: 'بنر تبلیغاتی',
-    isPublic: true,
-    type: 'بزرگ',
-    created: '',
-    updated: '',
-  },
-  {
-    id: '8727899000220',
-    categoryId: '987265443333233',
-    image: {
-      url: '/images/Tab/tabimg4.jpg',
-      placeholder: '/images/Tab/tabimg1.jpg',
-    },
-    uri: 'wwww.wwwwwwwwww.com',
-    title: 'بنر تبلیغاتی',
-    isPublic: true,
-    type: 'بزرگ',
-    created: '',
-    updated: '',
-  },
-]
-
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const { data: sliders } = await getSliders()
-  const { data: categories } = await getCategories()
-  
-  const slidersData = sliders ?? []
-  const categoriesData = categories?.categoryList ?? []
+  const dataSlider = await getSliders()
+  const dataBanner = await getAllBanners()
+  const dataFooterBanner = await getFooterBanner()
+  const dataHeaderText = await getHeaderText()
+  const dataCategory = await getCategories()
+
+  const slidersData = dataSlider?.data ?? []
+  const bannersData = dataBanner?.data ?? []
+  const footerBannersData = dataFooterBanner?.data ?? []
+  const headerTextData = dataHeaderText?.data ?? null
+  const categoriesData = dataCategory?.data?.categoryList ?? []
+
   return {
     revalidate: config.revalidate,
     props: {
       sliders: slidersData,
+      banners: bannersData,
+      footerBanners: footerBannersData,
+      headerText: headerTextData,
       childCategories: {
         title: 'دسته‌بندهای',
         categories: categoriesData,
@@ -98,16 +55,18 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 
 const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) => {
   // ? Props
-  const { sliders, childCategories } = props
-
+  const { sliders, banners, headerText, childCategories, footerBanners } = props
+  console.log(sliders, 'sliders')
+  const { generalSetting } = useAppSelector((state) => state.design)
   // ? Render(s)
   return (
     <ClientLayout>
       <main className="min-h-screen">
-        <Head>
-          <title>وندامد</title>
-          <meta name="description" content={siteDescription} />
-        </Head>
+        <MetaTags
+          title={generalSetting?.title || 'فروشگاه اینترنتی'}
+          description={generalSetting?.shortIntroduction || 'توضیحاتی فروشگاه اینترنتی'}
+          keywords={generalSetting?.googleTags || ' اینترنتی, فروشگاه'}
+        />
         <div className="mx-auto space-y-24 py-4 ">
           <MainSlider data={sliders} />
           <hr className="pb-8 mx-8 border-t-2" />
@@ -119,7 +78,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
           </div>
           <CategoryList childCategories={childCategories} name={'وندامد'} homePage />
           <hr className="pb-8 mx-8 border-t-2" />
-          <LargeBanner data={bannerAds} />
+          <LargeBanner data={banners} />
           <hr className="pb-8 mx-8 border-t-2" />
           {/* // slider */}
           <div className="relative w-full flex bg-slate-300">
@@ -133,6 +92,32 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
               <BrandSlider />
             </div>
           </div> */}
+
+          {/* best seller slider */}
+          {/* <div className="relative w-full flex bg-slate-300">
+            <div className="bg-[#dee2e6] w-full h-[410px] xs:h-[330px] sm:h-[360px] relative">
+              <SellerSlider />
+            </div>
+          </div> */}
+
+          {/* Readable Article slider */}
+          {/* <div className="relative w-full flex bg-slate-300">
+            <div className="bg-[#dee2e6] w-full h-[410px] xs:h-[330px] sm:h-[360px] relative">
+              <ReadableSlider />
+            </div>
+          </div> */}
+
+          {/* Recently viewed products by you slider */}
+          {/* <div className="relative w-full flex bg-slate-300">
+            <div className="bg-[#dee2e6] w-full h-[410px] xs:h-[330px] sm:h-[360px] relative">
+              <ReadableSlider />
+            </div>
+          </div> */}
+
+          {/* article Banners  */}
+          <ArticleBanners />
+          <hr className="pb-8 mx-8 border-t-2" />
+          <FooterBanner data={footerBanners} />
         </div>
       </main>
     </ClientLayout>

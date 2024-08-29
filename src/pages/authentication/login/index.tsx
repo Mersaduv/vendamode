@@ -9,15 +9,16 @@ import { useLoginMutation } from '@/services'
 
 import Logo from '../../../../public/logo/Logo.png'
 import { LoginForm } from '@/components/form'
-import { HandleResponse } from '@/components/shared'
+import { HandleResponse, MetaTags } from '@/components/shared'
 
 import type { ILoginForm } from '@/types'
 import Image from 'next/image'
+import { useAppSelector } from '@/hooks'
 
 function LoginPage() {
   // ? Assets
   const { replace, query } = useRouter()
-
+  const { generalSetting } = useAppSelector((state) => state.design)
   // ? Login User
   const [login, { data, isSuccess, isError, isLoading, error }] = useLoginMutation()
 
@@ -43,9 +44,11 @@ function LoginPage() {
         />
       )}
       <main className="grid min-h-screen items-center">
-        <Head>
-          <title>وندامد | ورود</title>
-        </Head>
+        <MetaTags
+          title={generalSetting?.title + ' | ' + 'ورود' || 'فروشگاه اینترنتی'}
+          description={generalSetting?.shortIntroduction || 'توضیحاتی فروشگاه اینترنتی'}
+          keywords={generalSetting?.googleTags || ' اینترنتی, فروشگاه'}
+        />
         <section className="container max-w-xl space-y-6 px-12 py-6 lg:rounded-lg lg:border-gray-100">
           <Link className="flex justify-center" passHref href="/">
             <img width={280} src={'/logo/Logo.png'} alt="Venda Mode" />

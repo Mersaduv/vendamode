@@ -39,6 +39,7 @@ const checkTokenValidity = async (
               expireTime: newExpireTime,
               refreshTokenExpireTime: newRefreshTokenExpireTime,
             },
+            loggedIn: true
           })
         )
         return true

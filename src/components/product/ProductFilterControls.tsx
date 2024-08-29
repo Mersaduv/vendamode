@@ -9,7 +9,7 @@ import { CustomCheckbox } from '@/components/ui'
 import { IBrand, QueryParams } from '@/types'
 import PriceRange from './PriceRange'
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react'
-import { digitsEnToFa } from '@persian-tools/persian-tools'
+import { digitsEnToFa, digitsFaToEn } from '@persian-tools/persian-tools'
 import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io'
 import { useGetBrandsQuery } from '@/services'
 
@@ -23,7 +23,7 @@ const ProductFilterControls: React.FC<Props> = (props) => {
   const { mainMaxPrice, mainMinPrice, onClose } = props
 
   // ? Assets
-  const { query } = useRouter()
+  const { query, push } = useRouter()
   const inStockQuery = !!query?.inStock || false
   const discountQuery = !!query?.discount || false
   const minPriceQuery = query.price && +query.price.toString().split('-')[0]
@@ -53,10 +53,15 @@ const ProductFilterControls: React.FC<Props> = (props) => {
     })
   }
 
+  useEffect(() => {
+    handleChangeRoute({ minPrice: debouncedMinPrice, maxPrice: debouncedMaxPrice })
+  }, [debouncedMinPrice, debouncedMaxPrice])
+
   const handlefilter = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, type, checked, value } = e.target
+    var numValue  =Number(digitsFaToEn(value))
     if (type === 'checkbox') handleChangeRoute({ [name]: checked })
-    if (type === 'number') setPrice((prev) => ({ ...prev, [name]: +value }))
+    if (type === 'text') setPrice((prev) => ({ ...prev, [name]: +numValue }))
   }
 
   const handleResetFilters = () => {
@@ -69,19 +74,19 @@ const ProductFilterControls: React.FC<Props> = (props) => {
 
   // ? Re-Renders
   //*   Change Route After Debounce
-  useEffect(() => {
-    if (debouncedMinPrice && mainMinPrice !== debouncedMinPrice)
-      handleChangeRoute({
-        price: `${debouncedMinPrice}-${debouncedMaxPrice}`,
-      })
-  }, [debouncedMinPrice])
+  // useEffect(() => {
+  //   if (debouncedMinPrice && mainMinPrice !== debouncedMinPrice)
+  //     handleChangeRoute({
+  //       price: `${debouncedMinPrice}-${debouncedMaxPrice}`,
+  //     })
+  // }, [debouncedMinPrice])
 
-  useEffect(() => {
-    if (debouncedMaxPrice && mainMaxPrice !== debouncedMaxPrice)
-      handleChangeRoute({
-        price: `${debouncedMinPrice}-${debouncedMaxPrice}`,
-      })
-  }, [debouncedMaxPrice])
+  // useEffect(() => {
+  //   if (debouncedMaxPrice && mainMaxPrice !== debouncedMaxPrice)
+  //     handleChangeRoute({
+  //       price: `${debouncedMinPrice}-${debouncedMaxPrice}`,
+  //     })
+  // }, [debouncedMaxPrice])
 
   //*   Close Modal on Change Filter
   useEffect(() => {
@@ -101,7 +106,7 @@ const ProductFilterControls: React.FC<Props> = (props) => {
         maxPrice: mainMaxPrice,
       })
     }
-  }, [mainMinPrice, mainMaxPrice, minPriceQuery, maxPriceQuery])
+  }, [minPriceQuery, maxPriceQuery])
 
   //search filter
   //..................
@@ -130,6 +135,7 @@ const ProductFilterControls: React.FC<Props> = (props) => {
 
   const handleBrandChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target
+
     if (checked) {
       setSelectedBrands([...selectedBrands, value])
     } else {
@@ -146,6 +152,8 @@ const ProductFilterControls: React.FC<Props> = (props) => {
       handleChangeRoute({
         brands: selectedBrands.length ? selectedBrands.join(',') : '',
       })
+    } else {
+      push('/products')
     }
   }, [selectedBrands])
 
@@ -210,12 +218,38 @@ const ProductFilterControls: React.FC<Props> = (props) => {
                                 />
                               </div>
                             </div>
-                            <PriceRange
+                            {/* <PriceRange
                               minPrice={price.minPrice}
                               maxPrice={price.maxPrice}
                               onPriceChange={(newPrice) => setPrice(newPrice)}
-                            />
+                            /> */}
                           </div>
+                          {/* <div className="py-4">
+                            <span className="font-medium text-gray-700">محدوده قیمت</span>
+                            <div className="flex items-center justify-between gap-x-1">
+                              <span className="text-base">از</span>
+                              <input
+                                type="number"
+                                className="w-3/4 border-b pt-3 border-gray-200 px-1 rounded-md text-center text-xl outline-none"                                style={{ direction: 'ltr' }}
+                                name="minPrice"
+                                value={digitsEnToFa(price.minPrice ?? 0)}
+                                onChange={handlefilter}
+                              />
+                             تومان
+                            </div>
+                            <div className="mb-4 mt-2 flex items-center justify-between gap-x-1">
+                              <span className="text-base">تا</span>
+                              <input
+                                type="number"
+                                className="w-3/4 border-b border-gray-200 px-1 text-left text-xl outline-none"
+                                style={{ direction: 'ltr' }}
+                                name="maxPrice"
+                                value={digitsEnToFa(price.maxPrice ?? 0)}
+                                onChange={handlefilter}
+                              />
+                              تومان{' '}
+                            </div>
+                          </div> */}
                         </div>
                       )}
                     </Menu.Item>

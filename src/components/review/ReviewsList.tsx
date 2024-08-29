@@ -17,7 +17,7 @@ interface Porps {
 
 const ReviewsList: React.FC<Porps> = (props) => {
   // ? Props
-  const { numReviews,product } = props
+  const { numReviews, product } = props
 
   // ? Assets
   const { query } = useRouter()
@@ -38,7 +38,11 @@ const ReviewsList: React.FC<Porps> = (props) => {
       <section className="space-y-4 p-3 l xl:max-w-7xl" id="_productReviews">
         <div className=" ">
           <div className="mb-4">
-            <ReviewModal productTitle={product.title} prdouctID={product.id}  productImg={product.imagesSrc} />
+            <ReviewModal
+              productTitle={product.title}
+              prdouctID={product.id}
+              productImg={product.imagesSrc && product.imagesSrc?.length > 0 ? product.imagesSrc : [product.mainImageSrc]}
+            />
           </div>
 
           <DataStateDisplay

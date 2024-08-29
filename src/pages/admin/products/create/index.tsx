@@ -26,7 +26,7 @@ const Create: NextPage<Props> = () => {
 
   const onSuccess = () => {
     dispatch(setUpdated(true))
-    push('/admin/products')
+    push(`/admin/products/edit/${data?.data}`)
   }
 
   return (
@@ -46,7 +46,7 @@ const Create: NextPage<Props> = () => {
           <title>مدیریت | محصول</title>
         </Head>
         <DashboardLayout>
-          <section className="bg-[#f5f8fa] w-full px-8 lg:px-14">
+          <section className="bg-[#f5f8fa] w-full">
             <ProductForm mode="create" createHandler={createHandler} isLoadingCreate={isLoading} />
           </section>
         </DashboardLayout>

@@ -11,21 +11,27 @@ import { ProfileLayout } from '@/components/Layouts'
 import { PageContainer, ResponsiveImage } from '@/components/ui'
 
 import type { NextPage } from 'next'
-import { Header } from '@/components/shared'
+import { Header, MetaTags } from '@/components/shared'
 
 const UserHistory: NextPage = () => {
   // ? Store
   const { lastSeen } = useAppSelector((state) => state.lastSeen)
-
+  const { generalSetting } = useAppSelector((state) => state.design)
   // ? selector
   return (
     <main>
-      <Head>
-        <title>پروفایل | بازدید‌های اخیر</title>
-      </Head>
+      <MetaTags
+        title={'پروفایل' + ' | ' + 'بازدید‌های اخیر'}
+        description={generalSetting?.shortIntroduction || 'توضیحاتی فروشگاه اینترنتی'}
+        keywords={generalSetting?.googleTags || ' اینترنتی, فروشگاه'}
+      />
       <Header />
       <ProfileLayout>
         <PageContainer title="بازدید‌های اخیر">
+          <div className="flex mt-3 px-4 text-sm md:text-base mx-3 border border-[#e90089] rounded-md py-2 justify-between items-center bg-[#fde5f3] text-[#e90089]">
+            {' '}
+            <h3 className="px-3 py-2.5">{'بازدید‌های اخیر'}</h3>
+          </div>
           {lastSeen.length > 0 ? (
             <div className="space-y-4 px-3 md:grid md:grid-cols-2 md:gap-x-2 md:gap-y-3 md:space-y-0 md:py-4 lg:grid-cols-3">
               {lastSeen.map((item) => (
@@ -37,7 +43,7 @@ const UserHistory: NextPage = () => {
                     <ResponsiveImage
                       dimensions="w-36 h-36"
                       className="md:mx-auto"
-                      src={item.image.url}
+                      src={item.image.imageUrl}
                       blurDataURL={item.image.placeholder}
                       alt={item.title}
                     />

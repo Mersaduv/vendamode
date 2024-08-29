@@ -6,4 +6,5 @@ export default interface IPagination<T> {
   hasPreviousPage: boolean
   lastPage: number
   data: T | null
+  totalCount :  number
 }

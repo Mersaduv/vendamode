@@ -1,9 +1,7 @@
 import baseApi from '@/services/baseApi'
-
 import { generateQueryParams, getToken } from '@/utils'
-
-import type { GetProductResult, GetProductsQuery, GetProductsResult, IdQuery, MsgResult } from './types'
-import { ICategory } from '@/types'
+import type { BulkRequest, GetProductResult, GetProductsQuery, GetProductsResult, IdQuery, MsgResult } from './types'
+import { ICategory, ServiceResponse } from '@/types'
 
 export const productApiSlice = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -15,6 +13,16 @@ export const productApiSlice = baseApi.injectEndpoints({
           method: 'GET',
         }
       },
+      providesTags: (result) =>
+        result?.data?.pagination.data
+          ? [
+              ...result.data?.pagination.data.map(({ id }) => ({
+                type: 'Product' as const,
+                id: id,
+              })),
+              'Product',
+            ]
+          : ['Product'],
     }),
 
     getSingleProduct: builder.query<GetProductResult, IdQuery>({
@@ -22,6 +30,7 @@ export const productApiSlice = baseApi.injectEndpoints({
         url: `/api/product/${id}`,
         method: 'GET',
       }),
+      providesTags: (result, error, arg) => [{ type: 'Product', id: arg.id }],
     }),
 
     getProductByCategory: builder.query<GetProductResult, IdQuery>({
@@ -36,9 +45,30 @@ export const productApiSlice = baseApi.injectEndpoints({
         url: `/api/product/${id}`,
         method: 'DELETE',
       }),
+      invalidatesTags: ['Product'],
     }),
 
-    createProduct: builder.mutation<MsgResult, FormData>({
+    deleteTrashProduct: builder.mutation<MsgResult, IdQuery>({
+      query: ({ id }) => {
+        return {
+          url: `/api/product/trash/${id}`,
+          method: 'POST',
+        }
+      },
+      invalidatesTags: ['Product'],
+    }),
+
+    restoreProduct: builder.mutation<MsgResult, IdQuery>({
+      query: ({ id }) => {
+        return {
+          url: `/api/product/restore/${id}`,
+          method: 'POST',
+        }
+      },
+      invalidatesTags: ['Product'],
+    }),
+
+    createProduct: builder.mutation<ServiceResponse<string>, FormData>({
       query: (body) => ({
         url: `/api/product`,
         method: 'POST',
@@ -47,22 +77,28 @@ export const productApiSlice = baseApi.injectEndpoints({
         },
         body,
       }),
+      invalidatesTags: ['Product', 'Category'],
     }),
 
-    updateProduct: builder.mutation<MsgResult, FormData>({
+    updateProduct: builder.mutation<ServiceResponse<string>, FormData>({
       query: (body) => ({
         url: `/api/product/update`,
         method: 'POST',
         body,
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
       }),
+      invalidatesTags: ['Product'],
     }),
 
-    bulkUpdateProduct: builder.mutation<MsgResult, { productIds: string[]; isActive: boolean }>({
+    bulkUpdateProduct: builder.mutation<MsgResult, BulkRequest>({
       query: (body) => ({
         url: `/api/product/bulk-update`,
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['Product'],
     }),
   }),
 })
@@ -75,4 +111,6 @@ export const {
   useDeleteProductMutation,
   useBulkUpdateProductMutation,
   useGetProductByCategoryQuery,
+  useDeleteTrashProductMutation,
+  useRestoreProductMutation,
 } = productApiSlice
