@@ -1,12 +1,12 @@
 import Link from 'next/link'
 
 import { Bag, Clock, Comment, Edit, Heart, Home, Location, Person, User } from '@/icons'
-import { HiChatAlt2 } from "react-icons/hi";
+import { HiChatAlt2 } from 'react-icons/hi'
 
 import { BoxLink } from '@/components/ui'
 import { LogoutButton } from '@/components/user'
 import { useGetUserInfoMeQuery, useGetUserInfoQuery } from '@/services'
-
+import { user2, user3 } from '@/icons'
 export const profilePaths = [
   {
     name: 'حساب کاربری',
@@ -51,9 +51,14 @@ function UserProfileAside() {
   const { data, isLoading } = useGetUserInfoMeQuery()
   // ? Render(s)
   return (
-    <aside className="sticky mt-6 md:rounded-md md:pt-4 md:top-[136px]">
+    <aside className="sticky mt-6 md:rounded-md md:pt-4 md:top-[136px] w-[300px]">
       <div className="flex items-center rounded-lg shadow-item justify-between px-5 py-2 ">
-        <Person className="h-12 w-12" />
+        {data?.data?.userSpecification.gender === 'آقا' ? (
+          <img className="w-10" src={user3.src} alt="user3" />
+        ) : (
+          <img className="w-10" src={user2.src} alt="user2" />
+        )}
+        {/* <Person className="h-12 w-12" /> */}
         <div className="ml-auto mr-3 flex flex-col gap-y-1">
           {isLoading ? (
             <>

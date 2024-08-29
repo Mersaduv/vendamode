@@ -16,6 +16,7 @@ interface Props {
 const CategoryList: React.FC<Props> = (props) => {
   // ? Props
   const { homePage, childCategories,name } = props
+console.log(childCategories , "childCategories");
 
   // ? Re-Renders
   if (childCategories.categories.length > 0) {

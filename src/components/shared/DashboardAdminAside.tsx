@@ -101,7 +101,7 @@ const profileData: ProfilePath[] = [
         id: 2,
         name: 'صفحه اصلی',
         Icon: TbPointFilled,
-        path: '/admin/sub',
+        path: '/admin/ads/main',
       },
       {
         id: 2,
@@ -132,13 +132,13 @@ const profileData: ProfilePath[] = [
         id: 3,
         name: 'مقاله جدید',
         Icon: TbPointFilled,
-        path: '/admin/article',
+        path: '/admin/articles/create',
       },
       {
         id: 3,
         name: 'همه مقالات',
         Icon: TbPointFilled,
-        path: '/admin/article',
+        path: '/admin/articles',
       },
     ],
   },
@@ -221,7 +221,7 @@ const profileData: ProfilePath[] = [
         id: 8,
         name: 'دیزاین',
         Icon: TbPointFilled,
-        path: '/admin/setting',
+        path: '/admin/design',
       },
       {
         id: 8,
@@ -279,8 +279,8 @@ export default function DashboardAdminAside(props: Props) {
   }
 
   return (
-    <>
-      <aside className="sticky top-[60px] w-[265px] bg-[#1e1e2d] hidden lg2:block">
+    <div className='lg2:w-[265px]'>
+      <aside className="fixed top-[74px] w-[265px] bg-[#1e1e2d] hidden lg2:block">
         <div className="py-5 flex flex-col justify-between h-screen">
           <div className="overflow-auto">
             {profilePaths.map((item, index) =>
@@ -376,7 +376,7 @@ export default function DashboardAdminAside(props: Props) {
 
       <Drawer open={openRight} side="right" setOpen={setOpenRight}>
         {openRight && (
-          <aside className="sticky  pt-[70px] top-[60px] w-[265px] bg-[#1e1e2d] block lg2:hidden">
+         <aside className="fixed top-[74px] w-[265px] bg-[#1e1e2d] hidden lg2:block">
             <div className="py-5 flex flex-col justify-between h-screen">
               <div className="overflow-auto">
                 {profilePaths.map((item, index) =>
@@ -473,6 +473,6 @@ export default function DashboardAdminAside(props: Props) {
           </aside>
         )}
       </Drawer>
-    </>
+    </div>
   )
 }

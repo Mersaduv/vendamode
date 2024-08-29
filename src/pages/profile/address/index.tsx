@@ -64,6 +64,7 @@ const BasicAddresses: NextPage = () => {
   return (
     <>
       <ConfirmDeleteModal
+        deleted
         title="آدرس"
         isLoading={isLoadingDelete}
         isShow={isShowConfirmDeleteModal}
@@ -96,7 +97,7 @@ const BasicAddresses: NextPage = () => {
                 refetch={refetch}
               />
             ) : (
-              <AddressModal isShow={isOpen} onClose={close} address={selectedAddress} refetch={refetch} />
+              <AddressModal isShow={isOpen} onClose={close} address={selectedAddress} mode={'edit'} refetch={refetch} />
             )}
             <div className="flex mt-3 px-4 text-sm md:text-base mx-3 border border-[#e90089] rounded-md py-2 justify-between items-center bg-[#fde5f3] text-[#e90089]">
               {' '}
@@ -120,32 +121,32 @@ const BasicAddresses: NextPage = () => {
                       <div className="flex flex-col gap-4">
                         <div className="flex md:items-center w-full flex-col md:flex-row gap-x-12">
                           <div className="flex items-center md:w-36 gap-1.5">
-                            <User className="text-xl text-gray-500" />
-                            <span className="font-normal text-base">گیرنده محصول</span>
+                            <User className="text-lg text-gray-500" />
+                            <span className="font-light  text-base">گیرنده محصول</span>
                           </div>
                           <span className="text-gray-400 font-normal">{address?.fullName}</span>
                         </div>
                         <div className="flex md:items-center w-full flex-col md:flex-row  gap-x-12">
                           <div className="flex items-center md:w-36 gap-1.5">
-                            <BsTelephoneOutboundFill className="text-lg text-gray-500" />
-                            <span className="font-normal text-base">شماره موبایل</span>
+                            <BsTelephoneOutboundFill className="text-sm text-gray-500" />
+                            <span className="font-light  text-base">شماره موبایل</span>
                           </div>
                           <span className="text-gray-400 font-normal">{address?.mobileNumber}</span>
                         </div>
                         <div className="flex md:items-center w-full flex-col md:flex-row  gap-x-12">
                           <div className="flex items-center md:w-36 gap-1.5">
-                            <Location2 className="text-2xl -mr-1 text-gray-500" />
-                            <span className="font-normal text-base">آدرس</span>
+                            <Location2 className="text-xl -mr-1 text-gray-500" />
+                            <span className="font-light  text-base">آدرس</span>
                           </div>
                           <span className="text-gray-400 font-normal">{address?.fullAddress}</span>
                         </div>
                       </div>
-                      <div className="flex justify-start flex-col left-4 bg-gray-200 rounded-3xl h-fit ml-2">
-                        <button className="px-2 py-3" onClick={() => handleDelete(address.id)}>
-                          <Delete className="text-xl cursor-pointer text-red-500" />
+                      <div className="flex justify-start  mt-2 flex-col left-4 bg-gray-200 rounded-3xl h-fit ml-2">
+                        <button title="حذف" className="px-2 py-3" onClick={() => handleDelete(address.id)}>
+                          <Delete className="text-xl cursor-pointer text-gray-500 hover:text-red-500" />
                         </button>
-                        <button className="px-2 py-3" onClick={() => open(address)}>
-                          <Edit className="text-xl cursor-pointer" />
+                        <button title="ویرایش" className="px-2 py-3 " onClick={() => open(address)}>
+                          <Edit className="text-xl cursor-pointer text-gray-500 hover:text-blue-400" />
                         </button>
                       </div>
                     </div>

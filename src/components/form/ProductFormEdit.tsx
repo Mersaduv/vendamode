@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, SetStateAction, useEffect, useState } from 'react'
+import { ChangeEvent, ChangeEventHandler, Dispatch, Fragment, SetStateAction, useEffect, useState } from 'react'
 
 import { SubmitHandler, useForm, Resolver } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -17,9 +17,11 @@ import type {
   IProductScaleCreate,
   ISizeInfoModel,
   IProductStatus,
+  IProductIsFake,
 } from '@/types'
 import { CategorySelector } from '../categories'
 import {
+  useDeleteTrashProductMutation,
   useGetAllCategoriesQuery,
   useGetBrandsQuery,
   useGetCategoriesTreeQuery,
@@ -40,12 +42,18 @@ import { Button } from '../ui'
 import { useGetSizeByCategoryIdQuery } from '@/services/size/apiSlice'
 import { digitsEnToFa, digitsFaToEn } from '@persian-tools/persian-tools'
 import { useAppDispatch, useAppSelector, useDisclosure } from '@/hooks'
-import { setUpdated, showAlert } from '@/store'
+import { setStateStringSlice, setUpdated, showAlert } from '@/store'
 import Link from 'next/link'
 import { AiFillDelete } from 'react-icons/ai'
 import { MdClose } from 'react-icons/md'
 import { FeatureValue, ProductFeature, SizeDTO } from '@/services/feature/types'
 import dynamic from 'next/dynamic'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
+import { IoIosTimer } from 'react-icons/io'
+import { HandleResponse } from '../shared'
+import { ConfirmDeleteModal } from '../modals'
+import { useRouter } from 'next/router'
+import IsFakeCombobox from '../selectorCombobox/IsFakeCombobox'
 
 const generateUniqueId = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -54,13 +62,33 @@ const generateUniqueId = () => {
     return v.toString(16)
   })
 }
-
+type Duration = 'none' | '1day' | '2days' | '3days' | '1week'
 const fetchImageAsFile = async (url: string): Promise<File> => {
-  const response = await fetch(url)
-  const blob = await response.blob()
-  const fileName = url.split('/').pop()
-  return new File([blob], fileName || 'image.jpg', { type: blob.type })
+  try {
+    const response = await fetch(url)
+    if (!response.ok) {
+      console.error(`HTTP error! status: ${response.status}`)
+    }
+    const blob = await response.blob()
+    const fileName = url.split('/').pop()
+    return new File([blob], fileName || 'image.jpg', { type: blob.type })
+  } catch (error) {
+    console.error(`Failed to fetch image from ${url}:`, error)
+    throw error
+  }
 }
+
+const formatTime = (totalHours: number, minutes?: number, seconds?: number) => {
+  const hours = Math.floor(totalHours)
+  const calculatedMinutes = minutes !== undefined ? minutes : Math.floor((totalHours % 1) * 60)
+  const calculatedSeconds = seconds !== undefined ? seconds : Math.floor((((totalHours % 1) * 60) % 1) * 60)
+
+  const padZero = (num: number) => num.toString().padStart(2, '0')
+
+  const formattedTime = `${padZero(hours)}:${padZero(calculatedMinutes)}:${padZero(calculatedSeconds)}`
+  return formattedTime
+}
+
 const addCommas = (num: string | number) => {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
@@ -101,8 +129,9 @@ interface PropTable {
 }
 
 interface PropSetStockImage {
+  index: number
   selectedFiles: File[]
-  selectedStockFiles: File | null
+  selectedStockFiles: { file: File | null; index: number | null } | null
   setSelectedStockFiles: (file: File, index: number) => void
   isShow?: boolean
   onClose?: () => void
@@ -112,6 +141,7 @@ interface PropSetStockImage {
 interface CurrentRow {
   [key: string]: any
   sizeId?: string
+  isHidden?: boolean
   featureValueId?: string[]
   price?: number
   quantity?: number
@@ -160,13 +190,14 @@ const ProductFormEdit: React.FC<Props> = (props) => {
   const [shamsiDate, setShamsiDate] = useState('')
   const [updateShamsiDate, setUpdateShamsiDate] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<IProductStatus | null>({ id: 'New', name: 'آکبند' })
+  const [isFake, setIsFake] = useState<IProductIsFake | null>({ id: 'false', name: 'محصول اصل' })
   const [isSecondRequest, setIsSecondRequest] = useState(false)
   const [rowsData, setRowsData] = useState<CurrentRow[]>([])
   const [textEditor, setTextEditor] = useState<any>()
   const newRows: CurrentRow[] = []
   //state management
   const { userInfo } = useAppSelector((state) => state.auth)
-
+  const { query, back, push } = useRouter()
   // ? Form Hook
   const {
     handleSubmit,
@@ -185,29 +216,46 @@ const ProductFormEdit: React.FC<Props> = (props) => {
   })
   useEffect(() => {
     if (selectedProduct && selectedProduct.created) {
+      console.log(selectedProduct.created, 'selectedProduct.created example =  2024-08-11T08:05:09.49494Z')
+
       const gregorianDateString = selectedProduct.created
       const gregorianDate = new Date(gregorianDateString)
       if (!isNaN(gregorianDate.getTime())) {
-        // Added type guard
+        // Convert to Jalali Date
         const jalaliDate = jalaali.toJalaali(
           gregorianDate.getFullYear(),
           gregorianDate.getMonth() + 1,
           gregorianDate.getDate()
         )
-        setShamsiDate(`${jalaliDate.jy}-${jalaliDate.jm}-${jalaliDate.jd}`)
+
+        // Extract time
+        const hours = gregorianDate.getHours()
+        const minutes = gregorianDate.getMinutes()
+        const seconds = gregorianDate.getSeconds()
+
+        // Format Jalali Date with time
+        setShamsiDate(` ${hours}:${minutes}:${seconds} - ${jalaliDate.jy}/${jalaliDate.jm}/${jalaliDate.jd}`)
       }
     }
+
     if (selectedProduct && selectedProduct.lastUpdated) {
       const gregorianDateString = selectedProduct.lastUpdated
       const gregorianDate = new Date(gregorianDateString)
       if (!isNaN(gregorianDate.getTime())) {
-        // Added type guard
+        // Convert to Jalali Date
         const jalaliDate = jalaali.toJalaali(
           gregorianDate.getFullYear(),
           gregorianDate.getMonth() + 1,
           gregorianDate.getDate()
         )
-        setUpdateShamsiDate(`${jalaliDate.jy}-${jalaliDate.jm}-${jalaliDate.jd}`)
+
+        // Extract time
+        const hours = gregorianDate.getHours()
+        const minutes = gregorianDate.getMinutes()
+        const seconds = gregorianDate.getSeconds()
+
+        // Format Jalali Date with time
+        setUpdateShamsiDate(`${hours}:${minutes}:${seconds} - ${jalaliDate.jy}/${jalaliDate.jm}/${jalaliDate.jd}`)
       }
     }
   }, [selectedProduct])
@@ -348,13 +396,18 @@ const ProductFormEdit: React.FC<Props> = (props) => {
   }, [selectedCategories?.categorySelected?.id])
 
   useEffect(() => {
-    const loadImages = async () => {
+    if (isFake !== null) {
+      let isFakeData = isFake.id === 'true' ? true : false
+      setValue('IsFake', isFakeData)
+    }
+  }, [isFake, setValue])
+
+  useEffect(() => {
+    const loadSimpleData = async () => {
       if (selectedProduct && mode === 'edit') {
         const {
           title,
           description,
-          imagesSrc,
-          mainImageSrc,
           isActive,
           categoryId,
           brandId,
@@ -364,10 +417,19 @@ const ProductFormEdit: React.FC<Props> = (props) => {
           stockItems: stockItemsData,
           brandData,
         } = selectedProduct
+
+        setIsActive(isActive ? 'true' : 'false')
+
         if (selectedProduct.status === 0) {
           setSelectedStatus({ id: 'New', name: 'آکبند' })
         } else {
           setSelectedStatus({ id: 'Used', name: 'کارکرده' })
+        }
+
+        if (isFake) {
+          setIsFake({ id: 'true', name: 'محصول غیر اصل' })
+        } else {
+          setIsFake({ id: 'false', name: 'محصول اصل' })
         }
 
         setProductSizeScaleData(
@@ -381,12 +443,12 @@ const ProductFormEdit: React.FC<Props> = (props) => {
         )
 
         setSingleCategoryId(categoryId)
-        // console.log(selectedProduct , "selectedProduct");
 
         setRowsData(
           stockItemsData?.map((stock) => {
             const fixedProperties = {
               sizeId: stock.sizeId,
+              isHidden: stock.isHidden,
               featureValueId: stock.featureValueId,
               id: stock.stockId,
               stockId: stock.stockId,
@@ -395,6 +457,7 @@ const ProductFormEdit: React.FC<Props> = (props) => {
               quantity: stock.quantity,
               price: stock.price,
               discount: stock.discount,
+              discountRemainingTime: stock.discountRemainingTime,
             }
 
             const dynamicProperties = Object.keys(stock).reduce((acc: { [key: string]: any }, key) => {
@@ -410,13 +473,11 @@ const ProductFormEdit: React.FC<Props> = (props) => {
             }
           }) || []
         )
-        console.log(stockItemsData, ' stockItemsData')
+        console.log(stockItemsData, 'stockItemsData - stockItemsData')
 
         const colorDTOsIds = productFeatureInfo?.colorDTOs?.map((color) => color.id) || []
-
         const featureValueIds =
           productFeatureInfo?.featureValueInfos?.flatMap((feature) => feature?.value?.map((val) => val.id)) || []
-
         const featureValuesIds = [...colorDTOsIds, ...featureValueIds]
 
         if (features?.data?.productFeatures) {
@@ -444,14 +505,6 @@ const ProductFormEdit: React.FC<Props> = (props) => {
           setStateSizeData(filteredSizeDTOs)
         }
 
-        const mainImageFile = await fetchImageAsFile(mainImageSrc.imageUrl)
-        if (mainImageFile) {
-          setMainSelectedFiles([mainImageFile])
-        }
-
-        const imageFiles = await Promise.all(imagesSrc!.map((image) => fetchImageAsFile(image.imageUrl)))
-        setSelectedFiles(imageFiles)
-
         setSelectedBrand(brandData)
         setTextEditor(description)
         reset({
@@ -463,13 +516,34 @@ const ProductFormEdit: React.FC<Props> = (props) => {
           BrandId: brandId,
           FeatureValueIds: featureValuesIds,
           IsFake: isFake,
-          MainThumbnail: mainImageFile,
-          Thumbnail: imageFiles,
           status: selectedProduct.status === 0 ? 'New' : 'Used',
         })
       }
     }
+
+    const loadImages = async () => {
+      if (selectedProduct && mode === 'edit') {
+        const { imagesSrc, mainImageSrc } = selectedProduct
+
+        const mainImageFile = await fetchImageAsFile(mainImageSrc.imageUrl)
+        if (mainImageFile) {
+          setMainSelectedFiles([mainImageFile])
+        }
+
+        const imageFiles = await Promise.all(imagesSrc!.map((image) => fetchImageAsFile(image.imageUrl)))
+        setSelectedFiles(imageFiles)
+
+        reset((prevState) => ({
+          ...prevState,
+          MainThumbnail: mainImageFile,
+          Thumbnail: imageFiles,
+        }))
+      }
+    }
+
     if (!isSecondRequest) {
+      loadSimpleData()
+      // .then(loadImages);
       loadImages()
     }
   }, [selectedProduct, features])
@@ -532,16 +606,16 @@ const ProductFormEdit: React.FC<Props> = (props) => {
     if (data.StockItems) {
       console.log(data.StockItems, 'data.StockItems')
 
-      // const stockItemsWithoutFile = data.StockItems.map((item) => {
-      //   const { thumbnailsStock, ...rest } = item
-      //   return rest
-      // })
+      const stockItemsWithoutFile = data.StockItems.map((item) => {
+        const { thumbnailsStock, ...rest } = item
+        return rest
+      })
 
-      formData.append('StockItems', JSON.stringify(data.StockItems))
+      formData.append('StockItems', JSON.stringify(stockItemsWithoutFile))
 
       data.StockItems.forEach((item, index) => {
         if (item.imageStock) {
-          formData.append(`ImageStock_${item.id || index}`, item.imageStock)
+          formData.append(`ImageStock_${item.stockId || index}`, item.imageStock)
         }
       })
     }
@@ -555,14 +629,113 @@ const ProductFormEdit: React.FC<Props> = (props) => {
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files)
-      setSelectedFiles((prevFiles) => [...prevFiles, ...newFiles])
-      if (newFiles.length > 0) {
-        setValue('Thumbnail', ((getValues('Thumbnail') as File[]) || []).concat(newFiles))
-      } else {
-        setValue('Thumbnail', [])
-      }
+    const files = e.target.files
+    if (files) {
+      const validFiles: any[] = []
+      const maxFileSize = 70 * 1024 // 70 KB
+      const exactWidth = 700
+      const exactHeight = 700
+
+      Array.from(files).forEach((file) => {
+        if (file.type !== 'image/jpeg') {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'فرمت عکس ها می بایست jpg باشد',
+            })
+          )
+          return
+        }
+
+        if (file.size > maxFileSize) {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'حجم عکس ها می بایست حداکثر 70 کیلوبایت باشد',
+            })
+          )
+          return
+        }
+
+        const img = new Image()
+        img.src = URL.createObjectURL(file)
+
+        img.onload = () => {
+          URL.revokeObjectURL(img.src)
+
+          if (img.width !== exactWidth || img.height !== exactHeight) {
+            dispatch(
+              showAlert({
+                status: 'error',
+                title: 'سایز عکس ها می بایست 700*700 پیکسل باشد',
+              })
+            )
+          } else {
+            validFiles.push(file)
+            if (validFiles.length === Array.from(files).length) {
+              setSelectedFiles((prevFiles) => [...prevFiles, ...validFiles])
+              if (validFiles.length > 0) {
+                setValue('Thumbnail', ((getValues('Thumbnail') as File[]) || []).concat(validFiles))
+              } else {
+                setValue('Thumbnail', [])
+              }
+            }
+          }
+        }
+      })
+    }
+  }
+
+  const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files) {
+      const validFiles: any[] = []
+      const maxFileSize = 70 * 1024 // 70 KB
+      const exactWidth = 700
+      const exactHeight = 700
+
+      // تبدیل FileList به آرایه
+      Array.from(files).forEach((file) => {
+        if (file.type !== 'image/jpeg') {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'فرمت عکس ها می بایست jpg باشد',
+            })
+          )
+          return // استفاده از return به جای continue در داخل forEach
+        }
+
+        if (file.size > maxFileSize) {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'حجم عکس ها می بایست حداکثر 70 کیلوبایت باشد',
+            })
+          )
+          return
+        }
+
+        const img = new Image()
+        img.src = URL.createObjectURL(file)
+
+        img.onload = () => {
+          URL.revokeObjectURL(img.src) // پاک کردن URL پس از بارگذاری تصویر
+
+          if (img.width !== exactWidth || img.height !== exactHeight) {
+            dispatch(
+              showAlert({
+                status: 'error',
+                title: 'سایز عکس ها می بایست 700*700 پیکسل باشد',
+              })
+            )
+          } else {
+            validFiles.push(file)
+            setValue('MainThumbnail', file)
+            setMainSelectedFiles([...validFiles])
+          }
+        }
+      })
     }
   }
 
@@ -579,20 +752,9 @@ const ProductFormEdit: React.FC<Props> = (props) => {
     )
   }
 
-  const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setMainSelectedFiles([...Array.from(e.target.files)])
-      if ([...Array.from(e.target.files)].length > 0) {
-        var ffff = e.target.files[0]
-        setValue('MainThumbnail', ffff)
-      } else {
-        setValue('MainThumbnail', null)
-      }
-    }
-  }
-
   // onSelect Combobox selector
   const handleMainCategorySelect = (category: ICategory) => {
+    setSelectedCategories({} as SelectedCategories)
     setChildCategories(category?.childCategories || ([] as ICategory[]))
   }
 
@@ -815,490 +977,615 @@ const ProductFormEdit: React.FC<Props> = (props) => {
     singleCategoryData,
     featureValueData,
   ])
-  return (
-    <section>
-      <form className="flex gap-4 flex-col pt-4 lg:pt-14" onSubmit={handleSubmit(editedCreateHandler)}>
-        {/* register title , isActive */}
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex flex-1">
-            <div className="bg-white w-full rounded-md shadow-item">
-              <h3 className="border-b p-6 text-gray-600">ویرایش محصول : {selectedProduct?.title}</h3>
-              <div className="flex flex-col">
-                <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-6">
-                  <label
-                    htmlFor="title"
-                    className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]"
-                  >
-                    <img className="w-5 h-5" src="/assets/svgs/duotone/text.svg" alt="" />
-                    <span className="whitespace-nowrap text-center w-[113px]">نام محصول</span>
-                  </label>
-                  <input
-                    className="w-full border rounded-r-none border-gray-200 rounded-md "
-                    type="text"
-                    id="title"
-                    {...register('Title')}
-                  />
-                </div>
-                <div className="flex flex-col xs:flex-row px-10 py-10 pt-6">
-                  <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]">
-                    <img className="w-5 h-5" src="/assets/svgs/duotone/barcode.svg" alt="" />
-                    <span className="whitespace-nowrap text-center w-[113px]">کد محصول</span>
-                  </div>
-                  <div className="w-full py-2 border-r text-center  bg-[#f5f8fa] rounded-r-none rounded-md ">
-                    {digitsEnToFa(selectedProduct?.code ?? '')}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-1">
-            <div className="bg-white w-full rounded-md shadow-item">
-              <div className="border-b p-6 flex justify-between  items-center">
-                <h3 className=" text-gray-600">وضعیت محصول</h3>
-                <div className="flex gap-2">
-                  <Link href={`/products/${selectedProduct?.slug}`}>
-                    <Button className="p-0  text-xs px-4 py-2 bg-blue-500 hover:bg-blue-600">نمایش</Button>
-                  </Link>
-                  <Button onClick={handleDeleteProduct} className="p-0  text-xs px-4 py-2 bg-red-500 hover:bg-red-600">
-                    زباله دان
-                  </Button>
-                </div>
-              </div>
-              <div className="flex- flex-col space-y-4">
-                <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-6">
-                  <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]">
-                    <PiUserDuotone className="w-5 h-5 opacity-50" />
-                    <span className="whitespace-nowrap text-center w-[113px]">انتشار توسط</span>
-                  </div>
-                  <div className="w-full text-sm py-2 border-r text-center  bg-[#f5f8fa] rounded-r-none rounded-md ">
-                    وندامد - {userInfo?.fullName}
-                  </div>
-                </div>
-                <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-0">
-                  <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]">
-                    <img className="w-5 h-5  opacity-50" src="/assets/svgs/duotone/calendar-days.svg" alt="" />
-                    <span className="whitespace-nowrap text-center w-[113px]">تاریخ انتشار</span>
-                  </div>
-                  <div className="w-full py-2 border-r text-center  bg-[#f5f8fa] rounded-r-none rounded-md ">
-                    {digitsEnToFa(shamsiDate)}
-                  </div>
-                </div>
-                <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-0">
-                  <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]">
-                    <img className="w-5 h-5 opacity-50" src="/assets/svgs/duotone/calendar-days.svg" alt="" />
-                    <span className="whitespace-nowrap text-center w-[113px]">آخرین ویرایش</span>
-                  </div>
-                  <div className="w-full text-sm  py-2 border-r text-center  bg-[#f5f8fa] rounded-r-none rounded-md ">
-                    {digitsEnToFa(updateShamsiDate)} توسط {userInfo?.fullName}
-                  </div>
-                </div>
-                <div className="flex px-10 py-10 pt-0 flex-col xs:flex-row">
-                  <label
-                    htmlFor="title"
-                    className="flex items-center justify-center xs:py-0 py-2 px-3 rounded-l-none rounded-md bg-[#f5f8fa]"
-                  >
-                    <img className="w-5 h-5" src="/assets/svgs/duotone/eye.svg" alt="" />
-                    <span className="whitespace-nowrap text-center w-[113px]">قابل مشاهده</span>
-                  </label>
-                  <select
-                    className="w-full rounded-md rounded-r-none border border-gray-300"
-                    id="isActive"
-                    {...register('IsActive')}
-                  >
-                    <option value={'false'}>غیر فعال</option>
-                    <option value={'true'}>فعال</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/*register image and category  */}
-        <div className="flex flex-col md:flex-row gap-4  h-auto">
-          <div className="flex flex-1 md:max-w-[370px]">
-            <div className="bg-white w-full rounded-md shadow-item">
-              <h3 className="border-b p-6 text-gray-600">دسته بندی محصول</h3>
-              <div className="flex px-6 py-10 pt-6">
-                {mode === 'edit' && (
-                  <div className="w-full">
-                    <CategoryCombobox
-                      selectedMainCategory={selectedMainCategory}
-                      setSelectedMainCategory={setSelectedMainCategory}
-                      mainCategories={mainCategories}
-                      onCategorySelect={handleMainCategorySelect}
-                    />
-                    <CategorySelector
-                      setSelectedCategories={setSelectedCategories}
-                      selectedCategories={selectedCategories}
-                      categories={childCategories}
-                      setIsSecondRequest={setIsSecondRequest}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+  const [isActive, setIsActive] = useState('false')
 
-          <div className="flex flex-1 relative">
-            <div className="bg-white  flex-col w-full h-full rounded-md shadow-item">
-              <h3 className="border-b p-6 text-gray-600">تصویر محصول</h3>
-              {/* negare  */}
-              <div className="flex justify-center mt-8">
-                <div className="">
-                  <input
-                    type="file"
-                    accept=".jpg, .jpeg, .png, .gif"
-                    className="hidden"
-                    id="MainThumbnail"
-                    onChange={handleMainFileChange}
-                  />
-                  <label htmlFor="MainThumbnail" className="block cursor-pointer p-6  text-sm font-normal">
-                    <h3 className="font-bold text-center mb-6">تصویر نگاره</h3>
-                    {selectedMainFile.length > 0 ? (
-                      selectedMainFile.map((file: any, index: number) => (
-                        <div key={index} className="text-sm shadow-item rounded-lg p-2 text-gray-600">
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={file.name}
-                            className="w-[125px] object-contain h-[125px] rounded-md"
-                          />
-                        </div>
-                      ))
-                    ) : (
-                      <img
-                        className="w-[125px] h-[125px] rounded-md"
-                        src="/images/other/product-placeholder.png"
-                        alt="product-placeholder"
-                      />
-                    )}
-                  </label>
-                </div>
-              </div>
-              <div className="flex flex-col justify-between h-fit py-10 pt-6 pb-0">
-                {/* drag files  */}
-                <div className="mt-4">
-                  {/* Thumbnail upload */}
-                  <div className="mb-6">
-                    <h3 className="font-medium text-center mb-6">گالری محصول</h3>
-                    <div className="border  mx-8  border-dashed border-[#009ef7] bg-[#f1faff] rounded text-center">
-                      <input
-                        // {...register('Thumbnail')}
-                        type="file"
-                        multiple
-                        className="hidden"
-                        id="Thumbnail"
-                        onChange={handleFileChange}
-                      />
-                      <label htmlFor="Thumbnail" className="block cursor-pointer p-6  text-sm font-normal">
-                        {selectedFiles.length > 0 ? (
-                          <div className="flex flex-wrap gap-2 mt-0 px-8">
-                            {selectedFiles.map((file, index) => (
-                              <div key={index} className="text-sm text-gray-600 relative">
-                                <img
-                                  src={URL.createObjectURL(file)}
-                                  alt={file.name}
-                                  className="w-[80px] h-[88px] object-cover  rounded-lg shadow-product"
-                                />
-                                <button
-                                  type="button"
-                                  className="absolute -top-2 -right-2 shadow-product bg-gray-50 p-0.5 rounded-full text-gray-500"
-                                  onClick={() => handleDelete(index)}
-                                >
-                                  <MdClose className="text-base" /> {/* Add your delete icon here */}
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div> عکس و فیلم ها را به اینجا بکشید یا برای انتخاب کلیک کنید</div>
-                        )}
-                      </label>
+  const handleChangeStatus = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setIsActive(event.target.value)
+  }
+  //*   Delete Handlers
+  const [
+    deleteTrashProduct,
+    {
+      isSuccess: isSuccessTrashDelete,
+      isError: isErrorTrashDelete,
+      error: errorTrashDelete,
+      data: dataTrashDelete,
+      isLoading: isLoadingTrashDelete,
+    },
+  ] = useDeleteTrashProductMutation()
+  const [isShowConfirmTrashDeleteModal, confirmTrashDeleteModalHandlers] = useDisclosure()
+  const [deleteTrashInfo, setDeleteTrashInfo] = useState({
+    id: '',
+  })
+  const handleDeleteTrash = (id: string) => {
+    setDeleteTrashInfo({ id })
+    confirmTrashDeleteModalHandlers.open()
+  }
+
+  const onCancel = () => {
+    setDeleteTrashInfo({ id: '' })
+    confirmTrashDeleteModalHandlers.close()
+  }
+
+  const onConfirmTrashDelete = () => {
+    deleteTrashProduct({ id: deleteTrashInfo.id })
+  }
+
+  const onSuccess = () => {
+    confirmTrashDeleteModalHandlers.close()
+    setDeleteTrashInfo({ id: '' })
+    dispatch(setStateStringSlice({ name: 'deletedProducts' }))
+    push(`/admin/products`)
+  }
+  const onError = () => {
+    confirmTrashDeleteModalHandlers.close()
+    setDeleteTrashInfo({ id: '' })
+  }
+  return (
+    <>
+      {/* Handle Delete Product Response */}
+      {(isSuccessTrashDelete || isErrorTrashDelete) && (
+        <HandleResponse
+          isError={isErrorTrashDelete}
+          isSuccess={isSuccessTrashDelete}
+          error={errorTrashDelete}
+          message={dataTrashDelete?.message}
+          onSuccess={onSuccess}
+          onError={onError}
+        />
+      )}
+      <ConfirmDeleteModal
+        title="محصول"
+        isLoading={isLoadingTrashDelete}
+        isShow={isShowConfirmTrashDeleteModal}
+        onClose={confirmTrashDeleteModalHandlers.close}
+        onCancel={onCancel}
+        onConfirm={onConfirmTrashDelete}
+      />
+      <section>
+        <form className="flex gap-4 flex-col p-7 px-4 mx-2" onSubmit={handleSubmit(editedCreateHandler)}>
+          {/* register title , isActive */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex flex-1">
+              <div className="bg-white w-full rounded-md shadow-item">
+                <h3 className="border-b p-6 text-gray-600 flex gap-2">
+                  ویرایش محصول : <div className="text-sky-500">{selectedProduct?.title}</div>
+                </h3>
+                <div className="flex flex-col">
+                  <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-6">
+                    <label
+                      htmlFor="title"
+                      className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]"
+                    >
+                      <img className="w-5 h-5" src="/assets/svgs/duotone/text.svg" alt="" />
+                      <span className="whitespace-nowrap text-center w-[113px]">نام محصول</span>
+                    </label>
+                    <input
+                      className="w-full border rounded-r-none border-gray-200 rounded-md "
+                      type="text"
+                      id="title"
+                      {...register('Title')}
+                    />
+                  </div>
+                  <div className="flex flex-col xs:flex-row px-10 py-10 pt-6">
+                    <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]">
+                      <img className="w-5 h-5" src="/assets/svgs/duotone/barcode.svg" alt="" />
+                      <span className="whitespace-nowrap text-center w-[113px]">کد محصول</span>
+                    </div>
+                    <div className="w-full py-2 border-r text-center  bg-[#f5f8fa] rounded-r-none rounded-md ">
+                      {digitsEnToFa(selectedProduct?.code ?? '')}
                     </div>
                   </div>
-                  <div className="bg-gray-50 bottom-0 w-full  rounded-b-lg px-8 flex flex-col pb-2">
-                    <span className="font-normal text-[11px] pt-2">حجم عکس ها می بایست حداکثر 70 کیلوبایت باشد</span>
-                    <span className="font-normal text-[11px]">سایز عکس ها می بایست 700*700 پیکسل باشد</span>
-                    <span className="font-normal text-[11px]">فرمت عکس ها می بایست jpg باشد</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-1">
+              <div className="bg-white w-full rounded-md shadow-item">
+                <div className="border-b p-5 flex justify-between  items-center">
+                  <h3 className=" text-gray-600">وضعیت محصول</h3>
+                  <div className="flex gap-2">
+                    <Link href={`/products/${selectedProduct?.slug}`}>
+                      <Button className="p-0  text-xs px-4 py-2 bg-blue-500 hover:bg-blue-600">نمایش</Button>
+                    </Link>
+                    <Button
+                      onClick={() => handleDeleteTrash(selectedProduct?.id ?? '')}
+                      className="p-0  text-xs px-4 py-2 bg-red-500 hover:bg-red-600"
+                    >
+                      زباله دان
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex- flex-col space-y-4">
+                  <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-6">
+                    <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]">
+                      <PiUserDuotone className="w-5 h-5 opacity-50" />
+                      <span className="whitespace-nowrap text-center w-[113px]">انتشار توسط</span>
+                    </div>
+                    <div className="w-full text-sm py-2 border-r text-center  bg-[#f5f8fa] rounded-r-none rounded-md ">
+                      وندامد - {userInfo?.fullName}
+                    </div>
+                  </div>
+                  <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-0">
+                    <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]">
+                      <img className="w-5 h-5  opacity-50" src="/assets/svgs/duotone/calendar-days.svg" alt="" />
+                      <span className="whitespace-nowrap text-center w-[133px]">زمان انتشار</span>
+                    </div>
+                    <div className="w-full py-2 border-r text-center text-sm  bg-[#f5f8fa] rounded-r-none rounded-md ">
+                      {digitsEnToFa(shamsiDate)}
+                    </div>
+                  </div>
+                  <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-0">
+                    <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]">
+                      <img className="w-5 h-5 opacity-50" src="/assets/svgs/duotone/calendar-days.svg" alt="" />
+                      <span className="whitespace-nowrap text-center w-[133px]"> ویرایش</span>
+                    </div>
+                    <div className="w-full text-sm  py-2 border-r text-center  bg-[#f5f8fa] rounded-r-none rounded-md  flex justify-center gap-3">
+                      {digitsEnToFa(updateShamsiDate)} <div>توسط {userInfo?.fullName}</div>
+                    </div>
+                  </div>
+                  <div className="flex px-10 py-10 pt-0 flex-col xs:flex-row">
+                    <label
+                      htmlFor="title"
+                      className="flex items-center justify-center xs:py-0 py-2 px-3 rounded-l-none rounded-md bg-[#f5f8fa]"
+                    >
+                      <img className="w-5 h-5" src="/assets/svgs/duotone/eye.svg" alt="" />
+                      <span className="whitespace-nowrap text-center w-[133px]">وضعیت</span>
+                    </label>
+                    <select
+                      className={`w-full text-center rounded-md rounded-r-none border border-gray-300 ${
+                        isActive === 'true' ? 'bg-green-100' : 'bg-red-100'
+                      }`}
+                      id="isActive"
+                      value={isActive}
+                      {...register('IsActive', { onChange: handleChangeStatus })}
+                    >
+                      <option value="false" className={isActive !== 'false' ? 'bg-white' : ''}>
+                        غیر فعال
+                      </option>
+                      <option value="true" className={isActive !== 'true' ? 'bg-white' : ''}>
+                        فعال
+                      </option>
+                    </select>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        {!isDetailsSkip && (
-          <>
-            {/*is show  add product descriptions*/}
-            <div className="flex flex-1">
-              <div className="bg-white w-full rounded-md shadow-item">
-                <h3 className="border-b p-6 text-gray-600">توضیحات محصول</h3>
-                <CustomEditor textEditor={textEditor} setTextEditor={setTextEditor} />
-                <div className="bg-gray-50 bottom-0 w-full  rounded-b-lg px-8 flex flex-col pb-2">
-                  <span className="font-normal text-[11px] pt-2">حجم عکس ها می بایست حداکثر 100 کیلوبایت باشد</span>
+          {/*register image and category  */}
+          <div className="flex flex-col md:flex-row gap-4  h-auto ">
+            <div className=" bg-white   rounded-md shadow-item  md:w-[30%]">
+              <div className="flex flex-1 md:max-w-[370px]h-[583px] overflow-auto ">
+                <div className="bg-white rounded-md w-full overflow-auto h-full ">
+                  <h3 className="border-b p-6 text-gray-600">دسته بندی محصول</h3>
+                  <div className="flex px-6 py-10 pt-6">
+                    {mode === 'edit' && (
+                      <div className="w-full">
+                        <CategoryCombobox
+                          selectedMainCategory={selectedMainCategory}
+                          setSelectedMainCategory={setSelectedMainCategory}
+                          mainCategories={mainCategories}
+                          onCategorySelect={handleMainCategorySelect}
+                        />
+                        <CategorySelector
+                          setSelectedCategories={setSelectedCategories}
+                          selectedCategories={selectedCategories}
+                          categories={childCategories}
+                          setIsSecondRequest={setIsSecondRequest}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-            {/* is show Product features,size,brand */}
-            <div className="flex flex-1">
-              <div className="bg-white w-full rounded-md shadow-item">
-                <h3 className="border-b p-6 text-gray-600">ویژگی محصول</h3>
-                {/*select isFake , brand and feature*/}
-                <div className="flex mt-8 md:justify-center px-3 md:px-0 mb-10">
-                  <div className="space-y-9 flex flex-col ">
-                    <div className="flex gap-10">
-                      <label htmlFor="IsFake" className="w-[95px]  font-normal text-gray-600 text-sm  cursor-pointer">
-                        محصول غیر اصل
-                      </label>
-                      <input
-                        id="isFake"
-                        {...register('IsFake')}
-                        className="bg-[#f7f8fa]  cursor-pointer checked:text-2xl outline-none ring-0 border-none rounded-md w-[24px] h-[24px] "
-                        type="checkbox"
-                      />
-                    </div>
-                    {/* selector*/}
-                    <div className="flex flex-col md:flex-row  md:items-center md:gap-10 gap-2">
-                      <label htmlFor="BrandId" className="w-[95px] font-normal  text-gray-600 text-sm  cursor-pointer">
-                        انتخاب برند{' '}
-                      </label>
-                      {brandData?.data?.data && (
-                        <BrandCombobox
-                          selectedBrand={selectedBrand}
-                          setSelectedBrand={setSelectedBrand}
-                          brands={brandData?.data?.data ?? []}
-                          onBrandSelect={handleBrandSelect}
+            <div className="flex flex-1 relative">
+              <div className="bg-white  flex-col w-full h-full rounded-md shadow-item">
+                <h3 className="border-b p-6 text-gray-600">تصویر محصول</h3>
+                {/* negare  */}
+                <div className="flex justify-center mt-8">
+                  <div className="">
+                    <input
+                      type="file"
+                      className="hidden"
+                      id="MainThumbnail"
+                      onChange={handleMainFileChange}
+                      accept="image/jpeg"
+                    />
+                    <label htmlFor="MainThumbnail" className="block cursor-pointer p-6 text-sm font-normal">
+                      <h3 className="font-bold text-center mb-6">تصویر نگاره</h3>
+                      {selectedMainFile.length > 0 ? (
+                        selectedMainFile.map((file: any, index: number) => (
+                          <div key={index} className="text-sm shadow-item rounded-lg p-2 text-gray-600">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={file.name}
+                              className="w-[200px] h-[200px] object-contain  rounded-md"
+                            />
+                          </div>
+                        ))
+                      ) : (
+                        <img
+                          className="w-[200px] h-[200px] rounded-md"
+                          src="/images/other/product-placeholder.png"
+                          alt="product-placeholder"
                         />
                       )}
-                    </div>
-
-                    <div className="flex flex-col md:flex-row  md:items-center md:gap-10 gap-2">
-                      <label htmlFor="BrandId" className="w-[95px] font-normal  text-gray-600 text-sm  cursor-pointer">
-                        وضعیت محصول{' '}
-                      </label>
-                      <StatusCombobox selectedStatus={selectedStatus} setSelectedStatus={setSelectedStatus} />
-                    </div>
+                    </label>
                   </div>
                 </div>
-                {/* feature */}
-
-                <div
-                  style={{ background: 'rgba(169, 243, 252,0.2)' }}
-                  className={`px-2 py-4 flex flex-col space-y-8 mb-6 mx-7 rounded-xl ${
-                    stateFeatureDataByCategory.length === 0 && features?.data?.sizeDTOs?.length === 0 && 'invisible'
-                  }`}
-                >
-                  {stateFeatureDataByCategory &&
-                    stateFeatureDataByCategory
-                      ?.filter((feature) => feature.name === 'رنگ')
-                      .map((feature) => {
-                        const filteredFeature = {
-                          ...feature,
-                          values: feature.values?.filter((value) => value.hexCode !== null) ?? [],
-                        }
-                        return (
-                          <div
-                            className="flex items-center flex-col xs:flex-row w-full gap-2 xs:gap-5"
-                            key={feature.id}
-                          >
-                            <div className="text-gray-600 text-sm w-[250px] px-2"> {filteredFeature.name} </div>
-                            <div className="w-full">
-                              <FeatureCombobox
-                                stateColorData={stateColorData}
-                                onFeatureSelect={handleFeatureSelect}
-                                features={filteredFeature}
-                              />
+                <div className="flex flex-col justify-between h-fit py-10 pt-6 pb-0 ">
+                  {/* drag files  */}
+                  <div className="mt-4">
+                    {/* Thumbnail upload */}
+                    <div className="mb-6">
+                      <h3 className="font-medium text-center mb-6">گالری محصول</h3>
+                      <div className="border mx-8 border-dashed border-[#009ef7] bg-[#f1faff] rounded text-center">
+                        <input type="file" multiple className="hidden" id="Thumbnail" onChange={handleFileChange} />
+                        <label htmlFor="Thumbnail" className="block cursor-pointer p-6 text-sm font-normal">
+                          {selectedFiles.length > 0 ? (
+                            <div className="flex flex-wrap gap-5 mt-0 px-8">
+                              {selectedFiles.map((file, index) => (
+                                <div key={index} className="text-sm text-gray-600 relative cursor-default">
+                                  <img
+                                    src={URL.createObjectURL(file)}
+                                    alt={file.name}
+                                    className="w-[80px] h-[88px] object-cover rounded-lg shadow-product"
+                                  />
+                                  <button
+                                    type="button"
+                                    className="absolute -top-2 -right-2 shadow-product hover:bg-red-500 hover:text-white bg-gray-50 p-0.5 rounded-full text-gray-500"
+                                    onClick={(e) => {
+                                      e.stopPropagation() // جلوگیری از انتشار رویداد
+                                      e.preventDefault() // جلوگیری از رفتار پیش‌فرض
+                                      handleDelete(index)
+                                    }}
+                                  >
+                                    <MdClose className="text-base" />
+                                  </button>
+                                </div>
+                              ))}
                             </div>
-                          </div>
-                        )
-                      })}
-
-                  {features?.data?.sizeDTOs && features.data.sizeDTOs.length > 0 && (
-                    <div className="flex items-center flex-col xs:flex-row w-full gap-2 xs:gap-5">
-                      <div className="text-gray-600 text-sm w-[250px] px-2"> سایزبندی </div>
-                      <div className="w-full">
-                        <FeatureCombobox
-                          onFeatureSelect={handleFeatureSelect}
-                          sizeList={features.data.sizeDTOs ?? []}
-                          stateSizeData={stateSizeData}
-                        />
+                          ) : (
+                            <div>برای انتخاب عکس و فیلم کلیک کنید </div>
+                          )}
+                        </label>
                       </div>
                     </div>
-                  )}
-                  {stateFeatureDataByCategory &&
-                    stateFeatureDataByCategory
-                      ?.filter((feature) => feature.name !== 'رنگ')
-                      .map((feature) => {
-                        const filteredFeature = {
-                          ...feature,
-                          values: feature.values?.filter((value) => value.hexCode == null) ?? [],
-                        }
-                        return (
-                          <div
-                            className="flex items-center flex-col xs:flex-row w-full gap-2 xs:gap-5"
-                            key={feature.id}
-                          >
-                            <div className="text-gray-600 text-sm w-[250px] px-2"> {filteredFeature.name} </div>
-                            <div className="w-full">
-                              <FeatureCombobox
-                                stateFeatureValueData={stateFeatureValueData?.filter(
-                                  (value) => value.productFeatureId === feature.id
-                                )}
-                                onFeatureSelect={handleFeatureSelect}
-                                features={filteredFeature}
-                                setStateFeatureValueData={setStateFeatureValueData}
-                              />
-                            </div>
-                          </div>
-                        )
-                      })}
+                    <div className="bg-gray-50 bottom-0 w-full  rounded-b-lg px-8 flex flex-col pb-2">
+                      <span className="font-normal text-[11px] pt-2">حجم عکس ها می بایست حداکثر 70 کیلوبایت باشد</span>
+                      <span className="font-normal text-[11px]">سایز عکس ها می بایست 700*700 پیکسل باشد</span>
+                      <span className="font-normal text-[11px]">فرمت عکس ها می بایست jpg باشد</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* is show product scale  */}
-            {isProductScale && productScales && (
+          </div>
+          {!isDetailsSkip && (
+            <>
+              {/*is show  add product descriptions*/}
               <div className="flex flex-1">
-                <div className="bg-white w-full rounded-md shadow-item  overflow-auto">
-                  <h3 className="border-b p-6 text-gray-600">اندازه ها</h3>
-                  <div className="flex flex-col-reverse  mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
-                    <div className="flex flex-col items-start flex-1 mdx:w-auto w-full overflow-auto">
-                      <table className="table-auto border-collapse w-full overflow-auto">
-                        <thead className="bg-[#8fdcff]">
-                          <tr>
-                            <th className=" px-4 py-2"></th>
-                            {productSizeScale?.columns?.map((column) => (
-                              <th key={column.id} className="px-4 py-2 w-[135px] font-normal">
-                                {column.name}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {productSizeScale?.rows?.map((row, rowIndex) => (
-                            <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-gray-50' : ''}>
-                              <td className="px-4 py-2 h-[60.5px] whitespace-nowrap">{row.productSizeValue}</td>
-                              {productSizeScale?.columns?.map((column, colIndex) => (
-                                <td key={colIndex} className="px-4 py-2 font-normal">
-                                  <input
-                                    inputMode="numeric"
-                                    dir="ltr"
-                                    type="text"
-                                    className="appearance-none border border-gray-200 rounded-lg"
-                                    value={digitsEnToFa(
-                                      (productScaleCreate?.Rows &&
-                                        productScaleCreate?.Rows[rowIndex]?.scaleValues &&
-                                        productScaleCreate?.Rows[rowIndex].scaleValues![colIndex]) ||
-                                        ''
-                                    )}
-                                    onChange={(e) => handleChange(rowIndex, colIndex, digitsFaToEn(e.target.value))}
-                                    onBlur={(e) => {
-                                      const currentValue =
-                                        productScaleCreate?.Rows![rowIndex].scaleValues![colIndex] ?? ''
-                                      e.target.value = digitsEnToFa(currentValue)
-                                    }}
-                                  />
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                    <div className=" mdx:w-fit flex justify-center w-full mdx:mb-0 mb-4">
-                      <div className="rounded-lg  shadow-product w-[240px] h-[240px]">
-                        <img
-                          className="w-full h-full rounded-lg"
-                          src={productSizeScale.imagesSrc?.imageUrl}
-                          alt="عکس اندازه محصول"
+                <div className="bg-white w-full rounded-md shadow-item">
+                  <h3 className="border-b p-6 text-gray-600">توضیحات محصول</h3>
+                  {/* <CustomEditor textEditor={textEditor} setTextEditor={setTextEditor} /> */}
+                  <CustomEditor
+                    value={textEditor}
+                    onChange={(event: any, editor: any) => {
+                      const data = editor.getData()
+                      setTextEditor(data)
+                    }}
+                    placeholder=""
+                  />
+                  <div className="bg-gray-50 bottom-0 w-full  rounded-b-lg px-8 flex flex-col pb-2">
+                    <span className="font-normal text-[11px] pt-2">توضیحات مربوط به محصول را وارد کنید</span>
+                  </div>
+                </div>
+              </div>
+              {/* is show Product features,size,brand */}
+              <div className="flex flex-1">
+                <div className="bg-white w-full rounded-md shadow-item">
+                  <h3 className="border-b p-6 text-gray-600">ویژگی محصول</h3>
+                  {/*select isFake , brand and feature*/}
+                  <div className="flex mt-8 md:justify-center px-3 md:px-0 mb-10">
+                    <div className="space-y-9 flex flex-col ">
+                      {/* <div className="flex gap-10">
+                        <label htmlFor="IsFake" className="w-[95px]  font-normal text-gray-600 text-sm  cursor-pointer">
+                          محصول غیر اصل
+                        </label>
+                        <input
+                          id="isFake"
+                          {...register('IsFake')}
+                          className="bg-[#f7f8fa] border border-gray-300  cursor-pointer checked:text-2xl outline-none ring-0 rounded-md w-[24px] h-[24px] "
+                          type="checkbox"
                         />
+                      </div> */}
+
+                      {/* selector*/}
+                      <div className="flex flex-col md:flex-row  md:items-center md:gap-10 gap-2">
+                        <label
+                          htmlFor="BrandId"
+                          className="w-[95px] font-normal  text-gray-600 text-sm  cursor-pointer"
+                        >
+                          انتخاب برند{' '}
+                        </label>
+                        {brandData?.data?.data && (
+                          <BrandCombobox
+                            selectedBrand={selectedBrand}
+                            setSelectedBrand={setSelectedBrand}
+                            brands={brandData?.data?.data ?? []}
+                            onBrandSelect={handleBrandSelect}
+                          />
+                        )}
+                      </div>
+
+                      <div className="flex flex-col md:flex-row  md:items-center md:gap-10 gap-2">
+                        <label
+                          htmlFor="BrandId"
+                          className="w-[95px] font-normal  text-gray-600 text-sm  cursor-pointer"
+                        >
+                          اصالت کالا{' '}
+                        </label>
+                        <IsFakeCombobox selectedStatus={isFake} setSelectedStatus={setIsFake} />
+                      </div>
+                      <div className="flex flex-col md:flex-row  md:items-center md:gap-10 gap-2">
+                        <label
+                          htmlFor="BrandId"
+                          className="w-[95px] font-normal  text-gray-600 text-sm  cursor-pointer"
+                        >
+                          وضعیت محصول{' '}
+                        </label>
+                        <StatusCombobox selectedStatus={selectedStatus} setSelectedStatus={setSelectedStatus} />
                       </div>
                     </div>
                   </div>
-                  <div className="bg-gray-100 bottom-0 w-full  rounded-b-lg px-8 flex flex-col pb-2">
-                    <span className="font-normal text-[11px] pt-2">
-                      اندازه ها را به{' '}
-                      <span className="text-[11px] text-[#f1416c]">
-                        {productSizeScale.sizeType == '0' ? 'سانتیمتر' : 'میلیمتر'}
-                      </span>{' '}
-                      وارد کنید
-                    </span>
+                  {/* feature */}
+
+                  <div
+                    style={{ background: 'rgba(169, 243, 252,0.2)' }}
+                    className={`px-2 py-4 flex flex-col space-y-8 mb-6 mx-7 rounded-xl ${
+                      stateFeatureDataByCategory.length === 0 && features?.data?.sizeDTOs?.length === 0 && 'invisible'
+                    }`}
+                  >
+                    {stateFeatureDataByCategory &&
+                      stateFeatureDataByCategory
+                        ?.filter((feature) => feature.name === 'رنگ')
+                        .map((feature) => {
+                          const filteredFeature = {
+                            ...feature,
+                            values: feature.values?.filter((value) => value.hexCode !== null) ?? [],
+                          }
+                          return (
+                            <div
+                              className="flex items-center flex-col xs:flex-row w-full gap-2 xs:gap-5"
+                              key={feature.id}
+                            >
+                              <div className="text-gray-600 text-sm w-[250px] px-2"> {filteredFeature.name} </div>
+                              <div className="w-full">
+                                <FeatureCombobox
+                                  stateColorData={stateColorData}
+                                  onFeatureSelect={handleFeatureSelect}
+                                  features={filteredFeature}
+                                />
+                              </div>
+                            </div>
+                          )
+                        })}
+
+                    {features?.data?.sizeDTOs && features.data.sizeDTOs.length > 0 && (
+                      <div className="flex items-center flex-col xs:flex-row w-full gap-2 xs:gap-5">
+                        <div className="text-gray-600 text-sm w-[250px] px-2"> سایزبندی </div>
+                        <div className="w-full">
+                          <FeatureCombobox
+                            onFeatureSelect={handleFeatureSelect}
+                            sizeList={features.data.sizeDTOs ?? []}
+                            stateSizeData={stateSizeData}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {stateFeatureDataByCategory &&
+                      stateFeatureDataByCategory
+                        ?.filter((feature) => feature.name !== 'رنگ')
+                        .map((feature) => {
+                          const filteredFeature = {
+                            ...feature,
+                            values: feature.values?.filter((value) => value.hexCode == null) ?? [],
+                          }
+                          return (
+                            <div
+                              className="flex items-center flex-col xs:flex-row w-full gap-2 xs:gap-5"
+                              key={feature.id}
+                            >
+                              <div className="text-gray-600 text-sm w-[250px] px-2"> {filteredFeature.name} </div>
+                              <div className="w-full">
+                                <FeatureCombobox
+                                  stateFeatureValueData={stateFeatureValueData?.filter(
+                                    (value) => value.productFeatureId === feature.id
+                                  )}
+                                  onFeatureSelect={handleFeatureSelect}
+                                  features={filteredFeature}
+                                  setStateFeatureValueData={setStateFeatureValueData}
+                                />
+                              </div>
+                            </div>
+                          )
+                        })}
                   </div>
                 </div>
+              </div>
+              <div className=" flex flex-col gap-4">
+                {/* is show product scale  */}
+                {!productScales ? (
+                  <div className="flex flex-1">
+                    <div className="bg-white w-full rounded-md shadow-item overflow-auto">
+                      <h3 className="border-b p-6 text-gray-600">اندازه ها</h3>
+                      <div className="flex justify-center  text-sm mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
+                        {/* table  */}
+                        برای این دسته بندی, اندازه تعریف نشده است
+                        {/* image  */}
+                      </div>
+                    </div>
+                  </div>
+                ) : !isProductScale ? (
+                  <div className="flex flex-1">
+                    <div className="bg-white w-full rounded-md shadow-item overflow-auto">
+                      <h3 className="border-b p-6 text-gray-600">اندازه ها</h3>
+                      <div className="flex justify-center  text-sm mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
+                        {/* table  */}
+                        برای وارد کردن اندازه ها, مقدار سایز بندی را وارد کنید
+                        {/* image  */}
+                      </div>
+                    </div>
+                  </div>
+                ) : productScales ? (
+                  <div className="flex flex-1">
+                    <div className="bg-white w-full rounded-md shadow-item overflow-auto">
+                      <h3 className="border-b p-6 text-gray-600">اندازه ها</h3>
+                      <div className="flex flex-col-reverse  mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
+                        {/* table  */}
+                        <div className="flex flex-col items-start flex-1 pt-3 mdx:w-auto w-full overflow-auto">
+                          <table className="table-auto border-collapse w-full">
+                            <thead className="bg-[#8fdcff]">
+                              <tr>
+                                <th className=" px-4 py-2"></th>
+                                {productSizeScale?.columns?.map((column) => (
+                                  <th key={column.id} className="px-4 py-2 w-[135px] font-normal">
+                                    {column.name}
+                                  </th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody className="">
+                              {productSizeScale?.rows?.map((row, rowIndex) => (
+                                <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-gray-50' : ''}>
+                                  <td className="px-4 py-2 h-[60.5px] whitespace-nowrap">{row.productSizeValue}</td>
+                                  {productSizeScale?.columns?.map((column, colIndex) => (
+                                    <td key={colIndex} className="px-4 py-2 font-normal">
+                                      <input
+                                        inputMode="numeric"
+                                        dir="ltr"
+                                        type="text"
+                                        className=" appearance-none border border-gray-200 rounded-lg"
+                                        value={digitsEnToFa(
+                                          productScaleCreate?.Rows![rowIndex].scaleValues![colIndex] || ''
+                                        )}
+                                        onChange={(e) => handleChange(rowIndex, colIndex, digitsFaToEn(e.target.value))}
+                                        onBlur={(e) => {
+                                          const currentValue =
+                                            productScaleCreate?.Rows![rowIndex].scaleValues![colIndex] ?? ''
+                                          e.target.value = digitsEnToFa(currentValue)
+                                        }}
+                                      />
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        {/* image  */}
+                        <div className=" mdx:w-fit flex justify-center w-full mdx:mb-0 pt-3 mb-4">
+                          <div className="rounded-lg  shadow-product w-[240px] h-[240px]">
+                            <img
+                              className="w-full h-full rounded-lg"
+                              src={productSizeScale.imagesSrc?.imageUrl}
+                              alt="عکس اندازه محصول"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="bg-gray-100 bottom-0 w-full  rounded-b-lg px-8 flex flex-col pb-2">
+                        <span className="font-normal text-[11px] pt-2">
+                          اندازه ها را به{' '}
+                          <span className="text-[11px] text-[#f1416c]">
+                            {productSizeScale.sizeType == '0' ? 'سانتیمتر' : 'میلیمتر'}
+                          </span>{' '}
+                          وارد کنید
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* is show Product features, quantity, price , discount */}
+                <div className="flex flex-1">
+                  <div className="bg-white w-full rounded-md shadow-item mb-2">
+                    <h3 className="border-b p-6 text-gray-600">تعداد و قیمت محصول</h3>
+                    <Table
+                      features={stateFeature}
+                      sizeList={stateSizeFeature}
+                      setStateStockItems={setStateStockItems}
+                      selectedFiles={selectedFiles}
+                      setStateFeature={setStateFeature}
+                      setStateSizeFeature={setStateSizeFeature}
+                      setProductSizeScale={setProductSizeScale}
+                      rowsData={rowsData}
+                      newRows={newRows}
+                      setIsSecondRequest={setIsSecondRequest}
+                      isSecondRequest={isSecondRequest}
+                    />
+                    <div className="bg-gray-50 bottom-0 w-full  rounded-b-lg px-8 flex flex-col pb-2">
+                      <span className="font-normal text-[11px] pt-2">قیمت هارا به تومان وارد کنید</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+          {/* validation errors */}
+          <div className="flex flex-col">
+            {formErrors.Title && <p className="text-red-500 px-10">{formErrors.Title.message}</p>}
+
+            {formErrors.CategoryId && <p className="text-red-500 px-10">{formErrors.CategoryId?.message}</p>}
+
+            {formErrors.MainThumbnail && <p className="text-red-500 px-10">{formErrors.MainThumbnail?.message}</p>}
+
+            {formErrors.Thumbnail && <p className="text-red-500 px-10">{formErrors.Thumbnail?.message}</p>}
+
+            {formErrors.StockItems && (
+              <div className="text-red-500 px-10">
+                {Array.isArray(formErrors.StockItems) &&
+                  formErrors.StockItems.map((stockItem, index) => (
+                    <div key={index}>
+                      {stockItem?.quantity && (
+                        <div>
+                          شناسه {'1' + index} {stockItem.quantity.message}
+                        </div>
+                      )}
+                    </div>
+                  ))}
               </div>
             )}
 
-            {/* is show Product features, quantity, price , discount */}
-            <div className="flex flex-1">
-              <div className="bg-white w-full rounded-md shadow-item">
-                <h3 className="border-b p-6 text-gray-600">تعداد و قیمت محصول</h3>
-                <Table
-                  features={stateFeature}
-                  sizeList={stateSizeFeature}
-                  setStateStockItems={setStateStockItems}
-                  selectedFiles={selectedFiles}
-                  setStateFeature={setStateFeature}
-                  setStateSizeFeature={setStateSizeFeature}
-                  setProductSizeScale={setProductSizeScale}
-                  rowsData={rowsData}
-                  newRows={newRows}
-                  setIsSecondRequest={setIsSecondRequest}
-                  isSecondRequest={isSecondRequest}
-                />
+            {formErrors.StockItems && (
+              <div className="text-red-500 px-10">
+                {Array.isArray(formErrors.StockItems) &&
+                  formErrors.StockItems.map((stockItem, index) => (
+                    <div key={index}>
+                      {stockItem?.price && (
+                        <div>
+                          شناسه {'1' + index} {stockItem.price.message}
+                        </div>
+                      )}
+                    </div>
+                  ))}
               </div>
-            </div>
-          </>
-        )}
-        {/* validation errors */}
-        <div className="flex flex-col">
-          {formErrors.Title && <p className="text-red-500 px-10">{formErrors.Title.message}</p>}
-
-          {formErrors.CategoryId && <p className="text-red-500 px-10">{formErrors.CategoryId?.message}</p>}
-
-          {formErrors.MainThumbnail && <p className="text-red-500 px-10">{formErrors.MainThumbnail?.message}</p>}
-
-          {formErrors.Thumbnail && <p className="text-red-500 px-10">{formErrors.Thumbnail?.message}</p>}
-
-          {formErrors.StockItems && (
-            <div className="text-red-500 px-10">
-              {Array.isArray(formErrors.StockItems) &&
-                formErrors.StockItems.map((stockItem, index) => (
-                  <div key={index}>
-                    {stockItem?.quantity && (
-                      <div>
-                        شناسه {'1' + index} {stockItem.quantity.message}
-                      </div>
-                    )}
-                  </div>
-                ))}
-            </div>
-          )}
-
-          {formErrors.StockItems && (
-            <div className="text-red-500 px-10">
-              {Array.isArray(formErrors.StockItems) &&
-                formErrors.StockItems.map((stockItem, index) => (
-                  <div key={index}>
-                    {stockItem?.price && (
-                      <div>
-                        شناسه {'1' + index} {stockItem.price.message}
-                      </div>
-                    )}
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
-        <div className="flex justify-end w-full">
-          {' '}
-          <Button
-            // disabled={!isValid}
-            type="submit"
-            className={`w-0 px-11 py-3 ${!isValid ? 'bg-gray-300' : 'hover:text-black'}  mb-10 float-start`}
-          >
-            بروزرسانی
-          </Button>
-        </div>
-      </form>
-    </section>
+            )}
+          </div>
+          <div className="flex justify-end w-full">
+            {' '}
+            <Button
+              // disabled={!isValid}
+              type="submit"
+              className={` px-11 py-3 ${!isValid ? 'bg-gray-300' : ''} hover:bg-[#e90088c4]  mb-10 float-start`}
+              isLoading={isLoadingUpdate}
+            >
+              بروزرسانی
+            </Button>
+          </div>
+        </form>
+      </section>
+    </>
   )
 }
 
@@ -1317,13 +1604,14 @@ const Table: React.FC<PropTable> = (props) => {
   } = props
   const [featuresAndSizeSelected, setFeaturesAndSizeSelected] = useState<ProductFeature[]>([])
   const [isShowSetImageStockModal, setImageStockModalHandlers] = useDisclosure()
-  const [selectedStockFiles, setSelectedStockFiles] = useState<(File | null)[]>([])
+  const [selectedStockFiles, setSelectedStockFiles] = useState<{ file: File | null; index: number | null }[]>([])
   const [stockItems, setStockItems] = useState<IStockItem[]>([])
   const [currentRowIndex, setCurrentRowIndex] = useState<number | null>(null)
   const [defaultRow, setDefaultRow] = useState<CurrentRow>({ id: 11 })
   const [rows, setRows] = useState<CurrentRow[]>([])
   const [isPriceEditable, setIsPriceEditable] = useState(true)
   const [isDiscountEditable, setIsDiscountEditable] = useState(true)
+  const [isSelectedColumn, setIsSelectedComlumn] = useState(false)
 
   const dispatch = useAppDispatch()
 
@@ -1424,18 +1712,43 @@ const Table: React.FC<PropTable> = (props) => {
   useEffect(() => {
     const convertImagesToFiles = async () => {
       if (stockItems.length > 1) {
-        // اطمینان حاصل کنید که هر آیتم دارای imagesSrc تعریف شده است
-        const imageUrls = stockItems.flatMap((item) =>
-          item.imagesSrc ? item.imagesSrc.map((image: { imageUrl: any }) => image.imageUrl) : []
-        )
-        const filePromises = imageUrls.map((url) => fetchImageAsFile(url))
-        const files = await Promise.all(filePromises)
-        setSelectedStockFiles(files)
+        const updatedStockItems = [...stockItems] // Create a shallow copy
+
+        const filePromises = stockItems.map(async (item, index) => {
+          if (item.imagesSrc && item.imagesSrc.length > 0) {
+            const files = await Promise.all(
+              item.imagesSrc.map(async (image: { imageUrl: string }) => {
+                const file = await fetchImageAsFile(image.imageUrl)
+                updatedStockItems[index] = { ...item, imageStock: file }
+                return { file, index: index }
+              })
+            )
+
+            return files.length > 0 ? files[0] : null
+          } else {
+            if (item.imageStock && item.imageStock.name) {
+              const file = { file: item.imageStock, index: index }
+              return file
+            } else {
+              return null
+            }
+          }
+        })
+
+        const selectedFilesWithIds = await Promise.all(filePromises)
+
+        // Check if stockItems actually changed before setting state
+        if (JSON.stringify(updatedStockItems) !== JSON.stringify(stockItems)) {
+          setStockItems(updatedStockItems)
+        }
+
+        setSelectedStockFiles(selectedFilesWithIds)
       }
     }
 
     convertImagesToFiles()
   }, [stockItems])
+
   ///................
 
   const handleInputChange = (index: number, field: string, value: any) => {
@@ -1445,6 +1758,15 @@ const Table: React.FC<PropTable> = (props) => {
       const item = updatedStockItems[index]
       const itemPrice = Number(item.price)
 
+      if (field === 'discount' && itemPrice === 0) {
+        dispatch(
+          showAlert({
+            status: 'error',
+            title: 'ابتدا قیمت اصلی محصول را وارد کنید',
+          })
+        )
+        return
+      }
       if (field === 'discount' && numericValue > itemPrice) {
         dispatch(
           showAlert({
@@ -1489,7 +1811,13 @@ const Table: React.FC<PropTable> = (props) => {
       }
       // Find matching rowData by stockId
       const matchingRowData = rowsData.find((data) => data.id === row.id)
-
+      var offerTimeHour, offerMinute, offerSecond
+      if (matchingRowData?.discountRemainingTime) {
+        const timeParts = matchingRowData.discountRemainingTime.split(':')
+        offerTimeHour = parseInt(timeParts[0], 10) // Extract hours and convert to number
+        offerMinute = parseInt(timeParts[1], 10) // Extract minutes and convert to number
+        offerSecond = parseInt(timeParts[2], 10) // Extract seconds and convert to number
+      }
       return {
         stockId: row.id,
         featureValueId: row.featureValueId || [],
@@ -1497,6 +1825,12 @@ const Table: React.FC<PropTable> = (props) => {
         price: matchingRowData ? matchingRowData.price : null,
         discount: matchingRowData ? matchingRowData.discount : null,
         quantity: matchingRowData ? matchingRowData.quantity : null,
+        isHidden: matchingRowData?.isHidden ?? false,
+        imageStock: matchingRowData?.imageStock,
+        imagesSrc: matchingRowData?.imagesSrc,
+        offerTime: offerTimeHour,
+        minuteTime: offerMinute,
+        secondTime: offerSecond,
         ...dynamicProperties,
       }
     })
@@ -1511,7 +1845,7 @@ const Table: React.FC<PropTable> = (props) => {
   useEffect(() => {
     if (stockItems) {
       setStateStockItems(stockItems)
-      // console.log(stockItems, 'stockItemsstockItems ')
+      console.log(stockItems, ' final -- stockItemsstockItems ')
     }
   }, [stockItems])
 
@@ -1537,63 +1871,76 @@ const Table: React.FC<PropTable> = (props) => {
   const handleImageSelect = (file: File, index: number) => {
     if (currentRowIndex !== null) {
       const updatedSelectedStockFiles = [...selectedStockFiles]
-      updatedSelectedStockFiles[currentRowIndex] = file
+
+      updatedSelectedStockFiles[currentRowIndex] = { file, index }
+
       setSelectedStockFiles(updatedSelectedStockFiles)
 
-      const updatedStockItems = stockItems.map((item, index) => {
-        if (index === currentRowIndex) {
+      const updatedStockItems = stockItems.map((item, itemIndex) => {
+        if (itemIndex === currentRowIndex) {
           return { ...item, imageStock: file }
         }
+
         return item
       })
       setStockItems(updatedStockItems)
     }
   }
-
   if (rowsData) {
     // console.log(rowsData, 'rowsData')
   }
 
-  const handleRemoveRow = (index: number) => {
-    const updatedStockItems = stockItems.filter((_, i) => i !== index)
+  const handleRemoveRow = (index: number, e: ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked
+    console.log(stockItems, 'stockItems')
+
+    const updatedStockItems = stockItems.map((item, i) => {
+      if (i === index) {
+        return { ...item, isHidden: checked }
+      }
+      return item
+    })
+
     setStockItems(updatedStockItems)
+    // const updatedStockItems = stockItems.filter((_, i) => i !== index)
+    // setStockItems(updatedStockItems)
 
-    const updatedSelectedStockFiles = selectedStockFiles.filter((_, i) => i !== index)
-    setSelectedStockFiles(updatedSelectedStockFiles)
+    // const updatedSelectedStockFiles = selectedStockFiles.filter((_, i) => i !== index)
+    // setSelectedStockFiles(updatedSelectedStockFiles)
 
-    const updatedRows = rows.filter((_, i) => i !== index)
-    setRows(updatedRows)
+    // const updatedRows = rows.filter((_, i) => i !== index)
+    // setRows(updatedRows)
 
-    const remainingFeatureValueIds = updatedRows.flatMap((row) => row.featureValueId || [])
-    const remainingSizeIds = updatedRows.map((row) => row.sizeId).filter((sizeId) => sizeId)
+    // const remainingFeatureValueIds = updatedRows.flatMap((row) => row.featureValueId || [])
+    // const remainingSizeIds = updatedRows.map((row) => row.sizeId).filter((sizeId) => sizeId)
 
-    const updatedFeaturesAndSizeSelected = featuresAndSizeSelected
-      .map((feature) => {
-        if (feature.name === 'سایزبندی') {
-          const updatedValues = feature?.values?.filter((value) => remainingSizeIds.includes(value.id))
-          return { ...feature, values: updatedValues }
-        } else {
-          const updatedValues = feature?.values?.filter((value) => remainingFeatureValueIds.includes(value.id))
-          return { ...feature, values: updatedValues }
-        }
-      })
-      .filter((feature) => feature?.values?.length! > 0)
+    // const updatedFeaturesAndSizeSelected = featuresAndSizeSelected
+    //   .map((feature) => {
+    //     if (feature.name === 'سایزبندی') {
+    //       const updatedValues = feature?.values?.filter((value) => remainingSizeIds.includes(value.id))
+    //       return { ...feature, values: updatedValues }
+    //     } else {
+    //       const updatedValues = feature?.values?.filter((value) => remainingFeatureValueIds.includes(value.id))
+    //       return { ...feature, values: updatedValues }
+    //     }
+    //   })
+    //   .filter((feature) => feature?.values?.length! > 0)
 
-    setFeaturesAndSizeSelected(updatedFeaturesAndSizeSelected)
+    // setFeaturesAndSizeSelected(updatedFeaturesAndSizeSelected)
 
-    // به‌روزرسانی stateFeature و stateSizeFeature
-    setStateFeature((prevFeatures) => {
-      return prevFeatures
-        .map((feature) => {
-          const updatedValues = feature?.values?.filter((value) => remainingFeatureValueIds.includes(value.id))
-          return { ...feature, values: updatedValues }
-        })
-        .filter((feature) => feature?.values?.length! > 0)
-    })
+    // // به‌روزرسانی stateFeature و stateSizeFeature
+    // setStateFeature((prevFeatures) => {
+    //   return prevFeatures
+    //     .map((feature) => {
+    //       const updatedValues = feature?.values?.filter((value) => remainingFeatureValueIds.includes(value.id))
+    //       return { ...feature, values: updatedValues }
+    //     })
+    //     .filter((feature) => feature?.values?.length! > 0)
+    // })
 
-    setStateSizeFeature((prevSizes) => {
-      return prevSizes.filter((size) => remainingSizeIds.includes(size.id))
-    })
+    // setStateSizeFeature((prevSizes) => {
+    //   return prevSizes.filter((size) => remainingSizeIds.includes(size.id))
+    // })
 
     // setProductSizeScale((prevScale) => {
     //   return prevScale.columns?.filter((size) => remainingSizeIds.includes(size.id))
@@ -1601,13 +1948,42 @@ const Table: React.FC<PropTable> = (props) => {
     // console.log(updatedFeaturesAndSizeSelected, 'Updated features and sizes')
   }
 
-  if (rows) {
-    // rows.map((row) => console.log(row, 'one by one'))
-  }
+  const handleMenuItemClick = (index: number, duration: Duration): void => {
+    let hours: number | null
 
+    switch (duration) {
+      case 'none':
+        hours = null
+        break
+      case '1day':
+        hours = 24
+        break
+      case '2days':
+        hours = 48
+        break
+      case '3days':
+        hours = 72
+        break
+      case '1week':
+        hours = 7 * 24
+        break
+      default:
+        hours = null
+    }
+
+    const updatedStockItems = [...stockItems]
+    updatedStockItems[index] = {
+      ...updatedStockItems[index],
+      offerTime: hours,
+      minuteTime: 0,
+      secondTime: 0,
+    }
+
+    setStockItems(updatedStockItems)
+  }
   return (
-    <div className="px-4 py-10 pt-3 overflow-auto">
-      <table className="table-auto overflow-auto w-full border-collapse border-gray-200">
+    <div className="px-4 py-10 pt-3">
+      <table className="table-auto w-full  overflow-x-scroll bg-white  border-gray-200">
         {!shouldHideHeader && (
           <thead>
             <tr className="bg-[#8fdcff]">
@@ -1623,199 +1999,435 @@ const Table: React.FC<PropTable> = (props) => {
               )}
               <th className="px-4 whitespace-nowrap py-2 font-normal">موجودی</th>
               <th className="px-4 whitespace-nowrap py-2 font-normal">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center  justify-center gap-1">
                   <div>
                     قیمت محصول
-                    <input
+                    {/* <input
                       className="bg-gray-200 border-gray-400 focus:outline-0 focus:ring-0 text-2xl w-5  h-5 mr-1 cursor-pointer focus:border-none rounded appearance-none checked:bg-[#e90089]"
                       type="checkbox"
                       onChange={(e) => handleCheckboxChange('price', e.target.checked)}
-                    />
+                    /> */}
                   </div>{' '}
-                  <FaArrowDownLong className="text-gray-400" />
+                  <div title="تکرار مبلغ" className=" py-2 px-1 cursor-pointer">
+                    <FaArrowDownLong
+                      onClick={() => {
+                        handleCheckboxChange('price', isSelectedColumn)
+                        setIsSelectedComlumn((prev) => !prev)
+                      }}
+                      className="text-gray-400"
+                    />
+                  </div>
                 </div>
               </th>
-              <th className="px-4 whitespace-nowrap py-2 font-normal">
-                <div className="flex items-center gap-1">
+              <th className="px-4 whitespace-nowrap  py-2 font-normal">
+                <div className="flex items-center justify-center gap-1">
                   <div>
                     فروش فوق العاده
-                    <input
+                    {/* <input
                       className="bg-gray-200 border-gray-400 focus:outline-0 focus:ring-0 text-2xl w-5  h-5 mr-1 cursor-pointer focus:border-none rounded appearance-none checked:bg-[#e90089]"
                       type="checkbox"
                       onChange={(e) => handleCheckboxChange('discount', e.target.checked)}
-                    />
+                    /> */}
                   </div>{' '}
-                  <FaArrowDownLong className="text-gray-400" />
+                  {/* <FaArrowDownLong className="text-gray-400" /> */}
                 </div>{' '}
               </th>
-              {!shouldHideHeader && <th className="px-4 whitespace-nowrap py-2 font-normal"></th>}
+              {!shouldHideHeader && <th className="px-4 whitespace-nowrap py-2 font-normal text-center">وضعیت</th>}
             </tr>
           </thead>
         )}
         <tbody>
-          {rows.length > 0 &&
-            rows
-              .sort((a, b) => a.id - b.id)
-              .map((row, idx) => (
-                <tr key={row.id} className={`border-b ${idx % 2 !== 0 ? 'bg-gray-50' : ''}`}>
-                  {!shouldHideHeader && (
-                    <Fragment>
-                      <td className="w-[50px] h-[50px] bg-center py-2 pr-2">
-                        {selectedStockFiles[idx] ? (
-                          <img
-                            onClick={() => handleImageClick(idx)}
-                            className="w-[50px] h-[50px] rounded-lg cursor-pointer bg-center"
-                            src={URL.createObjectURL(selectedStockFiles[idx]!)}
-                            alt={selectedStockFiles[idx]!.name}
-                          />
-                        ) : (
-                          <img
-                            onClick={() => handleImageClick(idx)}
-                            className="w-[50px] h-[50px] rounded-lg cursor-pointer bg-center"
-                            src="/images/other/product-placeholder.png"
-                            alt="product-placeholder"
-                          />
-                        )}
-                        <DialogSetStockItemImage
-                          isShow={isShowSetImageStockModal}
-                          open={setImageStockModalHandlers.open}
-                          setSelectedStockFiles={handleImageSelect}
-                          selectedFiles={selectedFiles}
-                          selectedStockFiles={selectedStockFiles[idx] || null}
-                          onClose={setImageStockModalHandlers.close}
-                          index={idx}
+          {rows.map((row, idx) => {
+            return (
+              <tr
+                key={row.id}
+                className={` ${idx % 2 !== 0 ? 'bg-gray-50' : ''} ${shouldHideHeader ? '' : 'border-b'}`}
+              >
+                {!shouldHideHeader && (
+                  <Fragment>
+                    <td className="w-[50px] h-[50px] bg-center py-2 pr-2">
+                      {selectedStockFiles[idx] ? (
+                        <img
+                          onClick={() => handleImageClick(idx)}
+                          className="w-[50px] h-[50px] rounded-lg cursor-pointer bg-center"
+                          src={URL.createObjectURL(selectedStockFiles[idx]?.file!)}
+                          alt={selectedStockFiles[idx]?.file?.name}
                         />
-                      </td>
-                      <td className="px-4 whitespace-nowrap text-center py-2">{digitsEnToFa(row.id.toString())}</td>
-                      {featuresAndSizeSelected.map(
-                        (feature) =>
-                          feature?.values?.length! > 1 && (
-                            <td key={feature.id} className="px-4 whitespace-nowrap text-center py-2">
-                              {digitsEnToFa(row[feature.name].toString())}
-                            </td>
-                          )
+                      ) : (
+                        <img
+                          onClick={() => handleImageClick(idx)}
+                          className="w-[50px] h-[50px] rounded-lg cursor-pointer bg-center"
+                          src="/images/other/product-placeholder.png"
+                          alt="product-placeholder"
+                        />
                       )}
-                    </Fragment>
-                  )}
-                  <td className="px-4 whitespace-nowrap text-center py-2">
-                    {shouldHideHeader ? (
-                      <div className="relative mb-3">
-                        <input
-                          dir="ltr"
-                          type="text"
-                          className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
-                          id="floatingInput"
-                          placeholder="موجودی انبار"
-                          value={digitsEnToFa(stockItems[idx]?.quantity || 0)}
-                          onChange={(e) => handleInputChange(idx, 'quantity', digitsFaToEn(e.target.value))}
-                          onFocus={(e) => (e.target.value = digitsEnToFa(stockItems[idx]?.quantity || ''))}
-                          onBlur={(e) => (e.target.value = digitsEnToFa(stockItems[idx]?.quantity || 0))}
-                        />
-                        <label
-                          htmlFor="floatingInput"
-                          className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
-                        >
-                          موجودی انبار
-                        </label>
-                      </div>
-                    ) : (
+                      {/* <DialogSetStockItemImage
+                            isShow={isShowSetImageStockModal}
+                            open={setImageStockModalHandlers.open}
+                            setSelectedStockFiles={handleImageSelect}
+                            selectedFiles={selectedFiles}
+                            selectedStockFiles={selectedFile?.file || null}
+                            onClose={setImageStockModalHandlers.close}
+                            index={idx}
+                          /> */}
+                    </td>
+                    <td className="px-4 whitespace-nowrap text-center py-2">{digitsEnToFa(row.id.toString())}</td>
+                    {featuresAndSizeSelected.map(
+                      (feature) =>
+                        feature?.values?.length! > 1 && (
+                          <td key={feature.id} className="px-4 whitespace-nowrap text-center py-2">
+                            {digitsEnToFa(row[feature.name].toString())}
+                          </td>
+                        )
+                    )}
+                  </Fragment>
+                )}
+                <td className="px-4 whitespace-nowrap text-center py-2">
+                  {shouldHideHeader ? (
+                    <div className="relative mb-3">
                       <input
                         dir="ltr"
                         type="text"
-                        placeholder=""
+                        className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
+                        id="floatingInput"
+                        placeholder="موجودی انبار"
                         value={digitsEnToFa(stockItems[idx]?.quantity || 0)}
                         onChange={(e) => handleInputChange(idx, 'quantity', digitsFaToEn(e.target.value))}
-                        className="w-36 h-9 rounded-lg text-center border border-gray-300"
                         onFocus={(e) => (e.target.value = digitsEnToFa(stockItems[idx]?.quantity || ''))}
                         onBlur={(e) => (e.target.value = digitsEnToFa(stockItems[idx]?.quantity || 0))}
                       />
-                    )}
-                  </td>
-                  <td className="px-4 text-center py-2">
-                    {shouldHideHeader ? (
-                      <div className="relative mb-3">
-                        <input
-                          dir="ltr"
-                          type="text"
-                          className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
-                          id="floatingInput"
-                          placeholder="قیمت محصول"
-                          onChange={(e) => handleInputChange(idx, 'price', digitsFaToEn(e.target.value))}
-                          value={digitsEnToFa(addCommas(stockItems[idx]?.price || ''))}
-                        />
-                        <label
-                          htmlFor="floatingInput"
-                          className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
-                        >
-                          قیمت محصول
-                        </label>
-                      </div>
-                    ) : (
+                      <label
+                        htmlFor="floatingInput"
+                        className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
+                      >
+                        موجودی انبار
+                      </label>
+                    </div>
+                  ) : (
+                    <input
+                      dir="ltr"
+                      type="text"
+                      placeholder=""
+                      value={digitsEnToFa(stockItems[idx]?.quantity || 0)}
+                      onChange={(e) => handleInputChange(idx, 'quantity', digitsFaToEn(e.target.value))}
+                      className="w-36 h-9 rounded-lg text-center border border-gray-300"
+                      onFocus={(e) => (e.target.value = digitsEnToFa(stockItems[idx]?.quantity || ''))}
+                      onBlur={(e) => (e.target.value = digitsEnToFa(stockItems[idx]?.quantity || 0))}
+                    />
+                  )}
+                </td>
+                <td className="px-4 text-center py-2">
+                  {shouldHideHeader ? (
+                    <div className="relative mb-3">
                       <input
                         dir="ltr"
                         type="text"
-                        placeholder=""
-                        value={digitsEnToFa(addCommas(stockItems[idx]?.price || ''))}
+                        className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
+                        id="floatingInput"
+                        placeholder="قیمت محصول"
                         onChange={(e) => handleInputChange(idx, 'price', digitsFaToEn(e.target.value))}
-                        className="w-36 h-9 rounded-lg text-center border border-gray-300"
-                        disabled={!isPriceEditable}
+                        value={digitsEnToFa(addCommas(stockItems[idx]?.price || ''))}
                       />
-                    )}
-                  </td>
-                  <td className="px-4 text-center py-2">
-                    {shouldHideHeader ? (
-                      <div className="relative mb-3">
-                        <input
-                          dir="ltr"
-                          type="text"
-                          className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
-                          id="floatingInput"
-                          placeholder="فروش فوق العاده"
-                          onChange={(e) => handleInputChange(idx, 'discount', digitsFaToEn(e.target.value))}
-                          value={digitsEnToFa(addCommas(stockItems[idx]?.discount || ''))}
-                        />
-                        <label
-                          htmlFor="floatingInput"
-                          className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
-                        >
-                          فروش فوق العاده
-                        </label>
-                      </div>
-                    ) : (
+                      <label
+                        htmlFor="floatingInput"
+                        className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
+                      >
+                        قیمت محصول
+                      </label>
+                    </div>
+                  ) : (
+                    <input
+                      dir="ltr"
+                      type="text"
+                      placeholder=""
+                      value={digitsEnToFa(addCommas(stockItems[idx]?.price || ''))}
+                      onChange={(e) => handleInputChange(idx, 'price', digitsFaToEn(e.target.value))}
+                      className={`w-36 h-9 rounded-lg text-center ${
+                        !isPriceEditable ? 'bg-gray-100' : ''
+                      } border border-gray-300`}
+                      disabled={!isPriceEditable}
+                    />
+                  )}
+                </td>
+                <td className="px-4 text-center py-5">
+                  {shouldHideHeader ? (
+                    <div className="relative mb-3 flex items-center">
+                      <input
+                        dir="ltr"
+                        type="text"
+                        className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
+                        id="floatingInput"
+                        placeholder="فروش فوق العاده"
+                        onChange={(e) => handleInputChange(idx, 'discount', digitsFaToEn(e.target.value))}
+                        value={digitsEnToFa(addCommas(stockItems[idx]?.discount || ''))}
+                      />
+                      <label
+                        htmlFor="floatingInput"
+                        className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
+                      >
+                        فروش فوق العاده
+                      </label>
+                      <Menu as="div" className="relative inline-block text-left">
+                        <div>
+                          <MenuButton
+                            // title={stockItems[idx]?.offerTime?.toString()}
+                            className={`inline-flex w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold text-gray-900 ${
+                              stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined
+                                ? 'cursor-not-allowed'
+                                : ''
+                            }`}
+                            disabled={stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined}
+                          >
+                            {/* {!stockItems[idx]?.offerTime && <div>text</div>} */}
+                            {stockItems[idx]?.offerTime === undefined ? (
+                              <IoIosTimer
+                                title="اعتبار تخفیف"
+                                aria-hidden="true"
+                                className={`h-7 w-7 ${
+                                  stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined
+                                    ? 'text-gray-400'
+                                    : stockItems[idx]?.offerTime !== undefined
+                                    ? 'text-green-400 hover:text-green-300'
+                                    : 'text-sky-500 hover:text-sky-400'
+                                }`}
+                              />
+                            ) : (
+                              <div className="tooltip-container text-sm text-gray-600 text-center cursor-pointer">
+                                <IoIosTimer
+                                  aria-hidden="true"
+                                  className={`h-7 w-7 ${
+                                    stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined
+                                      ? 'text-gray-400'
+                                      : stockItems[idx]?.offerTime !== null
+                                      ? 'text-green-400 hover:text-green-300'
+                                      : 'text-sky-500 hover:text-sky-400'
+                                  }`}
+                                />
+                                {stockItems[idx]?.offerTime !== null && (
+                                  <span className="tooltip-text2">
+                                    <div dir="ltr" className="">
+                                      {digitsEnToFa(formatTime(stockItems[idx]?.offerTime || 0))}
+                                    </div>
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </MenuButton>
+                        </div>
+
+                        {!(stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined) && (
+                          <MenuItems
+                            transition
+                            className="absolute left-0 z-[500] -top-52 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none"
+                          >
+                            <div className="py-1">
+                              <MenuItem>
+                                <div
+                                  onClick={() => handleMenuItemClick(idx, 'none')}
+                                  className="block cursor-pointer hover:bg-slate-50 px-4 py-2 text-sm text-start text-gray-700 border-b"
+                                >
+                                  هیچکدام
+                                </div>
+                              </MenuItem>
+                              <MenuItem>
+                                <div
+                                  onClick={() => handleMenuItemClick(idx, '1day')}
+                                  className="block cursor-pointer hover:bg-slate-50 px-4 py-2 text-sm text-start text-gray-700 border-b"
+                                >
+                                  {digitsEnToFa(1)} روز
+                                </div>
+                              </MenuItem>
+                              <MenuItem>
+                                <div
+                                  onClick={() => handleMenuItemClick(idx, '2days')}
+                                  className="block cursor-pointer hover:bg-slate-50 px-4 py-2 text-sm text-start text-gray-700 border-b"
+                                >
+                                  {digitsEnToFa(2)} روز
+                                </div>
+                              </MenuItem>
+                              <MenuItem>
+                                <div
+                                  onClick={() => handleMenuItemClick(idx, '3days')}
+                                  className="block cursor-pointer hover:bg-slate-50 px-4 py-2 text-sm text-start text-gray-700 border-b"
+                                >
+                                  {digitsEnToFa(3)} روز
+                                </div>
+                              </MenuItem>
+                              <MenuItem>
+                                <div
+                                  onClick={() => handleMenuItemClick(idx, '1week')}
+                                  className="block cursor-pointer hover:bg-slate-50 px-4 py-2 text-sm text-start text-gray-700"
+                                >
+                                  {digitsEnToFa(1)} هفته
+                                </div>
+                              </MenuItem>
+                            </div>
+                          </MenuItems>
+                        )}
+                      </Menu>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center">
                       <input
                         dir="ltr"
                         type="text"
                         placeholder=""
                         value={digitsEnToFa(addCommas(stockItems[idx]?.discount || ''))}
                         onChange={(e) => handleInputChange(idx, 'discount', digitsFaToEn(e.target.value))}
-                        className="w-36 h-9 rounded-lg text-center border border-gray-300"
+                        className={`w-36 h-9 rounded-lg text-center ${
+                          !isDiscountEditable ? 'bg-gray-100' : ''
+                        } border border-gray-300`}
                         disabled={!isDiscountEditable}
                       />
-                    )}
-                  </td>
-                  {!shouldHideHeader && (
-                    <td>
-                      <Button
-                        onClick={() => handleRemoveRow(idx)}
-                        className="bg-white ml-4 hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
-                      >
-                        حذف
-                      </Button>
-                    </td>
+                      <Menu as="div" className="relative inline-block text-left">
+                        <div>
+                          <MenuButton
+                            // title={stockItems[idx]?.offerTime?.toString()}
+                            className={`inline-flex w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold text-gray-900 ${
+                              stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined
+                                ? 'cursor-not-allowed'
+                                : ''
+                            }`}
+                            disabled={stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined}
+                          >
+                            {/* {!stockItems[idx]?.offerTime && <div>text</div>} */}
+                            {stockItems[idx]?.offerTime === undefined ? (
+                              <IoIosTimer
+                                title="اعتبار تخفیف"
+                                aria-hidden="true"
+                                className={`h-7 w-7 ${
+                                  stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined
+                                    ? 'text-gray-400'
+                                    : stockItems[idx]?.offerTime !== undefined
+                                    ? 'text-green-400 hover:text-green-300'
+                                    : 'text-sky-500 hover:text-sky-400'
+                                }`}
+                              />
+                            ) : (
+                              <div className="tooltip-container text-sm text-gray-600 text-center cursor-pointer">
+                                <IoIosTimer
+                                  aria-hidden="true"
+                                  className={`h-7 w-7 ${
+                                    stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined
+                                      ? 'text-gray-400'
+                                      : stockItems[idx]?.offerTime !== null
+                                      ? 'text-green-400 hover:text-green-300'
+                                      : 'text-sky-500 hover:text-sky-400'
+                                  }`}
+                                />
+                                {stockItems[idx]?.offerTime !== null && (
+                                  <span className="tooltip-text2">
+                                    <div dir="ltr" className="">
+                                      {digitsEnToFa(formatTime(stockItems[idx]?.offerTime || 0))}
+                                    </div>
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </MenuButton>
+                        </div>
+
+                        {!(stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined) && (
+                          <MenuItems
+                            transition
+                            className="absolute left-0 z-[500] -top-52 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none"
+                          >
+                            <div className="py-1">
+                              <MenuItem>
+                                <div
+                                  onClick={() => handleMenuItemClick(idx, 'none')}
+                                  className="block cursor-pointer hover:bg-slate-50 px-4 py-2 text-sm text-start text-gray-700 border-b"
+                                >
+                                  هیچکدام
+                                </div>
+                              </MenuItem>
+                              <MenuItem>
+                                <div
+                                  onClick={() => handleMenuItemClick(idx, '1day')}
+                                  className="block cursor-pointer hover:bg-slate-50 px-4 py-2 text-sm text-start text-gray-700 border-b"
+                                >
+                                  {digitsEnToFa(1)} روز
+                                </div>
+                              </MenuItem>
+                              <MenuItem>
+                                <div
+                                  onClick={() => handleMenuItemClick(idx, '2days')}
+                                  className="block cursor-pointer hover:bg-slate-50 px-4 py-2 text-sm text-start text-gray-700 border-b"
+                                >
+                                  {digitsEnToFa(2)} روز
+                                </div>
+                              </MenuItem>
+                              <MenuItem>
+                                <div
+                                  onClick={() => handleMenuItemClick(idx, '3days')}
+                                  className="block cursor-pointer hover:bg-slate-50 px-4 py-2 text-sm text-start text-gray-700 border-b"
+                                >
+                                  {digitsEnToFa(3)} روز
+                                </div>
+                              </MenuItem>
+                              <MenuItem>
+                                <div
+                                  onClick={() => handleMenuItemClick(idx, '1week')}
+                                  className="block cursor-pointer hover:bg-slate-50 px-4 py-2 text-sm text-start text-gray-700"
+                                >
+                                  {digitsEnToFa(1)} هفته
+                                </div>
+                              </MenuItem>
+                            </div>
+                          </MenuItems>
+                        )}
+                      </Menu>
+                    </div>
                   )}
-                </tr>
-              ))}
+                </td>
+                {!shouldHideHeader && (
+                  <td>
+                    {/* <Button
+                      onClick={() => handleRemoveRow(idx)}
+                      className="bg-white ml-4 hover:bg-red-600 hover:text-white text-red-600 text-sm border border-red-600 px-4 py-1.5"
+                    >
+                      حذف
+                    </Button> */}
+                    <div dir="ltr" className="flex justify-center">
+                      <label htmlFor={`switch-${idx}`} className="h-6 relative inline-block">
+                        <input
+                          id={`switch-${idx}`}
+                          type="checkbox"
+                          checked={stockItems[idx]?.isHidden ?? false}
+                          className="w-11 h-0 cursor-pointer inline-block focus:outline-0 dark:focus:outline-0 border-0 dark:border-0 focus:ring-offset-transparent dark:focus:ring-offset-transparent focus:ring-transparent dark:focus:ring-transparent focus-within:ring-0 dark:focus-within:ring-0 focus:shadow-none dark:focus:shadow-none after:absolute before:absolute after:top-0 before:top-0 after:block before:inline-block before:rounded-full after:rounded-full after:content-[''] after:w-5 after:h-5 after:mt-0.5 after:ml-0.5 after:shadow-md after:duration-100 before:content-[''] before:w-10 before:h-full before:shadow-[inset_0_0_#000] after:bg-white dark:after:bg-gray-50 before:bg-gray-300 dark:before:bg-gray-600 before:checked:bg-sky-500 checked:after:duration-300 checked:after:translate-x-4 disabled:after:bg-opacity-75 disabled:cursor-not-allowed disabled:checked:before:bg-opacity-40"
+                          onChange={(e) => handleRemoveRow(idx, e)}
+                        />
+                      </label>
+                    </div>
+                  </td>
+                )}
+              </tr>
+            )
+          })}
         </tbody>
       </table>
+      {currentRowIndex !== null && (
+        <DialogSetStockItemImage
+          isShow={isShowSetImageStockModal}
+          open={setImageStockModalHandlers.open}
+          setSelectedStockFiles={handleImageSelect}
+          selectedFiles={selectedFiles}
+          selectedStockFiles={selectedStockFiles[currentRowIndex] || null}
+          onClose={setImageStockModalHandlers.close}
+          index={currentRowIndex}
+        />
+      )}
     </div>
   )
 }
 
-const DialogSetStockItemImage = (props: PropSetStockImage & { index: number }) => {
+const DialogSetStockItemImage = (props: PropSetStockImage) => {
   const { isShow, onClose, selectedFiles, setSelectedStockFiles, open, selectedStockFiles, index } = props
   const [selectItem, setSelectItem] = useState<File>()
 
   const handleSelect = () => {
+    console.log(index, 'DialogSetStockItemImage')
+
     if (selectItem != undefined) {
       setSelectedStockFiles(selectItem, index)
     }
@@ -1824,9 +2436,6 @@ const DialogSetStockItemImage = (props: PropSetStockImage & { index: number }) =
     }
   }
 
-  if (selectedStockFiles) {
-    // console.log(selectedStockFiles)
-  }
   return (
     <>
       <Modal isShow={isShow!} onClose={onClose!} effect="ease-out">
@@ -1838,32 +2447,37 @@ const DialogSetStockItemImage = (props: PropSetStockImage & { index: number }) =
             گالری
           </Modal.Header>
           <Modal.Body>
-            {selectedFiles.length > 0 && (
-              <div className="flex flex-wrap gap-6 mt-4 px-8">
-                {selectedFiles.map((file, index) => (
-                  <div
-                    key={index}
-                    onClick={() => setSelectItem(file)}
-                    className="text-sm text-gray-600 cursor-pointer "
-                  >
-                    <img
-                      src={URL.createObjectURL(file)}
-                      alt={file.name}
-                      className={`${
-                        selectItem == file ? 'border-2 border-[#e90089]' : ''
-                      } w-[85px] h-[95px] object-cover  rounded-lg shadow-product`}
-                    />
+            <div className="flex flex-col w-full">
+              {selectedFiles.length > 0 ? (
+                <div className="flex flex-wrap gap-6 mt-4 px-8">
+                  {selectedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      onClick={() => setSelectItem(file)}
+                      className="text-sm text-gray-600 cursor-pointer "
+                    >
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={file.name}
+                        className={`${
+                          selectItem == file ? 'border-2 border-[#e90089]' : ''
+                        } w-[85px] h-[95px] object-cover  rounded-lg shadow-product`}
+                      />
+                    </div>
+                  ))}
+                  <div className="border-t-2 gap-2 border-gray-200 py-3 lg:pb-0 flex justify-end  my-2 w-full">
+                    <button
+                      type="button"
+                      className="bg-[#009ef7] text-white rounded-lg px-5 py-3"
+                      onClick={handleSelect}
+                    >
+                      ذخیره{' '}
+                    </button>
                   </div>
-                ))}
-              </div>
-            )}
-            <div className="border-t-2 gap-2 border-gray-200 py-3 lg:pb-0 flex justify-start ">
-              <button type="button" className="bg-gray-100 text-gray-400 rounded-lg px-5 py-3" onClick={onClose}>
-                لغو{' '}
-              </button>
-              <button type="button" className="bg-[#009ef7] text-white rounded-lg px-5 py-3" onClick={handleSelect}>
-                ذخیره{' '}
-              </button>
+                </div>
+              ) : (
+                <div className="text-sm text-center text-red-600">عکسی در گالری محصول وجود ندارد !</div>
+              )}
             </div>
           </Modal.Body>
         </Modal.Content>

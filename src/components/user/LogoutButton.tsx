@@ -22,7 +22,7 @@ export default function LogoutButton(prop: Props) {
   return (
     <>
       {isShowDrawer ? (
-        <div className="px-4 mt-5 mb-20">
+        <div className="px-4 mt-5 mb-16">
           <Button style={{background:"rgba(63, 66, 84, .35)"}} className="w-full text-[#b5b5c3] hover:text-white" onClick={handleLogout}>
             خروج
           </Button>
@@ -32,7 +32,7 @@ export default function LogoutButton(prop: Props) {
           className={!isShowDropDown ? 'bg-white p-0 mr-4' : 'bg-gray-50 p-0 flex w-44 pr-4 py-2'}
           onClick={handleLogout}
         >
-          <BiLogOut className="icon text-red-500" />
+          <BiLogOut className="w-5 h-5 text-red-500" />
           {isShowDropDown ? (
             <span className="ml-auto mr-2 text-gray-700 text-xs whitespace-nowrap font-semibold">
               خروج از حساب کاربری

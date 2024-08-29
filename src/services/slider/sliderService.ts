@@ -5,9 +5,9 @@ import { GetSliderResult } from './types'
 
 export const getSliders = async (): Promise<GetSliderResult | null> => {
   try {
-    const response = await instance.get('/api/main/sliders')
-    return response.data
+    const response = await instance.get('/api/sliders');
+    return response.data;
   } catch (error) {
-    return null; // در صورت بروز خطا، null برگردانید
+    return null;
   }
 }

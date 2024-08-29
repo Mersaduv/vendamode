@@ -21,6 +21,7 @@ export interface IProduct {
   price: number
   isFake: boolean
   isActive: boolean
+  isDeleted: boolean
   status: number
   brandId?: string
   brandName?: string
@@ -47,6 +48,7 @@ export interface IProduct {
 export interface GetStockItems {
   id?: string
   stockId?: string
+  isHidden: boolean
   imagesSrc?: {
     id: string
     imageUrl: string
@@ -58,6 +60,7 @@ export interface GetStockItems {
   quantity?: number
   price: number
   discount?: number
+  discountRemainingTime?: string
   [key: string]: any
 }
 

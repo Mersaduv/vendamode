@@ -2,7 +2,7 @@ import { Modal, Button } from '@/components/ui'
 import { ICategory } from '@/types'
 import SizesCombobox from '../selectorCombobox/SizesCombobox'
 import { useGetFeaturesQuery, useGetSizesQuery, useUpdateCategoryFeatureMutation } from '@/services'
-import { useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { HandleResponse } from '../shared'
 import { CategoryFeatureForm } from '@/services/category/types'
 import { ProductFeatureCombobox } from '../selectorCombobox'
@@ -15,6 +15,8 @@ interface Props {
   isShow: boolean
   onClose: () => void
   refetch: () => void
+  featureDb?: ProductFeature[] | undefined
+  setFeatureDb: Dispatch<SetStateAction<ProductFeature[] | undefined>>
 }
 const generateUniqueId = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -38,10 +40,9 @@ const hasSizeProperty: ProductFeature = {
 const FeaturesModal: React.FC<Props> = (props) => {
   // States
   const [stateFeature, setStateFeature] = useState<ProductFeature[]>([])
-  const [featureDb, setFeatureDb] = useState<ProductFeature[]>()
   const dispatch = useAppDispatch()
   // ? Props
-  const { category, isShow, onClose, refetch } = props
+  const { category, isShow, onClose, refetch, featureDb, setFeatureDb } = props
   if (category) {
     console.log(category, 'category')
   }
@@ -77,6 +78,7 @@ const FeaturesModal: React.FC<Props> = (props) => {
   }, [data])
 
   const handleFeatureSelect = (features: ProductFeature[]) => {
+    var x = features.find((x) => x.name === 'سایزبندی')
     setStateFeature((prevState) => {
       const newState = prevState.filter((item) => features.some((feature) => feature.id === item.id))
       features.forEach((feature) => {
@@ -137,15 +139,17 @@ const FeaturesModal: React.FC<Props> = (props) => {
           className="flex h-full flex-col z-[199] gap-y-5 bg-white  py-5 pb-0 md:rounded-lg "
         >
           <Modal.Header notBar onClose={onClose}>
-            <div className="text-start text-base">انتخاب سایزبندی برای {category?.name}</div>
+          <div className="text-start text-base flex gap-2">
+              انتخاب ویژگی برای <div className="text-sky-500"> {category?.name}</div>
+            </div>
           </Modal.Header>
           <Modal.Body>
-            <div className="space-y-4 bg-white   text-center md:rounded-lg">
+            <div className="space-y-4 bg-white   text-center md:rounded-lg w-full">
               <div className="flex items-center w-full gap-x-12 px-6">
-                <span>ویژگی ها</span>
+                <span className='whitespace-nowrap'>مقادیر</span>
                 <div className="w-full">
                   <ProductFeatureCombobox
-                  hasSizeProperty={hasSizeProperty}
+                    hasSizeProperty={hasSizeProperty}
                     onFeatureSelect={handleFeatureSelect}
                     setStateFeature={setStateFeature}
                     featureList={featureDb ?? []}
@@ -161,7 +165,7 @@ const FeaturesModal: React.FC<Props> = (props) => {
                   onClick={onConfirm}
                   isLoading={isLoadingUpdate}
                 >
-                  ذخیره
+                  بروزرسانی
                 </Button>
               </div>
             </div>

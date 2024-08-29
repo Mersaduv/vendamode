@@ -60,7 +60,7 @@ const FeatureValues: NextPage = () => {
     refetch,
     ...featureValuesQueryProps
   } = useGetFeatureValuesQuery({
-    pageSize: 5,
+    pageSize: 20,
     page: featureValuesPage,
     search: searchTerm,
     featureIds: featureIds,
@@ -151,7 +151,7 @@ const FeatureValues: NextPage = () => {
       />
 
       <FeatureValueModal
-        title="بروزرسانی"
+        title="ویرایش"
         refetch={refetch}
         featureValue={stateFeatureValue}
         productFeature={featureDb?.data}
@@ -162,6 +162,7 @@ const FeatureValues: NextPage = () => {
       />
 
       <ConfirmDeleteModal
+        deleted
         title="مقدار ویژگی"
         isLoading={isLoadingDelete}
         isShow={isShowConfirmDeleteModal}
@@ -178,7 +179,9 @@ const FeatureValues: NextPage = () => {
 
           <div id="_adminFeatureValues">
             <div className="flex gap-y-4 pt-4 px-6 sm:flex-row flex-col items-center justify-between">
-              <h3>پیکربندی {featureDb?.data?.name}</h3>
+              <div className="flex gap-2">
+                پیکربندی <div className="text-sky-500">{featureDb?.data?.name}</div>
+              </div>
               <div className="flex flex-col xs:flex-row items-center gap-4">
                 <Button
                   onClick={featureValuesModalHandlers.open}
@@ -231,7 +234,7 @@ const FeatureValues: NextPage = () => {
                   <tbody>
                     {featureValuesData?.data?.data &&
                       featureValuesData?.data?.data.map((featureValue, index) => {
-                        console.log(featureValue.hexCode)
+                        console.log(featureValue)
 
                         return (
                           <tr key={featureValue.id} className={`h-16 border-b ${index % 2 !== 0 ? 'bg-gray-50' : ''}`}>
@@ -245,8 +248,11 @@ const FeatureValues: NextPage = () => {
                             </td>
                             {featureValue.hexCode !== null && (
                               <td className="text-center">
-                                <div className='flex justify-center'>
-                                  <div className="w-8 h-8 rounded border border-black" style={{ backgroundColor: featureValue.hexCode }}></div>
+                                <div className="flex justify-center">
+                                  <div
+                                    className="w-8 h-8 rounded border border-black"
+                                    style={{ backgroundColor: featureValue.hexCode }}
+                                  ></div>
                                 </div>
                               </td>
                             )}
@@ -260,7 +266,7 @@ const FeatureValues: NextPage = () => {
                             </td>
 
                             <td className="text-center text-sm text-gray-600">
-                              <div className="cursor-pointer">-</div>
+                              <div className="cursor-pointer">{featureValue.description !== '' ? '✓' : '-'}</div>
                             </td>
 
                             <td className="text-center text-sm text-gray-600">

@@ -7,19 +7,20 @@ import { useGetProductsQuery } from '@/services'
 import { EmptyCustomList } from '@/components/emptyList'
 import { ClientLayout } from '@/components/Layouts'
 import { ProductSubCategoriesList, ProductCard, ProductFilterControls, ProductSort } from '@/components/product'
-import { DataStateDisplay } from '@/components/shared'
+import { DataStateDisplay, MetaTags } from '@/components/shared'
 import { ProductSkeleton } from '@/components/skeleton'
 import { Pagination } from '@/components/navigation'
 import { FilterModal } from '@/components/modals'
 
 import type { NextPage } from 'next'
 import { digitsEnToFa } from '@persian-tools/persian-tools'
+import { useAppSelector } from '@/hooks'
 
 const ProductsHome: NextPage = () => {
   // ? Assets
   const { query } = useRouter()
-  const category = query?.category?.toString() ?? ''
-
+  const category = query?.categorySlug?.toString() ?? ''
+  const { generalSetting } = useAppSelector((state) => state.design)
   // ? Querirs
   //*    Get Products Data
   const { data, ...productsQueryProps } = useGetProductsQuery(query)
@@ -27,10 +28,11 @@ const ProductsHome: NextPage = () => {
   // ? Render(s)
   return (
     <>
-      <Head>
-        <title> وندامد | فروشگاه</title>
-      </Head>
-
+      <MetaTags
+        title={generalSetting?.title + ' | ' + 'فروشگاه' || 'فروشگاه اینترنتی'}
+        description={generalSetting?.shortIntroduction || 'توضیحاتی فروشگاه اینترنتی'}
+        keywords={generalSetting?.googleTags || ' اینترنتی, فروشگاه'}
+      />
       <ClientLayout>
         <main className="lg:container overflow-y-auto lg:max-w-[1900px] lg:px-3 xl:mt-10">
           <ProductSubCategoriesList category={category} />

@@ -7,7 +7,8 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { brandSchema } from '@/utils'
 import { IBrand, IBrandForm } from '@/types'
 import { useAppDispatch } from '@/hooks'
-import { setUpdated } from '@/store'
+import { setUpdated, showAlert } from '@/store'
+import { digitsEnToFa } from '@persian-tools/persian-tools'
 
 interface Props {
   title: string
@@ -138,12 +139,61 @@ const BrandModal: React.FC<Props> = (props) => {
   }
 
   const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setSelectedFile([...Array.from(e.target.files)])
-      if ([...Array.from(e.target.files)].length > 0) {
-        var file = e.target.files[0]
-        setValue('Thumbnail', file)
-      }
+    // if (e.target.files) {
+    //   setSelectedFile([...Array.from(e.target.files)])
+    //   if ([...Array.from(e.target.files)].length > 0) {
+    //     var file = e.target.files[0]
+    //     setValue('Thumbnail', file)
+    //   }
+    // }
+    const files = e.target.files
+    if (files) {
+      const validFiles: any[] = []
+      const maxFileSize = 40 * 1024 // 40 KB
+      const exactWidth = 300
+      const exactHeight = 200
+
+      Array.from(files).forEach((file) => {
+        if (file.type !== 'image/png') {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'فرمت عکس ها می بایست png باشد',
+            })
+          )
+          return
+        }
+
+        if (file.size > maxFileSize) {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'حجم عکس ها می بایست حداکثر 40 کیلوبایت باشد',
+            })
+          )
+          return
+        }
+
+        const img = new Image()
+        img.src = URL.createObjectURL(file)
+
+        img.onload = () => {
+          URL.revokeObjectURL(img.src)
+
+          if (img.width !== exactWidth || img.height !== exactHeight) {
+            dispatch(
+              showAlert({
+                status: 'error',
+                title: 'سایز عکس ها می بایست 300*200 پیکسل باشد',
+              })
+            )
+          } else {
+            validFiles.push(file)
+            setValue('Thumbnail', file)
+            setSelectedFile([...validFiles])
+          }
+        }
+      })
     }
   }
   console.log(formErrors)
@@ -158,6 +208,9 @@ const BrandModal: React.FC<Props> = (props) => {
           message={dataCreate?.message}
           onSuccess={() => {
             reset()
+            setSelectedFile([])
+            setIsSlider(false)
+            setIsActive(false)
             onClose()
             refetch()
           }}
@@ -172,6 +225,7 @@ const BrandModal: React.FC<Props> = (props) => {
           message={dataUpdate?.message}
           onSuccess={() => {
             reset()
+            setSelectedFile([])
             onClose()
             refetch()
           }}
@@ -184,10 +238,14 @@ const BrandModal: React.FC<Props> = (props) => {
           className="flex h-full flex-col z-[199] gap-y-5 bg-white py-5 pb-0 md:rounded-lg"
         >
           <Modal.Header notBar onClose={onClose}>
-            <div className="text-start text-base">{title} برند</div>
+            <div className="text-start text-base flex gap-2">
+              {' '}
+              {title} {title === 'افزودن' && ' برند'}
+              <div className="text-sky-500">{brand?.name}</div>
+            </div>
           </Modal.Header>
           <Modal.Body>
-            <form onSubmit={handleSubmit(onConfirm)} className="space-y-4 bg-white text-center md:rounded-lg">
+            <form onSubmit={handleSubmit(onConfirm)} className="space-y-4 bg-white text-center md:rounded-lg w-full">
               <div className="flex justify-between flex-col sm:flex-row">
                 <div className="flex flex-col flex-1">
                   <div className="flex items-center w-full gap-x-12 px-6">
@@ -236,16 +294,17 @@ const BrandModal: React.FC<Props> = (props) => {
                         customStyle="bg-sky-500"
                       />
                     </label>
-
-                    <label htmlFor={`isSlider-${mode}`} className="flex items-center gap-x-2">
-                      <CustomCheckbox
-                        name={`isSlider-${mode}`}
-                        checked={isSlider}
-                        onChange={handleIsSliderChange}
-                        label="نمایش در اسلایدر"
-                        customStyle="bg-sky-500"
-                      />
-                    </label>
+                    {isActive && (
+                      <label htmlFor={`isSlider-${mode}`} className="flex items-center gap-x-2">
+                        <CustomCheckbox
+                          name={`isSlider-${mode}`}
+                          checked={isSlider}
+                          onChange={handleIsSliderChange}
+                          label="نمایش در اسلایدر"
+                          customStyle="bg-sky-500"
+                        />
+                      </label>
+                    )}
                   </div>
                 </div>
                 {/* thumbnail  */}
@@ -283,17 +342,22 @@ const BrandModal: React.FC<Props> = (props) => {
               </div>
 
               <div className="flex flex-col md:flex-row gap-y-4 px-5 py-3 justify-between items-center gap-x-20 bg-[#f5f8fa]">
+                <div className="bg-gray-50 flex flex-col">
+                  <span className="font-normal text-[11px] text-start">سایز عکس میبایست 300*200 پیکسل باشد</span>
+                  <span className="font-normal text-[11px] text-start">حجم عکس میبایست حداکثر 40 کیلوبایت باشد</span>
+                  <span className="font-normal text-[11px] text-start">نوع عکس میبایست png باشد</span>
+                </div>
                 <div className="flex flex-col">
                   {formErrors.name && <p className="text-red-500 px-10">{formErrors.name.message}</p>}
                 </div>
                 <Button
                   type="submit"
                   className={`bg-sky-500 px-5 py-2.5 hover:bg-sky-600 ${
-                    !isValid ? 'bg-gray-300' : 'hover:text-black'
+                    !isValid ? 'bg-gray-300' : ''
                   } `}
                   isLoading={isLoadingCreate || isLoadingUpdate}
                 >
-                  {title === 'افزودن' ? 'انتشار ' : 'ذخیره'}
+                  {title === 'افزودن' ? 'انتشار ' : 'بروزرسانی'}
                 </Button>
               </div>
             </form>

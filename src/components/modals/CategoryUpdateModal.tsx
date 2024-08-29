@@ -13,6 +13,8 @@ import { CategoryFeatureForm } from '@/services/category/types'
 import { Resolver, SubmitHandler, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { categorySchema } from '@/utils'
+import { showAlert } from '@/store'
+import { useAppDispatch } from '@/hooks'
 
 interface Props {
   title: string
@@ -34,7 +36,7 @@ const CategoryUpdateModal: React.FC<Props> = (props) => {
   const [stateCategoryData, setStateCategoryData] = useState<ICategoryForm>({
     level: 0,
     name: '',
-    isActive: false,
+    isActive: true,
   } as ICategoryForm)
   const [selectedMainFile, setSelectedMainFile] = useState<File[]>([])
 
@@ -66,9 +68,9 @@ const CategoryUpdateModal: React.FC<Props> = (props) => {
   const defaultValues: Partial<ICategoryForm> = {
     name: '',
     level: 0,
-    isActive: false, // Add default value for isActive
+    isActive: true, // Add default value for isActive
   }
-
+  const dispatch = useAppDispatch()
   // ? Form Hook
   const {
     handleSubmit,
@@ -93,6 +95,7 @@ const CategoryUpdateModal: React.FC<Props> = (props) => {
           id: category.id,
           name: category.name,
           isActive: category.isActive ?? false, // Ensure isActive has a boolean value
+          isActiveProduct: category.isActiveProduct,
           level: category.level,
           parentCategoryId: category.parentCategoryId,
           mainCategoryId: category.parentCategoryId,
@@ -135,14 +138,64 @@ const CategoryUpdateModal: React.FC<Props> = (props) => {
   // }
 
   const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setSelectedMainFile([...Array.from(e.target.files)])
-      if ([...Array.from(e.target.files)].length > 0) {
-        var ffff = e.target.files[0]
-        setValue('thumbnail', ffff)
-      } else {
-        setValue('thumbnail', null)
-      }
+    // if (e.target.files) {
+    //   setSelectedMainFile([...Array.from(e.target.files)])
+    //   if ([...Array.from(e.target.files)].length > 0) {
+    //     var ffff = e.target.files[0]
+    //     setValue('thumbnail', ffff)
+    //   } else {
+    //     setValue('thumbnail', null)
+    //   }
+    // }
+    const files = e.target.files
+    if (files) {
+      const validFiles: any[] = []
+      const maxFileSize = 30 * 1024 // 40 KB
+      const exactWidth = 200
+      const exactHeight = 200
+
+      // تبدیل FileList به آرایه
+      Array.from(files).forEach((file) => {
+        if (file.type !== 'image/png') {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'فرمت عکس ها می بایست png باشد',
+            })
+          )
+          return
+        }
+
+        if (file.size > maxFileSize) {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'حجم عکس ها می بایست حداکثر 30 کیلوبایت باشد',
+            })
+          )
+          return
+        }
+
+        const img = new Image()
+        img.src = URL.createObjectURL(file)
+
+        img.onload = () => {
+          URL.revokeObjectURL(img.src)
+
+          if (img.width !== exactWidth || img.height !== exactHeight) {
+            dispatch(
+              showAlert({
+                status: 'error',
+                title: 'سایز عکس ها می بایست 200*200 پیکسل باشد',
+              })
+            )
+          } else {
+            validFiles.push(file)
+            setValue('thumbnail', file)
+            setSelectedMainFile([...validFiles])
+          }
+        }
+      })
     }
   }
 
@@ -221,10 +274,12 @@ const CategoryUpdateModal: React.FC<Props> = (props) => {
           className="flex h-full flex-col z-[199] gap-y-5 bg-white py-5 pb-0 md:rounded-lg"
         >
           <Modal.Header notBar onClose={onClose}>
-            <div className="text-start text-base">{title} دسته بندی</div>
+            <div className="text-start text-base flex gap-2">
+              {title} <div className="text-sky-500">{category?.name}</div>
+            </div>
           </Modal.Header>
           <Modal.Body>
-            <form onSubmit={handleSubmit(onConfirm)} className="space-y-4 bg-white text-center md:rounded-lg">
+            <form onSubmit={handleSubmit(onConfirm)} className="space-y-4 bg-white text-center md:rounded-lg w-full">
               <div className="flex items-center w-full gap-x-12 px-6">
                 <div className="relative mb-3 w-full">
                   <input
@@ -289,7 +344,7 @@ const CategoryUpdateModal: React.FC<Props> = (props) => {
                   // onClick={onConfirm}
                   isLoading={isLoadingCreate || isLoadingUpdate}
                 >
-                  {stateCategoryData.id ? 'به‌روزرسانی' : 'انتشار'}
+                  {stateCategoryData.id ? 'بروزرسانی' : 'انتشار'}
                 </Button>
               </div>
             </form>

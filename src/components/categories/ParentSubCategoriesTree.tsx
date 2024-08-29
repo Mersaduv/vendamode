@@ -17,6 +17,7 @@ import { useRouter } from 'next/router'
 import { useDeleteCategoryMutation } from '@/services'
 import { HandleResponse } from '../shared'
 import { showAlert } from '@/store'
+import { ProductFeature } from '@/services/feature/types'
 
 interface Props {
   subCategories: ICategory[]
@@ -61,7 +62,7 @@ const ParentSubCategoriesTree: React.FC<Props> = (props) => {
     const [deleteInfo, setDeleteInfo] = useState({
       id: '',
     })
-
+    const [featureDb, setFeatureDb] = useState<ProductFeature[]>()
     //*    Delete Category
     const [
       deleteCategory,
@@ -124,6 +125,8 @@ const ParentSubCategoriesTree: React.FC<Props> = (props) => {
     return (
       <>
         <FeaturesModal
+          setFeatureDb={setFeatureDb}
+          featureDb={[]}
           refetch={refetch}
           category={stateCategoryFeatures ?? undefined}
           isShow={isShowFeaturesModal}

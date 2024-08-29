@@ -1,5 +1,7 @@
-
 export { default as LoginForm } from './LoginForm'
 export { default as ProfileForm } from './ProfileForm'
 export { default as ProductForm } from './ProductForm'
-export { default as TextEditor } from './TextEditor'
+export { default as ProductFormEdit } from './ProductFormEdit'
+export { default as MainPageAdsForm } from './MainPageAdsForm'
+export { default as ArticleForm } from './ArticleForm'
+export { default as DesignForm } from './DesignForm'

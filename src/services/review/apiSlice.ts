@@ -12,7 +12,7 @@ import type {
   MsgResult,
 } from './types'
 import { ServiceResponse } from '@/types'
-import { getToken } from '@/utils'
+import { generateQueryParams, getToken } from '@/utils'
 
 export const reviewApiSlice = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -36,6 +36,46 @@ export const reviewApiSlice = baseApi.injectEndpoints({
           : ['Review'],
     }),
 
+    getAllArticleReviews: builder.query<GetReviewsResult, GetReviewsQuery>({
+      query: ({ ...params }) => {
+        const queryParams = generateQueryParams(params)
+        return {
+          url: `/api/all-articleReviews?${queryParams}`,
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      },
+      providesTags: (result) =>
+        result?.data?.pagination.data
+          ? [
+              ...result.data?.pagination?.data.map(({ id }) => ({
+                type: 'ArticleReview' as const,
+                id: id,
+              })),
+              'ArticleReview',
+            ]
+          : ['ArticleReview'],
+    }),
+
+    getArticleReviews: builder.query<GetProductReviewsResult, GetProductReviewsQuery>({
+      query: ({ id, page }) => ({
+        url: `/api/articleReviews/${id}?page=${page}&pageSize=5`,
+        method: 'GET',
+      }),
+      providesTags: (result) =>
+        result?.data?.pagination.data
+          ? [
+              ...result.data?.pagination.data.map(({ id }) => ({
+                type: 'ArticleReview' as const,
+                id: id,
+              })),
+              'ArticleReview',
+            ]
+          : ['ArticleReview'],
+    }),
+
     createReview: builder.mutation<ServiceResponse<boolean>, FormData>({
       query: (body) => ({
         url: `/api/reviews`,
@@ -46,6 +86,18 @@ export const reviewApiSlice = baseApi.injectEndpoints({
         body,
       }),
       invalidatesTags: ['Review'],
+    }),
+
+    createArticleReviews: builder.mutation<ServiceResponse<boolean>, FormData>({
+      query: (body) => ({
+        url: `/api/articleReviews`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body,
+      }),
+      invalidatesTags: ['ArticleReview'],
     }),
 
     getProductReviews: builder.query<GetProductReviewsResult, GetProductReviewsQuery>({
@@ -86,6 +138,9 @@ export const reviewApiSlice = baseApi.injectEndpoints({
         url: `/api/reviews/${id}`,
         method: 'PATCH',
         body,
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
       }),
       invalidatesTags: (result, err, arg) => [{ type: 'Review', id: arg.id }],
     }),

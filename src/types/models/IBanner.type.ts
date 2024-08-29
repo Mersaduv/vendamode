@@ -2,13 +2,11 @@ export interface IBanner {
   id: string
   categoryId: string
   image: {
-    url: string
+    imageUrl: string
     placeholder: string
   }
-  title: string
-  uri?: string
-  isPublic: boolean
+  link: string
   type: string
-  created: string
-  updated: string
+  isActive: boolean
+  index: number
 }

@@ -115,10 +115,25 @@ const SizeModal: React.FC<Props> = (props) => {
           className="flex h-full flex-col z-[199] gap-y-5 bg-white py-5 pb-0 md:rounded-lg"
         >
           <Modal.Header notBar onClose={onClose}>
-            <div className="text-start text-base">{title} مقدار ویژگی</div>
+            {/* <div className="text-start text-base flex gap-2">
+              {' '}
+              {title} <div className='text-sky-500'>{size?.name}</div>
+            </div> */}
+            <div className="text-start text-base flex gap-2">
+              {' '}
+              {title === 'ویرایش' ? (
+                'ویرایش'
+              ) : (
+                <div className='flex'>
+                  {title} {" "}
+                   مقدار {" "} برای {" "}<div className="text-sky-500 mx-2">سایزبندی</div>{' '}
+                </div>
+              )}{' '}
+              <div className="text-sky-500">{size?.name}</div>
+            </div>
           </Modal.Header>
           <Modal.Body>
-            <form onSubmit={handleSubmit(onConfirm)} className="space-y-4 bg-white text-center md:rounded-lg">
+            <form onSubmit={handleSubmit(onConfirm)} className="space-y-4 bg-white text-center md:rounded-lg w-full">
               <div className="flex items-center w-full gap-x-12 px-6">
                 <div className="relative mb-3 w-full">
                   <input
@@ -162,11 +177,11 @@ const SizeModal: React.FC<Props> = (props) => {
                 <Button
                   type="submit"
                   className={`bg-sky-500 px-5 py-2.5 hover:bg-sky-600 ${
-                    !isValid ? 'bg-gray-300' : 'hover:text-black'
+                    !isValid ? 'bg-gray-300' : ''
                   } `}
                   isLoading={isLoadingCreate || isLoadingUpdate}
                 >
-                  {title === 'افزودن' ? 'انتشار ' : 'ذخیره'}
+                  {title === 'افزودن' ? 'انتشار ' : 'بروزرسانی'}
                 </Button>
               </div>
             </form>

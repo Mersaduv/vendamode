@@ -23,8 +23,9 @@ const SearchModal: React.FC<Props> = (props) => {
   const [search, setSearch] = useState('')
   const searchRef = useRef<HTMLInputElement | null>(null)
   const [isShowSearchModal, searchModalHanlders] = useDisclosure()
+  const [isShowSearchInput, setIsShowSearchInput] = useState(false)
   const debouncedSearch = useDebounce(search, 1200)
-
+  const searchInputRef = useRef<HTMLDivElement>(null)
   // ? Search Products Query
   const { data, ...productQueryProps } = useGetProductsQuery(
     {
@@ -60,44 +61,43 @@ const SearchModal: React.FC<Props> = (props) => {
   const handleRemoveSearch = () => {
     setSearch('')
   }
+  useEffect(() => {
+    if (isShowSearchInput && searchRef.current) {
+      searchRef.current.focus() // فوکوس کردن بر روی input
+    }
+  }, [isShowSearchInput])
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchInputRef.current && !searchInputRef.current.contains(event.target as Node)) {
+        setIsShowSearchInput(false)
+      }
+    }
 
+    document.addEventListener('mousedown', handleClickOutside)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
   // ? Render(s)
   return (
     <>
-      <button
-        onClick={searchModalHanlders.open}
-        className="flex w-full z-0  rounded-md bg-zinc-200/80 items-center transition duration-700 ease-in-out"
-      >
-        <Search className="icon m-2" />
-        <span className="mr-">جستجو</span>
-      </button>
-
-      <Modal isShow={isShowSearchModal} onClose={searchModalHanlders.close} effect="bottom-to-top">
-        <Modal.Content
-          onClose={searchModalHanlders.close}
-          className="flex h-screen flex-col gap-y-3 bg-white py-3 pl-2 pr-4 md:rounded-lg lg:h-fit"
-        >
-          <Modal.Header notBar onClose={searchModalHanlders.close}>
-            جستجو محصول
-          </Modal.Header>
-          <Modal.Body>
-            <div className="my-3 flex flex-row-reverse rounded-md bg-zinc-200/80">
-              <button type="button" className="p-2.5" onClick={handleRemoveSearch}>
-                <Close className="h-4 w-4 text-gray-700 md:h-5 md:w-5" />
-              </button>
+      <div className={`sm:w-2/3 w-full border relative rounded-md ${isShowSearchInput ? 'rounded-b-none' : ''} `}>
+        {/* input   */}
+        {isShowSearchInput ? (
+          <div ref={searchInputRef} className="w-full rounded-md rounded-b-none px-3 pb-2 bg-white shadow-item">
+            <div className="flex flex-row-reverse  border-b border-blue-300 w-full ">
               <input
                 type="text"
                 placeholder="جستجو"
-                className="input grow bg-transparent p-1 text-right outline-none"
+                className="input grow placeholder:text-sm  pr-0 bg-transparent text-right focus:outline-none border-none focus:ring-0"
                 ref={searchRef}
                 value={search}
                 onChange={handleChange}
               />
-              <div className="p-2">
-                <Search className="icon " />
-              </div>
+              <Search className="icon m-2 ml-2 mr-0 text-gray-500" />
             </div>
-            <div className="overflow-y-auto lg:max-h-[500px]">
+            <div className="absolute shadow-searchModal h-[500px] overflow-auto rounded-md rounded-t-none sm:top-12 right-0 left-0 bg-white w-full border border-gray-200   border-t-0 p-3 ">
               <DataStateDisplay
                 {...productQueryProps}
                 dataLength={data ? data.data?.productsLength! : 0}
@@ -122,7 +122,11 @@ const SearchModal: React.FC<Props> = (props) => {
                             <div>
                               {/* {item.stockItems[0].discount! > 0 && <ProductDiscountTag price={item.stockItems[0].price ?? 0} discount={item.stockItems[0].discount ?? 0} />} */}
                             </div>
-                            <ProductPriceDisplay inStock={item.inStock} discount={item.stockItems[0].discount ?? 0} price={item.stockItems[0].price ?? 0} />
+                            <ProductPriceDisplay
+                              inStock={item.inStock}
+                              discount={item.stockItems[0].discount ?? 0}
+                              price={item.stockItems[0].price ?? 0}
+                            />
                           </div>
                         </Link>
                       </article>
@@ -130,11 +134,19 @@ const SearchModal: React.FC<Props> = (props) => {
                 </div>
               </DataStateDisplay>
               {/* <EmptySearchList /> */}
-              خالی
+              تاریخچه جستجو ..
             </div>
-          </Modal.Body>
-        </Modal.Content>
-      </Modal>
+          </div>
+        ) : (
+          <button
+            onClick={() => setIsShowSearchInput(true)}
+            className="flex w-full cursor-text  z-0  rounded-md bg-zinc-200/80 items-center transition duration-700 ease-in-out"
+          >
+            <Search className="icon m-2 text-gray-500" />
+            <div className="text-sm text-gray-600">جستجو</div>
+          </button>
+        )}
+      </div>
     </>
   )
 }

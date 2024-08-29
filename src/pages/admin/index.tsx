@@ -19,7 +19,7 @@ const AdminPage: NextPage = () => {
           <title>وندامد | مدیریت</title>
         </Head>
         <DashboardLayout>
-          <div className=" flex">
+          <div className=" flex " >
             <div>
             </div>
             <div className="">

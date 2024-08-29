@@ -14,8 +14,7 @@ import { HandleResponse } from '@/components/shared'
 import { PageContainer, FullScreenLoading } from '@/components/ui'
 
 import type { IProduct, IProductForm } from '@/types'
-import { ProductForm } from '@/components/form'
-import ProductFormEdit from '@/components/form/ProductFormEdit'
+import { ProductForm, ProductFormEdit } from '@/components/form'
 import { useGetSingleProductQuery, useUpdateProductMutation } from '@/services'
 import { useDispatch } from 'react-redux'
 import { setUpdated } from '@/store'
@@ -83,7 +82,7 @@ const Edit: NextPage<Props> = () => {
               <FullScreenLoading />
             </div>
           ) : selectedProduct?.data ? (
-            <section className="bg-[#f5f8fa] w-full px-8 lg:px-14">
+            <section className="bg-[#f5f8fa] w-full ">
               <ProductFormEdit
                 mode="edit"
                 isLoadingUpdate={isLoadingUpdate}

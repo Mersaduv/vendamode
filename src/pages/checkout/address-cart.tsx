@@ -13,7 +13,7 @@ import { Menu, Tab, Transition } from '@headlessui/react'
 import { CartItemDisplay, CartSummary, FreeShippingIndicator } from '@/components/cart'
 import { AddressListModal, AddressModal, RedirectToLogin } from '@/components/modals'
 import { Button } from '@/components/ui'
-import { HandleResponse, Header } from '@/components/shared'
+import { HandleResponse, Header, MetaTags } from '@/components/shared'
 import { formatNumber, roles } from '@/utils'
 import { Cart as CartIcon } from '@/icons'
 import { TbTruck } from 'react-icons/tb'
@@ -38,7 +38,7 @@ const AddressCart: NextPage = () => {
   const [isOpen, selectedAddress, { open, close }] = useDisclosureWithData()
   const [isShowAddressListModal, addressListModalHandlers] = useDisclosure()
   const [isShowAddressModal, addressModalHandlers] = useDisclosure()
-
+  const { generalSetting } = useAppSelector((state) => state.design)
   // const [isShowRedirectModal, redirectModalHandlers] = useDisclosure()
   const dispatch = useAppDispatch()
   const { push } = useRouter()
@@ -58,8 +58,7 @@ const AddressCart: NextPage = () => {
       if (addressData[0] !== undefined) {
         dispatch(setAddress(addressData[0]))
         setSelectedAddress(addressData[0])
-      }
-      else{
+      } else {
         dispatch(setAddress(isRefetchData[0]))
         setSelectedAddress(isRefetchData[0])
       }
@@ -89,9 +88,11 @@ const AddressCart: NextPage = () => {
     <ProtectedRouteWrapper allowedRoles={[roles.ADMIN, roles.SUPERADMIN, roles.USER]}>
       <Header />
       <main className="mt-[220px]">
-        <Head>
-          <title>وندامد | اطلاعات ارسال</title>
-        </Head>
+        <MetaTags
+          title={generalSetting?.title + ' | ' + 'ارسال اطلاعات' || 'فروشگاه اینترنتی'}
+          description={generalSetting?.shortIntroduction || 'توضیحاتی فروشگاه اینترنتی'}
+          keywords={generalSetting?.googleTags || ' اینترنتی, فروشگاه'}
+        />
         {/* steps header  */}
         <div className="flex flex-col items-center px-4 md:px-8">
           <div className="flex justify-between w-[300px]">

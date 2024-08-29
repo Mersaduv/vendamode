@@ -15,26 +15,49 @@ const ConfirmUpdateModal: React.FC<Props> = (props) => {
 
   // ? Render(s)
   return (
-    <Modal isShow={isShow} onClose={onClose} effect="ease-out">
-      <Modal.Content onClose={onClose}>
-        <Modal.Body>
-          <div className="space-y-4 bg-white px-3 py-6 text-center md:rounded-lg">
-            <p>
-              آیا موافق بروزرسانی <span className="font-bold text-green-500">{title}</span> تغییر داده شده هستید؟
-            </p>
-            <div className="flex justify-center gap-x-20">
-              <Button onClick={onConfirm} isLoading={isLoading}>
-                بروزرسانی و ادامه
-              </Button>
+    // <Modal isShow={isShow} onClose={onClose} effect="ease-out">
+    //   <Modal.Content onClose={onClose}>
+    //     <Modal.Body>
+    //       <div className="space-y-4 bg-white px-3 py-6 text-center md:rounded-lg">
+    //         <p>
+    //           آیا موافق به بازگردانی <span className="font-bold text-green-500">{title}</span> مد نظر هستید؟
+    //         </p>
+    //         <div className="flex justify-center gap-x-20">
+    //           <Button onClick={onConfirm} isLoading={isLoading}>
+    //             انجام
+    //           </Button>
 
-              <Button className="!bg-green-500" onClick={onCancel}>
-                لغو
-              </Button>
+    //           <Button className="!bg-red-500" onClick={onCancel}>
+    //             لغو
+    //           </Button>
+    //         </div>
+    //       </div>
+    //     </Modal.Body>
+    //   </Modal.Content>
+    // </Modal>
+    <>
+      <Modal isShow={isShow} onClose={onClose} effect="ease-out">
+        <Modal.Content onClose={onClose}>
+          <Modal.Body>
+            <div className="space-y-8 flex flex-col w-[70%] bg-white px-3 py-6 text-center md:rounded-lg pt-10">
+              <div className="flex justify-center">
+                <img className="w-36" src="/gifs/7211795.gif" alt="" />
+              </div>
+              آیا موافق به بازگردانی {title} مد نظر هستید؟
+              <div className="flex justify-center gap-x-3">
+                <Button className="bg-red-500 rounded" onClick={onConfirm} isLoading={isLoading}>
+                  بله
+                </Button>
+
+                <Button className="bg-gray-300 rounded" onClick={onCancel}>
+                  خیر
+                </Button>
+              </div>
             </div>
-          </div>
-        </Modal.Body>
-      </Modal.Content>
-    </Modal>
+          </Modal.Body>
+        </Modal.Content>
+      </Modal>
+    </>
   )
 }
 

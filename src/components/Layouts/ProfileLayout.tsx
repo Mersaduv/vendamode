@@ -1,16 +1,18 @@
 import { roles } from '@/utils'
 import { ProtectedRouteWrapper } from '@/components/user'
 import { UserProfileAside } from '@/components/shared'
+import { useAppSelector } from '@/hooks'
 
 interface Props {
   children: React.ReactNode
 }
 
 const ProfileLayout: React.FC<Props> = ({ children }) => {
+  const { isActive } = useAppSelector((state) => state.headerTextState)
   return (
     <>
     <ProtectedRouteWrapper allowedRoles={[roles.ADMIN, roles.SUPERADMIN, roles.USER]}>
-      <div className="lg:container md:flex md:max-w-7xl md:gap-x-6 md:px-3 pt-40 md:pt-32">
+      <div className={`lg:container md:flex  md:gap-x-6 md:px-3 pt-40 md:pt-32 sm:mt-24  ${isActive ? 'sm:mt-32' : ''}`}>
         <div className="hidden md:block">
           <UserProfileAside />
         </div>

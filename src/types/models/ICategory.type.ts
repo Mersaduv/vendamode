@@ -21,6 +21,7 @@ export interface ICategory {
   categorySizes?: CategorySizeDTO
   brandCount: number
   isActive: boolean
+  isActiveProduct: boolean
   isDeleted: boolean
   hasSizeProperty: boolean
   parentCategory?: ICategory

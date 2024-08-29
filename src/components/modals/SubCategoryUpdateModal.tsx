@@ -15,7 +15,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { categorySchema } from '@/utils'
 import { SelectParentCategoryCombobox } from '../selectorCombobox'
 import { useAppDispatch } from '@/hooks'
-import { setUpdated } from '@/store'
+import { setUpdated, showAlert } from '@/store'
 
 interface Props {
   title: string
@@ -85,6 +85,7 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
           id: category.id,
           name: category.name,
           isActive: category.isActive ?? false, // Ensure isActive has a boolean value
+          isActiveProduct: category.isActiveProduct ?? false, // Ensure isActive has a boolean value
           level: category.level,
           parentCategoryId: category.parentCategoryId,
           mainCategoryId: category.parentCategoryId,
@@ -114,14 +115,64 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
   }, [category])
 
   const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setSelectedFile([...Array.from(e.target.files)])
-      if ([...Array.from(e.target.files)].length > 0) {
-        var ffff = e.target.files[0]
-        setValue('thumbnail', ffff)
-      } else {
-        setValue('thumbnail', null)
-      }
+    // if (e.target.files) {
+    //   setSelectedFile([...Array.from(e.target.files)])
+    //   if ([...Array.from(e.target.files)].length > 0) {
+    //     var ffff = e.target.files[0]
+    //     setValue('thumbnail', ffff)
+    //   } else {
+    //     setValue('thumbnail', null)
+    //   }
+    // }
+    const files = e.target.files
+    if (files) {
+      const validFiles: any[] = []
+      const maxFileSize = 30 * 1024 // 30 KB
+      const exactWidth = 200
+      const exactHeight = 200
+
+      // تبدیل FileList به آرایه
+      Array.from(files).forEach((file) => {
+        if (file.type !== 'image/png') {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'فرمت عکس ها می بایست png باشد',
+            })
+          )
+          return
+        }
+
+        if (file.size > maxFileSize) {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'حجم عکس ها می بایست حداکثر 30 کیلوبایت باشد',
+            })
+          )
+          return
+        }
+
+        const img = new Image()
+        img.src = URL.createObjectURL(file)
+
+        img.onload = () => {
+          URL.revokeObjectURL(img.src)
+
+          if (img.width !== exactWidth || img.height !== exactHeight) {
+            dispatch(
+              showAlert({
+                status: 'error',
+                title: 'سایز عکس ها می بایست 200*200 پیکسل باشد',
+              })
+            )
+          } else {
+            validFiles.push(file)
+            setValue('thumbnail', file)
+            setSelectedFile([...validFiles])
+          }
+        }
+      })
     }
   }
 
@@ -137,7 +188,7 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
 
     formData.append('Name', data.name)
     formData.append('IsActive', data.isActive.toString())
-
+    formData.append('IsActiveProduct', data.isActiveProduct?.toString())
     if (data.thumbnail) {
       formData.append('Thumbnail', data.thumbnail)
     }
@@ -146,12 +197,15 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
       formData.append('Level', data.level.toString())
     }
 
-    if (parentCategory === undefined) {
-      console.log('ParentCategoryId', data.parentCategoryId);
-      
+    if (data.parentCategoryId === undefined) {
+      console.log('ParentCategoryId', data.parentCategoryId)
+      console.log(categoryParent, 'categoryParent')
+
       formData.append('ParentCategoryId', categoryParent.id)
     } else {
-      if (data.parentCategoryId) formData.append('ParentCategoryId', data.parentCategoryId)
+      if (data.parentCategoryId) {
+        formData.append('ParentCategoryId', data.parentCategoryId)
+      }
     }
 
     if (data.id != undefined) {
@@ -161,15 +215,22 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
     dispatch(setUpdated(true))
   }
 
-  const handleIsActiveChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleIsActiveChange = (e: React.ChangeEvent<HTMLInputElement>, feild: string) => {
     var isActive = e.target.checked
-    setStateCategoryData({
-      ...stateCategoryData,
-      isActive,
-    })
-    setValue('isActive', isActive)
+    if (feild === 'isActive') {
+      setStateCategoryData({
+        ...stateCategoryData,
+        isActive,
+      })
+      setValue('isActive', isActive)
+    } else {
+      setStateCategoryData({
+        ...stateCategoryData,
+        isActiveProduct: isActive,
+      })
+      setValue('isActiveProduct', isActive)
+    }
   }
-
   return (
     <>
       {(isSuccessUpdate || isErrorUpdate) && (
@@ -200,10 +261,12 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
           className="flex h-full flex-col z-[199] gap-y-5 bg-white py-5 pb-0 md:rounded-lg"
         >
           <Modal.Header notBar onClose={onClose}>
-            <div className="text-start text-base">{title} دسته بندی</div>
+            <div className="text-start text-base flex gap-2">
+              ویرایش <div className="text-sky-500"> {category?.name}</div>
+            </div>
           </Modal.Header>
           <Modal.Body>
-            <form onSubmit={handleSubmit(onConfirm)} className="space-y-4 bg-white text-center md:rounded-lg">
+            <form onSubmit={handleSubmit(onConfirm)} className="space-y-4 bg-white text-center md:rounded-lg w-full">
               <div className="flex items-center w-full gap-x-12 px-6">
                 <div className="relative mb-3 w-full">
                   <input
@@ -227,8 +290,20 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
                   <CustomCheckbox
                     name="isActive"
                     checked={stateCategoryData.isActive}
-                    onChange={handleIsActiveChange}
+                    onChange={(e) => handleIsActiveChange(e, 'isActive')}
                     label="وضعیت نمایش"
+                    customStyle="bg-sky-500"
+                  />
+                </label>
+              </div>
+
+              <div className="flex py-3 items-center gap-x-12 border mx-6 rounded-lg px-2">
+                <label htmlFor={`isActiveProduct-subUpdate`} className="flex items-center gap-x-2">
+                  <CustomCheckbox
+                    name={`isActiveProduct-subUpdate`}
+                    checked={stateCategoryData.isActiveProduct}
+                    onChange={(e) => handleIsActiveChange(e, 'isActiveProduct')}
+                    label="اجازه ثبت محصول"
                     customStyle="bg-sky-500"
                   />
                 </label>
@@ -236,7 +311,7 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
 
               <div className="flex py-3 pt-2 items-start gap-x-12 border mx-6 rounded-lg px-2">
                 <div className="flex flex-col w-full">
-                  <h3 className="text-start pb-2">زیر دسته بندی</h3>
+                  <h3 className="text-start pb-2">محل قرارگیری دسته</h3>
                   {categoryList.length > 0 && (
                     <SelectParentCategoryCombobox
                       selectedCategory={selectedCategory}
@@ -288,9 +363,7 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
                 </div>
                 <Button
                   type="submit"
-                  className={`bg-sky-500 px-5 py-2.5 hover:bg-sky-600 ${
-                    !isValid ? 'bg-gray-300' : 'hover:text-black'
-                  } `}
+                  className={`bg-sky-500 px-5 py-2.5 hover:bg-sky-600 ${!isValid ? 'bg-gray-300' : ''} `}
                   isLoading={isLoadingUpdate}
                 >
                   بروزرسانی

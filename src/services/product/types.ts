@@ -2,7 +2,7 @@ import type { IPagination, IProduct, QueryParams, ServiceResponse } from '@/type
 
 export type MsgResult = ServiceResponse<boolean>
 export type IdQuery = { id: string }
-type ProductsResult = {
+export type ProductsResult = {
   productsLength: number
   mainMaxPrice: number
   mainMinPrice: number
@@ -17,3 +17,7 @@ export type GetSimilarProductResult = ServiceResponse<IProduct[]>
 export type GetSingleProductResult = IProduct
 // export type CreateProductQuery = { body: IProductForm }
 // export type UpdateProductQuery = { body: IProduct; id: string }
+export type BulkRequest = {
+  productIds: string[]
+  action: string
+}

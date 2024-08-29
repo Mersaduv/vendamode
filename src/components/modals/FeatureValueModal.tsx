@@ -1,8 +1,5 @@
 import { Modal, Button } from '@/components/ui'
-import {
-  useCreateFeatureValueMutation,
-  useUpdateFeatureValueMutation,
-} from '@/services'
+import { useCreateFeatureValueMutation, useUpdateFeatureValueMutation } from '@/services'
 import { useEffect, useState } from 'react'
 import { HandleResponse } from '../shared'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -55,7 +52,7 @@ const FeatureValueModal: React.FC<Props> = (props) => {
   })
 
   useEffect(() => {
-    if (productFeature?.values?.some((value) => value.hexCode !== null)) {
+    if (productFeature?.values?.some((value) => value.name !== "رنگ")) {
       setIsColor(true)
     } else {
       setIsColor(false)
@@ -129,10 +126,21 @@ const FeatureValueModal: React.FC<Props> = (props) => {
           className="flex h-full flex-col z-[199] gap-y-5 bg-white py-5 pb-0 md:rounded-lg"
         >
           <Modal.Header notBar onClose={onClose}>
-            <div className="text-start text-base">{title} مقدار ویژگی</div>
+            <div className="text-start text-base flex gap-2">
+              {' '}
+              {title === 'ویرایش' ? (
+                'ویرایش'
+              ) : (
+                <div className='flex'>
+                  {title} {" "}
+                   مقدار {" "} برای {" "}<div className="text-sky-500 mx-2">{productFeature?.name}</div>{' '}
+                </div>
+              )}{' '}
+              <div className="text-sky-500">{featureValue?.name}</div>
+            </div>
           </Modal.Header>
           <Modal.Body>
-            <form onSubmit={handleSubmit(onConfirm)} className="space-y-4 bg-white text-center md:rounded-lg">
+            <form onSubmit={handleSubmit(onConfirm)} className="space-y-4 bg-white text-center md:rounded-lg w-full">
               <div className="flex items-center w-full gap-x-12 px-6">
                 <div className="relative mb-3 w-full">
                   <input
@@ -169,19 +177,6 @@ const FeatureValueModal: React.FC<Props> = (props) => {
                 </div>
               </div>
 
-              <div className="flex items-center w-full gap-x-12 px-6">
-                <label htmlFor="isColor" className="flex items-center  cursor-pointer">
-                  آیا مقدار رنگ می‌باشد؟
-                </label>
-                <input
-                  id="isColor"
-                  type="checkbox"
-                  className="rounded h-5 w-5 text-xl text-sky-500 cursor-pointer"
-                  checked={isColor}
-                  onChange={(e) => setIsColor(e.target.checked)}
-                />
-              </div>
-
               {isColor && (
                 <div className="flex items-center border rounded-lg py-1 mx-6 px-3.5">
                   <span>رنگ</span>
@@ -198,18 +193,17 @@ const FeatureValueModal: React.FC<Props> = (props) => {
               )}
 
               <div className="flex flex-col md:flex-row gap-y-4 px-5 py-3 justify-between items-center gap-x-20 bg-[#f5f8fa]">
-                {/* نمایش خطاهای اعتبارسنجی */}
                 <div className="flex flex-col">
                   {formErrors.name && <p className="text-red-500 px-10">{formErrors.name.message}</p>}
                 </div>
                 <Button
                   type="submit"
                   className={`bg-sky-500 px-5 py-2.5 hover:bg-sky-600 ${
-                    !isValid ? 'bg-gray-300' : 'hover:text-black'
+                    !isValid ? 'bg-gray-300' : ''
                   } `}
                   isLoading={isLoadingCreate || isLoadingUpdate}
                 >
-                  {title === 'افزودن' ? 'انتشار ' : 'ذخیره'}
+                  {title === 'افزودن' ? 'انتشار ' : 'بروزرسانی'}
                 </Button>
               </div>
             </form>

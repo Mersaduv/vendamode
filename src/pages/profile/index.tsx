@@ -2,13 +2,13 @@ import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { roles } from '@/utils'
 import { ProtectedRouteWrapper } from '@/components/user'
-import { Header, UserProfileAside } from '@/components/shared'
+import { Header, MetaTags, UserProfileAside } from '@/components/shared'
 import { ClientLayout, ProfileLayout } from '@/components/Layouts'
 import { Skeleton, PageContainer } from '@/components/ui'
 import type { NextPage } from 'next'
 import { useEditUserMutation, useGetUserInfoMeQuery, useGetUserInfoQuery } from '@/services'
 import { showAlert } from '@/store'
-import { useAppDispatch } from '@/hooks'
+import { useAppDispatch, useAppSelector } from '@/hooks'
 import { ProfileForm as ProfileFormType } from '@/types'
 import { ProfileForm } from '@/components/form'
 import { useEffect, useState } from 'react'
@@ -16,6 +16,8 @@ import { useEffect, useState } from 'react'
 const ProfilePage: NextPage = () => {
   const { data: userData, isLoading, refetch } = useGetUserInfoMeQuery()
   const [editUser, { isLoading: isEditLoading }] = useEditUserMutation()
+  const { isActive } = useAppSelector((state) => state.headerTextState)
+  const { generalSetting } = useAppSelector((state) => state.design)
   const [defaultValues, setDefaultValues] = useState<ProfileFormType | undefined>(undefined)
   const dispatch = useAppDispatch()
   useEffect(() => {
@@ -55,11 +57,13 @@ const ProfilePage: NextPage = () => {
 
   return (
     <ProtectedRouteWrapper allowedRoles={['مدیر سایت', 'مشتری', 'اپراتور']}>
-      <Head>
-        <title>وندامد | پروفایل</title>
-      </Head>
+      <MetaTags
+        title={generalSetting?.title + ' | ' + 'پروفایل' || 'فروشگاه اینترنتی'}
+        description={generalSetting?.shortIntroduction || 'توضیحاتی فروشگاه اینترنتی'}
+        keywords={generalSetting?.googleTags || ' اینترنتی, فروشگاه'}
+      />
       <Header />
-      <div className="lg:container lg:flex lg:max-w-7xl lg:gap-x-4 lg:px-3 xl:mt-10">
+      <div className={`lg:container lg:flex lg:max-w-7xl lg:gap-x-4 ${isActive ? '' : ''}`}>
         <ProfileLayout>
           <PageContainer title=" ">
             <div className="flex w-full mt-4">

@@ -15,7 +15,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { categorySchema } from '@/utils'
 import { SelectParentCategoryCombobox } from '../selectorCombobox'
 import { useAppDispatch } from '@/hooks'
-import { setUpdated } from '@/store'
+import { setUpdated, showAlert } from '@/store'
 
 interface Props {
   title: string
@@ -33,7 +33,8 @@ const SubCategoryModal: React.FC<Props> = (props) => {
   const [stateCategoryData, setStateCategoryData] = useState<ICategoryForm>({
     level: 0,
     name: '',
-    isActive: false,
+    isActive: true,
+    isActiveProduct: true,
   } as ICategoryForm)
   const [selectedFile, setSelectedFile] = useState<File[]>([])
   const [selectedCategory, setSelectedCategory] = useState<ICategory | null>(null)
@@ -53,7 +54,8 @@ const SubCategoryModal: React.FC<Props> = (props) => {
   const defaultValues: Partial<ICategoryForm> = {
     name: '',
     level: 0,
-    isActive: false, // Add default value for isActive
+    isActive: true, // Add default value for isActive
+    isActiveProduct: true,
   }
 
   // ? Form Hook
@@ -69,14 +71,64 @@ const SubCategoryModal: React.FC<Props> = (props) => {
   })
 
   const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setSelectedFile([...Array.from(e.target.files)])
-      if ([...Array.from(e.target.files)].length > 0) {
-        var ffff = e.target.files[0]
-        setValue('thumbnail', ffff)
-      } else {
-        setValue('thumbnail', null)
-      }
+    // if (e.target.files) {
+    //   setSelectedFile([...Array.from(e.target.files)])
+    //   if ([...Array.from(e.target.files)].length > 0) {
+    //     var ffff = e.target.files[0]
+    //     setValue('thumbnail', ffff)
+    //   } else {
+    //     setValue('thumbnail', null)
+    //   }
+    // }
+    const files = e.target.files
+    if (files) {
+      const validFiles: any[] = []
+      const maxFileSize = 30 * 1024 // 30 KB
+      const exactWidth = 200
+      const exactHeight = 200
+
+      // تبدیل FileList به آرایه
+      Array.from(files).forEach((file) => {
+        if (file.type !== 'image/png') {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'فرمت عکس ها می بایست png باشد',
+            })
+          )
+          return
+        }
+
+        if (file.size > maxFileSize) {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'حجم عکس ها می بایست حداکثر 30 کیلوبایت باشد',
+            })
+          )
+          return
+        }
+
+        const img = new Image()
+        img.src = URL.createObjectURL(file)
+
+        img.onload = () => {
+          URL.revokeObjectURL(img.src)
+
+          if (img.width !== exactWidth || img.height !== exactHeight) {
+            dispatch(
+              showAlert({
+                status: 'error',
+                title: 'سایز عکس ها می بایست 200*200 پیکسل باشد',
+              })
+            )
+          } else {
+            validFiles.push(file)
+            setValue('thumbnail', file)
+            setSelectedFile([...validFiles])
+          }
+        }
+      })
     }
   }
 
@@ -89,9 +141,20 @@ const SubCategoryModal: React.FC<Props> = (props) => {
 
   const onConfirm: SubmitHandler<ICategoryForm> = (data) => {
     const formData = new FormData()
+    console.log(parentCategory, 'parentCategory')
 
+    if (parentCategory?.level === 4) {
+      dispatch(
+        showAlert({
+          status: 'error',
+          title: 'تعداد زیر دسته ها نهایتا 4 عدد میباشد',
+        })
+      )
+      return
+    }
     formData.append('Name', data.name)
     formData.append('IsActive', data.isActive.toString())
+    formData.append('IsActiveProduct', data.isActiveProduct.toString())
 
     if (data.thumbnail) {
       formData.append('Thumbnail', data.thumbnail)
@@ -115,13 +178,21 @@ const SubCategoryModal: React.FC<Props> = (props) => {
     }
     dispatch(setUpdated(true))
   }
-  const handleIsActiveChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleIsActiveChange = (e: React.ChangeEvent<HTMLInputElement>, feild: string) => {
     var isActive = e.target.checked
-    setStateCategoryData({
-      ...stateCategoryData,
-      isActive,
-    })
-    setValue('isActive', isActive)
+    if (feild === 'isActive') {
+      setStateCategoryData({
+        ...stateCategoryData,
+        isActive,
+      })
+      setValue('isActive', isActive)
+    } else {
+      setStateCategoryData({
+        ...stateCategoryData,
+        isActiveProduct: isActive,
+      })
+      setValue('isActiveProduct', isActive)
+    }
   }
 
   return (
@@ -136,7 +207,7 @@ const SubCategoryModal: React.FC<Props> = (props) => {
             reset()
             onClose()
             refetch()
-            setStateCategoryData({} as ICategoryForm)
+            setStateCategoryData({ isActive: true, isActiveProduct: true } as ICategoryForm)
             setSelectedFile([])
           }}
         />
@@ -155,10 +226,10 @@ const SubCategoryModal: React.FC<Props> = (props) => {
           className="flex h-full flex-col z-[199] gap-y-5 bg-white py-5 pb-0 md:rounded-lg"
         >
           <Modal.Header notBar onClose={onClose}>
-            <div className="text-start text-base">{title} دسته بندی</div>
+            <div className="text-start text-base">{title} دسته </div>
           </Modal.Header>
           <Modal.Body>
-            <form onSubmit={handleSubmit(onConfirm)} className="space-y-4 bg-white text-center md:rounded-lg">
+            <form onSubmit={handleSubmit(onConfirm)} className="space-y-4 bg-white text-center md:rounded-lg w-full">
               <div className="flex items-center w-full gap-x-12 px-6">
                 <div className="relative mb-3 w-full">
                   <input
@@ -182,8 +253,20 @@ const SubCategoryModal: React.FC<Props> = (props) => {
                   <CustomCheckbox
                     name={`isActive-subCreate`}
                     checked={stateCategoryData.isActive}
-                    onChange={handleIsActiveChange}
+                    onChange={(e) => handleIsActiveChange(e, 'isActive')}
                     label="وضعیت نمایش"
+                    customStyle="bg-sky-500"
+                  />
+                </label>
+              </div>
+
+              <div className="flex py-3 items-center gap-x-12 border mx-6 rounded-lg px-2">
+                <label htmlFor={`isActiveProduct-subCreate`} className="flex items-center gap-x-2">
+                  <CustomCheckbox
+                    name={`isActiveProduct-subCreate`}
+                    checked={stateCategoryData.isActiveProduct}
+                    onChange={(e) => handleIsActiveChange(e, 'isActiveProduct')}
+                    label="اجازه ثبت محصول"
                     customStyle="bg-sky-500"
                   />
                 </label>
@@ -191,7 +274,7 @@ const SubCategoryModal: React.FC<Props> = (props) => {
 
               <div className="flex py-3 pt-2 items-start gap-x-12 border mx-6 rounded-lg px-2">
                 <div className="flex flex-col w-full">
-                  <h3 className="text-start pb-2">زیر دسته بندی</h3>
+                  <h3 className="text-start pb-2">محل قرارگیری دسته</h3>
                   {categoryList.length > 0 && (
                     <SelectParentCategoryCombobox
                       setParentCategory={setParentCategory}
@@ -237,9 +320,11 @@ const SubCategoryModal: React.FC<Props> = (props) => {
                 </div>
                 {/* validation errors */}
                 <div className="flex flex-col">
-                  {formErrors.name && <p className="text-red-500 px-10">{formErrors.name.message}</p>}
+                  {formErrors.name && <p className="text-red-500 px-10 whitespace-nowrap">{formErrors.name.message}</p>}
 
-                  {formErrors.thumbnail && <p className="text-red-500 px-10">{formErrors.thumbnail?.message}</p>}
+                  {formErrors.thumbnail && (
+                    <p className="text-red-500 whitespace-nowrap">{formErrors.thumbnail?.message}</p>
+                  )}
                 </div>
                 <Button
                   type="submit"

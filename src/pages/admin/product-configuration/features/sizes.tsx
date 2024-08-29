@@ -62,7 +62,7 @@ const Sizes: NextPage = () => {
     refetch,
     ...sizesQueryProps
   } = useGetSizesQuery({
-    pageSize: 5,
+    pageSize: 20,
     page: sizePage,
     search: searchTerm,
   })
@@ -150,7 +150,7 @@ const Sizes: NextPage = () => {
       />
 
       <SizeModal
-        title="بروزرسانی"
+        title="ویرایش"
         refetch={refetch}
         size={stateSize}
         isShow={isShowEditSizeModal}
@@ -160,6 +160,7 @@ const Sizes: NextPage = () => {
       />
 
       <ConfirmDeleteModal
+        deleted
         title="مقدار ویژگی"
         isLoading={isLoadingDelete}
         isShow={isShowConfirmDeleteModal}
@@ -176,7 +177,9 @@ const Sizes: NextPage = () => {
 
           <div id="_adminSizes">
             <div className="flex gap-y-4 pt-4 px-6 sm:flex-row flex-col items-center justify-between">
-              <h3>پیکربندی سایزبندی</h3>
+              <div className="flex gap-2">
+                پیکربندی <div className="text-sky-500">سایزبندی</div>
+              </div>
               <div className="flex flex-col xs:flex-row items-center gap-4">
                 <Button
                   onClick={sizeModalHandlers.open}
@@ -243,7 +246,7 @@ const Sizes: NextPage = () => {
                             </td>
 
                             <td className="text-center text-sm text-gray-600">
-                              <div className="cursor-pointer">-</div>
+                              <div className="cursor-pointer">{size.description !== '' ? '✓' : '-'}</div>
                             </td>
 
                             <td className="text-center text-sm text-gray-600">

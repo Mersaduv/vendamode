@@ -4,7 +4,7 @@ import { Close } from '@/icons'
 interface ModalProps {
   isShow: boolean
   onClose: () => void
-  effect: 'bottom-to-top' | 'ease-out' | 'buttom-to-fit'
+  effect: 'bottom-to-fix' | 'bottom-to-top' | 'ease-out' | 'buttom-to-fit'
   children: React.ReactNode
 }
 
@@ -37,7 +37,7 @@ const Modal: React.FC<ModalProps> = (props) => {
 
   // ? Styles
   const effectClasses =
-    effect === 'bottom-to-top'
+  effect === 'bottom-to-top'
       ? `
   ${isShow ? 'bottom-0 md:top-20' : '-bottom-full md:top-60'} w-full h-full  md:h-fit md:max-w-3xl 
    fixed transition-all duration-700 left-0 right-0 mx-auto`
@@ -114,7 +114,7 @@ const Header: React.FC<HeaderProps> = (props) => {
         className="text-base pt-2 flex items-center justify-between md:text-xl md:font-medium  font-normal border-b px-5 pb-3"
       >
         {children}
-        <button onClick={onClose} className="">
+        <button type='button' onClick={onClose} className="">
           <Close className="icon " />
         </button>
       </div>
@@ -135,7 +135,7 @@ interface BodyProps {
 }
 
 const Body: React.FC<BodyProps> = ({ children }) => {
-  return <>{children}</>
+  return <div className="flex justify-center">{children}</div>
 }
 
 const _default = Object.assign(Modal, {

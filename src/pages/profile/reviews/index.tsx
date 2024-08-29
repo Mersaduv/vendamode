@@ -2,14 +2,14 @@ import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { useState } from 'react'
 
-import { useDisclosure } from '@/hooks'
+import { useAppSelector, useDisclosure } from '@/hooks'
 
 import { useRouter } from 'next/router'
 
 import { EmptyCommentsList } from '@/components/emptyList'
 import { ProfileLayout } from '@/components/Layouts'
 import { ConfirmDeleteModal } from '@/components/modals'
-import { HandleResponse, Header } from '@/components/shared'
+import { HandleResponse, Header, MetaTags } from '@/components/shared'
 import { PageContainer } from '@/components/ui'
 
 import type { NextPage } from 'next'
@@ -17,7 +17,7 @@ import type { NextPage } from 'next'
 const Reviews: NextPage = () => {
   // ? Assets
   const { query } = useRouter()
-
+  const { generalSetting } = useAppSelector((state) => state.design)
   // ? Modals
   const [isShowConfirmDeleteModal, confirmDeleteModalHandlers] = useDisclosure()
 
@@ -94,13 +94,21 @@ const Reviews: NextPage = () => {
       )} */}
 
       <main id="profileReviews">
-        <Head>
-          <title>پروفایل | دیدگاه‌ها</title>
-        </Head>
+        <MetaTags
+          title={'پروفایل' + ' | ' + 'دیدکاه ها'}
+          description={generalSetting?.shortIntroduction || 'توضیحاتی فروشگاه اینترنتی'}
+          keywords={generalSetting?.googleTags || ' اینترنتی, فروشگاه'}
+        />
         <Header />
 
         <ProfileLayout>
           <PageContainer title="دیدگاه‌ها">
+            <div>
+              <div className="flex mt-3 px-4 text-sm md:text-base mx-3 border border-[#e90089] rounded-md py-2 justify-between items-center bg-[#fde5f3] text-[#e90089]">
+                {' '}
+                <h3 className="px-3 py-2.5">{'دیدگاه‌ها'}</h3>
+              </div>
+            </div>
             {/* <DataStateDisplay
               {...reviewsQueryProps}
               dataLength={data ? data.reviewsLength : 0}

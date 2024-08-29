@@ -168,7 +168,7 @@ export const categoryApiSlice = baseApi.injectEndpoints({
         url: `/api/category/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['Category'],
+      invalidatesTags: ['Category',"Article"],
     }),
   }),
 })

@@ -25,6 +25,7 @@ interface Props {
   isShow: boolean
   onClose: () => void
   refetch: () => void
+  mode?: 'create' | 'edit'
 }
 interface Tags {
   id: string
@@ -40,7 +41,7 @@ const fetchImageAsFile = async (url: string): Promise<File> => {
 
 const SubCategorySizesModal: React.FC<Props> = (props) => {
   // ? Props
-  const { category, isShow, onClose, refetch } = props
+  const { category, isShow, onClose, refetch, mode } = props
   const dispatch = useAppDispatch()
   // States
   const [tags, setTags] = useState<Tags[]>([])
@@ -84,47 +85,6 @@ const SubCategorySizesModal: React.FC<Props> = (props) => {
     },
   ] = useUpdateCategorySizeMutation()
 
-  const { data: productSizeCategoryData, refetch: refetchSizeCategoryData } = useGetSizeByProductSizeIdQuery({
-    categoryId: category?.id ?? '',
-    productSizeId: category?.productSizeId[0] ?? '',
-  })
-
-  useEffect(() => {
-    if (category) {
-      setSelectedFile([])
-      setInputValue('')
-      setTags([])
-      refetchSizeCategoryData()
-    }
-  }, [category,isSuccessUpdate, refetchSizeCategoryData])
-
-  useEffect(() => {
-    setSelectedFile([])
-    setInputValue('')
-    setTags([])
-    const loadData = async () => {
-      if (productSizeCategoryData && productSizeCategoryData?.data !== null) {
-        const imageFile = await fetchImageAsFile(productSizeCategoryData.data.imagesSrc?.imageUrl ?? '')
-        if (imageFile) {
-          setSelectedFile([imageFile])
-        }
-        const productSizeValues = productSizeCategoryData.data.productSizeValues || []
-        const tagsData = productSizeValues.map((value) => ({
-          id: value.id,
-          name: value.name,
-        }))
-        setTags(tagsData)
-        reset({
-          id: productSizeCategoryData.data.id,
-          sizeType: productSizeCategoryData.data.sizeType,
-          categoryIds: [category?.id],
-          thumbnail: imageFile,
-        })
-      }
-    }
-    loadData()
-  }, [productSizeCategoryData])
-
   useEffect(() => {
     setValue(
       'productSizeValues',
@@ -134,27 +94,77 @@ const SubCategorySizesModal: React.FC<Props> = (props) => {
 
   // ؟ Handler
   const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setSelectedFile([...Array.from(e.target.files)])
-      if ([...Array.from(e.target.files)].length > 0) {
-        setValue('thumbnail', e.target.files[0])
-      } else {
-        setValue('thumbnail', null)
-      }
+    // if (e.target.files) {
+    //   setSelectedFile([...Array.from(e.target.files)])
+    //   if ([...Array.from(e.target.files)].length > 0) {
+    //     setValue('thumbnail', e.target.files[0])
+    //   } else {
+    //     setValue('thumbnail', null)
+    //   }
+    // }
+    const files = e.target.files
+    if (files) {
+      const validFiles: any[] = []
+      const maxFileSize = 50 * 1024 // 50 KB
+      const exactWidth = 600
+      const exactHeight = 600
+
+      // تبدیل FileList به آرایه
+      Array.from(files).forEach((file) => {
+        if (file.type !== 'image/jpeg') {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'فرمت عکس ها می بایست jpg باشد',
+            })
+          )
+          return
+        }
+
+        if (file.size > maxFileSize) {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'حجم عکس ها می بایست حداکثر 50 کیلوبایت باشد',
+            })
+          )
+          return
+        }
+
+        const img = new Image()
+        img.src = URL.createObjectURL(file)
+
+        img.onload = () => {
+          URL.revokeObjectURL(img.src)
+
+          if (img.width !== exactWidth || img.height !== exactHeight) {
+            dispatch(
+              showAlert({
+                status: 'error',
+                title: 'سایز عکس ها می بایست 600*600 پیکسل باشد',
+              })
+            )
+          } else {
+            validFiles.push(file)
+            setValue('thumbnail', file)
+            setSelectedFile([...validFiles])
+          }
+        }
+      })
     }
   }
   const addTag = () => {
-    const trimmedInput = inputValue.trim();
+    const trimmedInput = inputValue.trim()
     if (trimmedInput !== '') {
-      const isDuplicate = tags.some(tag => tag.name === trimmedInput);
+      const isDuplicate = tags.some((tag) => tag.name === trimmedInput)
       if (isDuplicate) {
-        dispatch(showAlert({ status: 'error', title: 'مقدار وارد شده تکراری است' }));
+        dispatch(showAlert({ status: 'error', title: 'مقدار وارد شده تکراری است' }))
       } else {
-        setTags([...tags, { id: Date.now().toString(), name: trimmedInput }]);
-        setInputValue('');
+        setTags([...tags, { id: Date.now().toString(), name: trimmedInput }])
+        setInputValue('')
       }
     }
-  };
+  }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -184,13 +194,11 @@ const SubCategorySizesModal: React.FC<Props> = (props) => {
   }
 
   const onConfirm: SubmitHandler<IProductSizeForm> = (data) => {
-
     const formData = new FormData()
 
     if (data.id !== null && data.id !== undefined) {
       formData.append('Id', data.id)
     }
-
     if (category !== undefined) {
       const categoryIds = [category.id]
       categoryIds.forEach((value, index) => {
@@ -207,12 +215,8 @@ const SubCategorySizesModal: React.FC<Props> = (props) => {
       formData.append('Thumbnail', data.thumbnail)
     }
 
-    if (
-      category?.productSizeId?.length! > 0 ) {
-      updateSizeCategoryFeature(formData)
-    } else {
-      createSizeCategoryFeature(formData)
-    }
+    createSizeCategoryFeature(formData)
+
     dispatch(setUpdated(true))
   }
 
@@ -270,13 +274,15 @@ const SubCategorySizesModal: React.FC<Props> = (props) => {
           className="flex h-full flex-col z-[199] gap-y-5 bg-white  py-5 pb-0 md:rounded-lg "
         >
           <Modal.Header notBar onClose={onClose}>
-            <div className="text-start text-base">انتخاب اندازه برای {category?.name}</div>
+            <div className="text-start text-base flex gap-2">
+              انتخاب اندازه برای <div className="text-sky-500"> {category?.name}</div>
+            </div>
           </Modal.Header>
           <Modal.Body>
             <form
               onSubmit={handleSubmit(onConfirm)}
               onKeyDown={handleFormKeyDown}
-              className="space-y-4 bg-white   text-center md:rounded-lg"
+              className="space-y-4 bg-white   text-center md:rounded-lg w-full"
             >
               <div className="flex items-center gap-12 px-6">
                 <span>مقادیر</span>
@@ -357,6 +363,7 @@ const SubCategorySizesModal: React.FC<Props> = (props) => {
               <div className="flex px-5 py-3 justify-between items-center gap-x-20 bg-[#f5f8fa]">
                 <div className="flex flex-col items-start">
                   <p className="text-xs">ابعاد تصویر میبایست 600*600 پیکسل باشد</p>
+                  <p className="text-xs">حجم عکس میبایست حداکثر 50 کیلوبایت باشد</p>
                   <p className="text-xs">نوع عکس میبایست jpg باشد</p>
                 </div>
                 <Button
@@ -364,7 +371,7 @@ const SubCategorySizesModal: React.FC<Props> = (props) => {
                   className="bg-sky-500 px-5 py-3 hover:bg-sky-600"
                   isLoading={isLoadingCreate || isLoadingUpdate}
                 >
-                  ذخیره
+                  بروزرسانی
                 </Button>
               </div>
             </form>

@@ -32,7 +32,6 @@ const FeatureCombobox: React.FC<Props> = ({
   const [selectedSizes, setSelectedSizes] = useState<SizeDTO[]>([])
 
   let filteredFeatures: (FeatureValue | SizeDTO)[] = []
-console.log(features , "featuresfeaturesfeatures");
 
   useEffect(() => {
     if (stateColorData) {

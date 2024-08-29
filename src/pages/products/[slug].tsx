@@ -30,6 +30,7 @@ import { TfiMenuAlt, TfiRulerAlt2 } from 'react-icons/tfi'
 import { FaStar } from 'react-icons/fa'
 import { RiMenu5Fill } from 'react-icons/ri'
 import { digitsEnToFa } from '@persian-tools/persian-tools'
+import { MetaTags } from '@/components/shared'
 
 interface Props {
   product: IProduct
@@ -71,7 +72,7 @@ const SingleProduct: NextPage<Props> = (props) => {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const { lastSeen } = useAppSelector((state) => state.lastSeen)
-
+  const { generalSetting } = useAppSelector((state) => state.design)
   // ? initial color or size
   // useEffect(() => {
   //   if (product?.productSizeInfo?.columns != undefined) {
@@ -155,11 +156,11 @@ const SingleProduct: NextPage<Props> = (props) => {
   // ? Render(s)
   return (
     <>
-      <Head>
-        <title>{`خرید ${product.title}`}</title>
-        <meta name="description" content={product.title} />
-      </Head>
-
+      <MetaTags
+        title={generalSetting?.title + ' | ' + `خرید ${product.title}` || 'فروشگاه اینترنتی'}
+        description={generalSetting?.shortIntroduction + product.title || 'توضیحاتی فروشگاه اینترنتی'}
+        keywords={generalSetting?.googleTags || ' اینترنتی, فروشگاه'}
+      />
       <ClientLayout>
         <main className="mx-auto space-y-4 py-4 lg:max-w-[1550px] lg:mt-4 sm:mt-4 md:mt-6  -mt-20">
           <div className="flex items-center mr-6">

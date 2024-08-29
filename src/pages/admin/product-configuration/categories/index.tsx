@@ -41,7 +41,7 @@ const Categories: NextPage = () => {
   const { query, push } = useRouter()
   const categoryPage = query.page ? +query.page : 1
   const { data, refetch, ...categoriesQueryProps } = useGetAllCategoriesQuery({
-    pageSize: 5,
+    pageSize: 20,
     page: categoryPage,
     search: searchTerm,
   })
@@ -159,6 +159,7 @@ const Categories: NextPage = () => {
   return (
     <>
       <ConfirmDeleteModal
+        deleted
         title="دسته بندی"
         isLoading={isLoadingDelete}
         isShow={isShowConfirmDeleteModal}
@@ -252,15 +253,13 @@ const Categories: NextPage = () => {
                     emptyComponent={<EmptyCustomList />}
                     loadingComponent={<TableSkeleton count={4} />}
                   >
-                    <table className="w-[700px] md:w-[800px] lg:w-[900px] xl:w-full mx-auto">
+                    <table className="w-[700px] md:w-full mx-auto">
                       <thead className="bg-sky-300">
                         <tr>
                           <th className="text-sm py-3 px-2  font-normal w-[70px] text-center">عکس</th>
                           <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[150px] text-center">
                             نام
                           </th>
-                          <th className="text-sm py-3 px-2 text-gray-600 font-normal">سایزبندی</th>
-                          <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[150px]">برند</th>
                           <th className="text-sm py-3 px-2 text-gray-600 font-normal">زیردسته</th>
                           <th className="text-sm py-3 px-2 text-gray-600 font-normal">محصولات مرتبط</th>
                           <th className="text-sm py-3 px-2 text-gray-600 font-normal">وضعیت</th>
@@ -286,15 +285,6 @@ const Categories: NextPage = () => {
                                   {category.name}
                                 </div>
                               </td>
-                              <td className="text-center">
-                                <div
-                                  className="text-sky-500 cursor-pointer"
-                                  onClick={() => handlerEditSizeModal(category)}
-                                >
-                                  {digitsEnToFa(category.sizeCount)}
-                                </div>
-                              </td>
-                              <td className="text-sm text-gray-600 text-center">{digitsEnToFa(0)}</td>
                               <td className="text-center text-sm text-gray-600">
                                 {digitsEnToFa(countAllChildCategories(category))}
                               </td>
@@ -314,7 +304,7 @@ const Categories: NextPage = () => {
                                 )}
                               </td>
                               <td className="text-center text-sm text-gray-600">
-                                <Menu as="div" className="dropdown">
+                                <Menu key={category.id} as="div" className={`dropdown`}>
                                   <Menu.Button className="">
                                     <div className="w-full flex justify-center items-center">
                                       <span className="text-2xl hover:bg-gray-300 cursor-pointer  bg-gray-200 text-gray-700 p-1 pb-1.5 px-1.5 h-8 flex justify-center items-center rounded-md">
@@ -334,20 +324,43 @@ const Categories: NextPage = () => {
                                   >
                                     <Menu.Items className="dropdown__items w-32 ">
                                       <Menu.Item>
-                                        <button
-                                          onClick={() => handleChangeRoute(category.id)}
-                                          className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
-                                        >
-                                          <span>پیکربندی</span>
-                                        </button>
-                                      </Menu.Item>
-                                      <Menu.Item>
-                                        <button
-                                          onClick={() => handleDelete(category)}
-                                          className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
-                                        >
-                                          <span>حذف</span>
-                                        </button>
+                                        {/* <>
+                                          <button
+                                            onClick={() => handleChangeRoute(category.id)}
+                                            className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
+                                          >
+                                            <span>پیکربندی</span>
+                                          </button>
+
+                                          <button
+                                            onClick={() => handleDelete(category)}
+                                            className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
+                                          >
+                                            <span>حذف</span>
+                                          </button>
+                                        </> */}
+                                        {({ close }) => (
+                                          <>
+                                            <button
+                                              onClick={() => {
+                                                handleChangeRoute(category.id)
+                                                close()
+                                              }}
+                                              className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
+                                            >
+                                              <span>پیکربندی</span>
+                                            </button>
+                                            <button
+                                              onClick={() => {
+                                                handleDelete(category)
+                                                close()
+                                              }}
+                                              className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
+                                            >
+                                              <span>حذف</span>
+                                            </button>
+                                          </>
+                                        )}
                                       </Menu.Item>
                                     </Menu.Items>
                                   </Transition>

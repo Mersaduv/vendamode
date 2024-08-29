@@ -12,6 +12,7 @@ interface Props {
 
 const ProductSubCategoriesList: React.FC<Props> = (props) => {
   const { category } = props
+  console.log(category, 'categorycategory')
 
   const { childCategories, isLoading } = useGetSubCategoriesQuery(
     { slug: category },
@@ -37,7 +38,8 @@ const ProductSubCategoriesList: React.FC<Props> = (props) => {
               <Link
                 key={item.id}
                 href={`/products?${generateQueryParams({
-                  category: item.slug,
+                  categorySlug: item.slug,
+                  categoryId: item.id,
                   sort: '',
                 })}`}
                 className="rounded-md border-4 border-gray-100 px-3 pb-2 pt-4 text-center"

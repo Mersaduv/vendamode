@@ -25,9 +25,9 @@ const UserAuthLinks = () => {
   // ? Render(s)
   if (!userInfo) {
     return (
-      <Link href={`/authentication/login?redirectTo=${asPath}`} className="flex-center gap-x-1">
-        <div className="flex-center gap-x-2 lg:rounded-xl lg:border lg:border-[#e90089] lg:px-3 lg:py-2">
-          <Login className="text-2xl rotate-180" />
+      <Link href={`/authentication/login?redirectTo=${asPath}`} className="flex-center gap-x-1 p-1 py-2 z-50">
+        <div className="flex-center gap-x-2 lg:rounded-xl lg:border lg:border-[#e90089] lg:px-3 lg:py-1.5">
+          <Login className="text-2xl rotate-180 text-gray-500  ml-3 sm:ml-0" />
           <span className="text-sm hidden sm:block font-medium">ورود</span>
         </div>
       </Link>
@@ -84,7 +84,7 @@ const UserAuthLinks = () => {
                             <div>
                               <AiOutlineProduct className="h-6 w-6 text-black ml-1.5" />
                             </div>
-                            پیشخوان وندا
+                            پیشخوان 
                           </Link>
                         </div>
                       )}

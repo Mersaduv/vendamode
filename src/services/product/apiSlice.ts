@@ -1,6 +1,6 @@
 import baseApi from '@/services/baseApi'
 import { generateQueryParams, getToken } from '@/utils'
-import type { GetProductResult, GetProductsQuery, GetProductsResult, IdQuery, MsgResult } from './types'
+import type { BulkRequest, GetProductResult, GetProductsQuery, GetProductsResult, IdQuery, MsgResult } from './types'
 import { ICategory, ServiceResponse } from '@/types'
 
 export const productApiSlice = baseApi.injectEndpoints({
@@ -48,6 +48,26 @@ export const productApiSlice = baseApi.injectEndpoints({
       invalidatesTags: ['Product'],
     }),
 
+    deleteTrashProduct: builder.mutation<MsgResult, IdQuery>({
+      query: ({ id }) => {
+        return {
+          url: `/api/product/trash/${id}`,
+          method: 'POST',
+        }
+      },
+      invalidatesTags: ['Product'],
+    }),
+
+    restoreProduct: builder.mutation<MsgResult, IdQuery>({
+      query: ({ id }) => {
+        return {
+          url: `/api/product/restore/${id}`,
+          method: 'POST',
+        }
+      },
+      invalidatesTags: ['Product'],
+    }),
+
     createProduct: builder.mutation<ServiceResponse<string>, FormData>({
       query: (body) => ({
         url: `/api/product`,
@@ -57,7 +77,7 @@ export const productApiSlice = baseApi.injectEndpoints({
         },
         body,
       }),
-      invalidatesTags: ['Product'],
+      invalidatesTags: ['Product', 'Category'],
     }),
 
     updateProduct: builder.mutation<ServiceResponse<string>, FormData>({
@@ -65,11 +85,14 @@ export const productApiSlice = baseApi.injectEndpoints({
         url: `/api/product/update`,
         method: 'POST',
         body,
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
       }),
       invalidatesTags: ['Product'],
     }),
 
-    bulkUpdateProduct: builder.mutation<MsgResult, { productIds: string[]; isActive: boolean }>({
+    bulkUpdateProduct: builder.mutation<MsgResult, BulkRequest>({
       query: (body) => ({
         url: `/api/product/bulk-update`,
         method: 'POST',
@@ -88,4 +111,6 @@ export const {
   useDeleteProductMutation,
   useBulkUpdateProductMutation,
   useGetProductByCategoryQuery,
+  useDeleteTrashProductMutation,
+  useRestoreProductMutation,
 } = productApiSlice

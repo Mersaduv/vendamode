@@ -1,15 +1,25 @@
-import React, { Fragment, useEffect, useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import React, { forwardRef, Fragment, useEffect, useState } from 'react'
+import { useForm, Controller, useController, FieldError, Control } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import Modal from 'react-modal'
 import { profileFormSchema } from '@/utils'
 import { ProfileForm as ProfileFormType } from '@/types'
-import { TextField, LoginButton, Button, BackIconButton, DeleteIconButton, CloseIconButton } from '@/components/ui'
+import {
+  TextField,
+  LoginButton,
+  Button,
+  BackIconButton,
+  DeleteIconButton,
+  CloseIconButton,
+  DisplayError,
+} from '@/components/ui'
 import { user2, user3 } from '@/icons'
 import { Dialog, Transition } from '@headlessui/react'
 import jalaali from 'jalaali-js'
 import { showAlert } from '@/store'
 import { useAppDispatch } from '@/hooks'
+import { digitsEnToFa } from '@persian-tools/persian-tools'
+import { FaRegCalendar, FaRegCalendarAlt } from 'react-icons/fa'
 interface Props {
   onSubmit: (data: ProfileFormType) => void
   isLoading: boolean
@@ -24,12 +34,18 @@ const toJalaali = (date: Date) => {
     year: jalaaliDate.jy,
   }
 }
-
-const days = Array.from({ length: 31 }, (_, i) => i + 1)
+interface FieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  classStyle?: string | null
+  label?: string
+  errors?: FieldError | undefined
+  name: string
+  control: Control<any>
+}
+const days = Array.from({ length: 31 }, (_, i) => digitsEnToFa(String(i + 1)))
 const months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
 const currentDateJalaali = toJalaali(new Date())
 const currentYearJalaali = currentDateJalaali.year
-const years = Array.from({ length: 100 }, (_, i) => currentYearJalaali - i)
+const years = Array.from({ length: 100 }, (_, i) => digitsEnToFa(String(currentYearJalaali - i)))
 
 const ProfileForm: React.FC<Props> = ({ onSubmit, isLoading, defaultValues }) => {
   const {
@@ -43,6 +59,7 @@ const ProfileForm: React.FC<Props> = ({ onSubmit, isLoading, defaultValues }) =>
   } = useForm<ProfileFormType>({
     resolver: yupResolver(profileFormSchema),
     defaultValues,
+    mode: 'onChange',
   })
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [birthDate, setBirthDate] = useState({ day: '', month: '', year: '' })
@@ -53,25 +70,32 @@ const ProfileForm: React.FC<Props> = ({ onSubmit, isLoading, defaultValues }) =>
     if (defaultValues.birthDate !== '' && defaultValues.birthDate != '--') {
       const defaultBirthDate = new Date(defaultValues.birthDate!)
       const jalaaliBirthDate = toJalaali(defaultBirthDate)
-      setValue('birthDate', `${jalaaliBirthDate.year}-${jalaaliBirthDate.month}-${jalaaliBirthDate.day}`)
+      setValue(
+        'birthDate',
+        `${digitsEnToFa(jalaaliBirthDate.year)}/${digitsEnToFa(jalaaliBirthDate.month)}/${digitsEnToFa(
+          jalaaliBirthDate.day
+        )}`
+      )
     }
     reset(defaultValues)
   }, [defaultValues, reset, setValue])
 
-  const handleModalOpen = () => setIsModalOpen(true)
-  const handleModalClose = () => setIsModalOpen(false)
-
   const handleDateChange = (field: 'day' | 'month' | 'year', value: string) => {
     const birthDate = watch('birthDate') || ''
-    const [year, month, day] = birthDate.split('-')
+    const [year, month, day] = birthDate.split('/')
     const newBirthDate = {
       day: field === 'day' ? value : day,
       month: field === 'month' ? value : month,
       year: field === 'year' ? value : year,
     }
-    setValue('birthDate', `${newBirthDate.year}-${newBirthDate.month}-${newBirthDate.day}`)
+    setValue('birthDate', `${newBirthDate.year}/${newBirthDate.month}/${newBirthDate.day}`)
   }
+  const handleModalOpen = () => setIsModalOpen(true)
+  const handleModalClose = () => setIsModalOpen(false)
 
+  if (errors) {
+    console.log(errors, 'errors')
+  }
   return (
     <form className="gap-x-5 grid md:grid-cols-2 w-full md:relative" onSubmit={handleSubmit(onSubmit)}>
       <Controller
@@ -79,53 +103,65 @@ const ProfileForm: React.FC<Props> = ({ onSubmit, isLoading, defaultValues }) =>
         disabled
         control={control}
         render={({ field }) => (
-          <TextField {...field} control={control} errors={errors.mobileNumber} label="شماره کاربری / موبایل" />
+          <TextFieldFa
+            //  {...field} control={control} errors={errors.mobileNumber} label="شماره کاربری / موبایل"
+            label="شماره کاربری / موبایل"
+            control={control}
+            errors={errors.mobileNumber}
+            name="mobileNumber"
+            // type="number"
+            inputMode="numeric"
+            readOnly
+          />
         )}
       />
-      <Controller
-        name="gender"
-        control={control}
-        render={({ field }) => (
-          <div className="flex gap-8">
-            <div className="flex items-center">
-              <input
-                id="default-radio-1"
-                type="radio"
-                {...field}
-                value="بانو"
-                checked={field.value === 'بانو'}
-                name="default-radio"
-                className="w-4 h-4  mb-6 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-              />
-              <label
-                htmlFor="default-radio-1"
-                className="ms-2 cursor-pointer flex items-center gap-3 ml-3 text-sm font-medium text-gray-900 dark:text-gray-300"
-              >
-                بانو
-                <img className="w-10" src={user2.src} alt="user2" />
-              </label>
+      <div>
+        <span>جنسیت</span>
+        <Controller
+          name="gender"
+          control={control}
+          render={({ field }) => (
+            <div className="flex gap-10 justify-center">
+              <div className="flex items-center">
+                <input
+                  id="default-radio-1"
+                  type="radio"
+                  {...field}
+                  value="بانو"
+                  checked={field.value === 'بانو'}
+                  name="default-radio"
+                  className="w-4 h-4  mb-6 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                />
+                <label
+                  htmlFor="default-radio-1"
+                  className="ms-2 cursor-pointer flex items-center gap-3 ml-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+                >
+                  بانو
+                  <img className="w-10" src={user2.src} alt="user2" />
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  id="default-radio-2"
+                  type="radio"
+                  {...field}
+                  value="آقا"
+                  checked={field.value === 'آقا'}
+                  name="default-radio"
+                  className="w-4 h-4  mb-6 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                />
+                <label
+                  htmlFor="default-radio-2"
+                  className="ms-2 cursor-pointer flex items-center gap-3 ml-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+                >
+                  آقا
+                  <img className="w-10" src={user3.src} alt="user2" />
+                </label>
+              </div>
             </div>
-            <div className="flex items-center">
-              <input
-                id="default-radio-2"
-                type="radio"
-                {...field}
-                value="آقا"
-                checked={field.value === 'آقا'}
-                name="default-radio"
-                className="w-4 h-4  mb-6 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-              />
-              <label
-                htmlFor="default-radio-2"
-                className="ms-2 cursor-pointer flex items-center gap-3 ml-3 text-sm font-medium text-gray-900 dark:text-gray-300"
-              >
-                آقا
-                <img className="w-10" src={user3.src} alt="user2" />
-              </label>
-            </div>
-          </div>
-        )}
-      />
+          )}
+        />
+      </div>
       <Controller
         name="firstName"
         control={control}
@@ -142,25 +178,42 @@ const ProfileForm: React.FC<Props> = ({ onSubmit, isLoading, defaultValues }) =>
         name="nationalCode"
         control={control}
         render={({ field }) => (
-          <TextField {...field} control={control} errors={errors.nationalCode} label="کد ملی (اختیاری)" />
+          <TextFieldFa
+            label="کد ملی (اختیاری)"
+            control={control}
+            errors={errors.nationalCode}
+            name="nationalCode"
+            // type="number"
+            inputMode="numeric"
+            // {...field} inputMode="numeric" control={control} errors={errors.nationalCode} label="کد ملی (اختیاری)"
+          />
         )}
       />
       <Controller
         name="birthDate"
         control={control}
         render={({ field }) => (
-          <>
-            <TextField
-              {...field}
-              value={field.value}
-              control={control}
-              errors={errors.birthDate}
-              label="تاریخ تولد"
+          <div className="flex items-center">
+            <div className=" w-full">
+              <TextField
+                {...field}
+                value={field.value}
+                control={control}
+                errors={errors.birthDate}
+                label="تاریخ تولد"
+                readOnly
+                isBirthDay
+              />
+            </div>
+            <div
               onClick={handleModalOpen}
-              readOnly
-            />
+              className="bg-[#e90089] flex justify-center gap-3 hover:bg-[#e90088c0] text-center cursor-pointer border-[#e90089] rounded-l-md border text-sm text-white py-2.5 mt-1.5 w-full"
+            >
+              <FaRegCalendarAlt  className='w-5 h-5 text-white'  />
+              انتخاب تاریخ تولد
+            </div>
             <Transition appear show={isModalOpen} as={Fragment}>
-              <Dialog as="div" className="relative z-10" onClose={handleModalClose}>
+              <Dialog as="div" className="relative z-300" onClose={handleModalClose}>
                 <Transition.Child
                   as={Fragment}
                   enter="ease-out duration-300"
@@ -197,7 +250,7 @@ const ProfileForm: React.FC<Props> = ({ onSubmit, isLoading, defaultValues }) =>
                           <select
                             className="w-full border-none"
                             onChange={(e) => handleDateChange('day', e.target.value)}
-                            value={field.value?.split('-')[2] || ''}
+                            value={digitsEnToFa(field.value?.split('/')[2] || '')}
                           >
                             <option value="">روز</option>
                             {days.map((day) => (
@@ -209,11 +262,11 @@ const ProfileForm: React.FC<Props> = ({ onSubmit, isLoading, defaultValues }) =>
                           <select
                             className="w-full border-none"
                             onChange={(e) => handleDateChange('month', e.target.value)}
-                            value={field.value?.split('-')[1] || ''}
+                            value={digitsEnToFa(field.value?.split('/')[1] || '')}
                           >
                             <option value="">ماه</option>
                             {months.map((month, index) => (
-                              <option key={index + 1} value={index + 1}>
+                              <option key={index + 1} value={digitsEnToFa(String(index + 1))}>
                                 {month}
                               </option>
                             ))}
@@ -221,11 +274,11 @@ const ProfileForm: React.FC<Props> = ({ onSubmit, isLoading, defaultValues }) =>
                           <select
                             className="w-full border-none"
                             onChange={(e) => handleDateChange('year', e.target.value)}
-                            value={field.value?.split('-')[0] || ''}
+                            value={digitsEnToFa(field.value?.split('/')[0] || '')}
                           >
                             <option value="">سال</option>
                             {years.map((year) => (
-                              <option key={year} value={year}>
+                              <option key={year} value={digitsEnToFa(year)}>
                                 {year}
                               </option>
                             ))}
@@ -246,20 +299,28 @@ const ProfileForm: React.FC<Props> = ({ onSubmit, isLoading, defaultValues }) =>
                 </div>
               </Dialog>
             </Transition>
-          </>
+          </div>
         )}
       />
       <Controller
         name="bankAccountNumber"
         control={control}
         render={({ field }) => (
-          <TextField {...field} control={control} errors={errors.bankAccountNumber} label="شماره کارت بانکی" />
+          <TextField
+            {...field}
+            isBankNumber
+            control={control}
+            errors={errors.bankAccountNumber}
+            label="شماره کارت بانکی"
+          />
         )}
       />
       <Controller
         name="shabaNumber"
         control={control}
-        render={({ field }) => <TextField {...field} control={control} errors={errors.shabaNumber} label="شماره شبا" />}
+        render={({ field }) => (
+          <TextField {...field} isSheba control={control} type="number" errors={errors.shabaNumber} label="شماره شبا" />
+        )}
       />
       <Controller
         name="email"
@@ -268,7 +329,10 @@ const ProfileForm: React.FC<Props> = ({ onSubmit, isLoading, defaultValues }) =>
       />
       <div className="w-full flex justify-end">
         {' '}
-        <Button type="submit" className="md:mx-auto w-28 h-11 rounded-md md:absolute bottom-4 left-4">
+        <Button
+          type="submit"
+          className="md:mx-auto w-28 h-11 rounded-md md:absolute bottom-4 left-4 hover:bg-[#e90088bb]"
+        >
           {' '}
           ذخیره{' '}
         </Button>{' '}
@@ -276,4 +340,48 @@ const ProfileForm: React.FC<Props> = ({ onSubmit, isLoading, defaultValues }) =>
     </form>
   )
 }
+
+const TextFieldFa = forwardRef<HTMLInputElement, FieldProps>((props, ref) => {
+  const { classStyle, label, errors, name, type = 'text', control, ...restProps } = props
+
+  const { field } = useController({ name, control, rules: { required: true } })
+
+  const direction = /^[a-zA-Z0-9]+$/.test(field.value?.[0]) ? 'ltr' : 'ltr'
+  const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value
+
+    // فیلتر کردن کاراکترهای غیر عددی
+    const filteredValue = inputValue.replace(/[^0-9۰-۹]/g, '')
+
+    // تبدیل اعداد انگلیسی به فارسی
+    const faInputValue = digitsEnToFa(filteredValue)
+
+    field.onChange(faInputValue)
+  }
+
+  return (
+    <div>
+      {label && (
+        <label className="mb-3 block text-xs text-gray-700 md:min-w-max lg:text-sm" htmlFor={name}>
+          {label}
+        </label>
+      )}
+      <input
+        className={`block appearance-none focus:outline-none outline-none ring-0 focus:ring-0 w-full ${
+          classStyle ? classStyle : 'rounded-md bg-zinc-100'
+        } border border-gray-200  px-3 py-1.5 text-base outline-none transition-colors placeholder:text-center focus:border-[#ffb9e2] lg:text-lg`}
+        style={{ direction }}
+        id={name}
+        type="tel"
+        value={field?.value}
+        name={field.name}
+        onBlur={field.onBlur}
+        onChange={onChangeHandler}
+        ref={ref}
+        {...restProps}
+      />
+      <DisplayError errors={errors} />
+    </div>
+  )
+})
 export default ProfileForm

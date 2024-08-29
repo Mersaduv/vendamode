@@ -3,9 +3,9 @@ export default interface ProfileForm {
   gender: 'آقا' | 'بانو'
   firstName: string
   familyName: string
-  nationalCode?: string
+  nationalCode?: string | undefined
   birthDate?: string
-  bankAccountNumber?: string
-  shabaNumber?: string
+  bankAccountNumber?: string | undefined
+  shabaNumber?: string | undefined
   email?: string
 }

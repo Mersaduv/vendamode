@@ -34,11 +34,11 @@ export default function Sidebar() {
   // ? Render(s)
   return (
     <>
-      <button className="p-1 lg:hidden" type="button" onClick={sidebarHandlers.open}>
-        <BiCategory className="text-2xl" />
+      <button className="p-1 lg:hidden z-40" type="button" onClick={sidebarHandlers.open}>
+        <BiCategory className="text-2xl text-gray-500" />
       </button>
       <div
-        className={`fixed top-0 z-10 h-screen w-full duration-200 lg:hidden ${isSidebar ? 'right-0' : '-right-full'} `}
+        className={`fixed top-0 z-[500] h-screen w-full duration-200 lg:hidden ${isSidebar ? 'right-0' : '-right-full'} `}
       >
         <div
           className={`${
@@ -47,7 +47,7 @@ export default function Sidebar() {
           onClick={sidebarHandlers.close}
         />
 
-        <div className="absolute right-0 top-0 z-20 h-screen w-3/4 max-w-sm space-y-4 overflow-y-auto bg-white py-4">
+        <div className="absolute right-0 top-0 z-[500] h-screen w-3/4 max-w-sm space-y-4 overflow-y-auto bg-white py-4">
           {/* <LogoPersian className="mr-3 h-10 w-28" /> */}
           VENDA MODE
           <h5 className="border-t-2 border-gray-200  p-3">دسته‌بندی کالاها</h5>
@@ -60,7 +60,7 @@ export default function Sidebar() {
                   <Disclosure key={category.id}>
                     {({ open }) => (
                       <>
-                        <Disclosure.Button className="!mt-0 flex w-full items-center justify-between px-4 py-2">
+                        <Disclosure.Button className="!mt-0  flex w-full items-center justify-between px-4 py-2">
                           <span
                             className={`pl-3 font-semibold tracking-wide ${open ? 'text-[#e90089]' : 'text-gray-600'}`}
                           >

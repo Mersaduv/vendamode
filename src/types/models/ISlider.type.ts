@@ -5,8 +5,7 @@ export interface ISlider {
     imageUrl: string
     placeholder: string
   }
-  title: string
-  uri?: string
-  isPublic: boolean
-  isMain: boolean
+  link: string
+  type: string
+  isActive: boolean
 }

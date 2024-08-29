@@ -13,9 +13,11 @@ import {
   useGetAllCategoriesQuery,
   useGetFeaturesQuery,
   useGetParenSubCategoriesQuery,
+  useGetProductsQuery,
+  useGetSizesQuery,
 } from '@/services'
 import { useRouter } from 'next/router'
-import { ICategory } from '@/types'
+import { ICategory, IProduct, IStockItem } from '@/types'
 import { useAppDispatch, useAppSelector, useDisclosure } from '@/hooks'
 import { CategoryModal, CategoryUpdateModal, ConfirmDeleteModal, FeatureModal, SizesModal } from '@/components/modals'
 import { Fragment, useEffect, useState } from 'react'
@@ -51,10 +53,18 @@ const Features: NextPage = () => {
     refetch,
     ...featuresQueryProps
   } = useGetFeaturesQuery({
-    pageSize: 5,
+    pageSize: 20,
     page: featurePage,
     search: searchTerm,
   })
+
+  const { data: productList } = useGetProductsQuery({ pageSize: 9999999 })
+  const { data: sizeDb } = useGetSizesQuery({ pageSize: 9999999 })
+
+  const productWithSizeIds =
+    productList?.data?.pagination.data?.filter((product: IProduct) =>
+      product.stockItems.some((item: IStockItem) => item.sizeId !== null && item.sizeId !== '')
+    ) || null
 
   //*    Delete Category
   const [
@@ -70,6 +80,10 @@ const Features: NextPage = () => {
 
   const handleChangePage = (id: string) => {
     push(`/admin/products?featureIds=${id}`)
+  }
+
+  const handleSizeChangePage = (productWithSizeIds: IProduct[] | null) => {
+    push(`/admin/products?productIds=${productWithSizeIds?.map((x) => x.id)}`)
   }
 
   const handleChangeRoute = (id: string) => {
@@ -124,7 +138,7 @@ const Features: NextPage = () => {
     confirmDeleteModalHandlers.close()
     setDeleteInfo({ id: '' })
   }
-
+  const shouldHideSizeRow = searchTerm !== '' && !searchTerm.includes('س')
   return (
     <>
       {/* Handle Delete Response */}
@@ -140,7 +154,7 @@ const Features: NextPage = () => {
       )}
 
       <FeatureModal
-        title="افزودن"
+        title="افزودن ویژگی"
         refetch={refetch}
         isShow={isShowFeatureModal}
         onClose={() => {
@@ -159,6 +173,7 @@ const Features: NextPage = () => {
       />
 
       <ConfirmDeleteModal
+        deleted
         title="ویژگی"
         isLoading={isLoadingDelete}
         isShow={isShowConfirmDeleteModal}
@@ -218,21 +233,26 @@ const Features: NextPage = () => {
                         <div className="pr-2">نام ویژگی</div>
                       </th>
                       <th className="text-sm py-3 px-2 text-gray-600 font-normal">مقدار</th>
-                      <th className="text-sm py-3 px-2 text-gray-600 font-normal">محصولات مرتبط</th>
+                      <th className="text-sm py-3 px-2 text-gray-600 font-normal w-1/4">محصولات مرتبط</th>
                       <th className="text-sm py-3 px-2 text-gray-600 font-normal">عملیات</th>
                     </tr>
                   </thead>
                   <tbody>
                     {featurePage === 1 && (
-                      <tr className={`h-16 border-b bg-gray-50`}>
+                      <tr className={`h-16 border-b bg-gray-50 ${shouldHideSizeRow ? 'hidden' : ''}`}>
                         <td className="text-start">
-                          <div className="text-sm text-sky-500 cursor-pointer px-2">سایزبندی</div>
+                          <div className="text-sm cursor-pointer px-2">سایزبندی</div>
                         </td>
                         <td className="text-center">
-                          <div className="text-sky-500 cursor-pointer">{digitsEnToFa(0)}</div>
+                          <div className=" cursor-pointer">{digitsEnToFa(sizeDb?.data?.data?.length ?? 0)}</div>
                         </td>
                         <td className="text-center text-sm text-gray-600">
-                          <div className="text-sky-500 cursor-pointer">{digitsEnToFa(0)}</div>
+                          <div
+                            onClick={() => handleSizeChangePage(productWithSizeIds)}
+                            className="text-sky-500 cursor-pointer"
+                          >
+                            {digitsEnToFa(productWithSizeIds?.length ?? 0)}
+                          </div>
                         </td>
                         <td className="text-center text-sm text-gray-600">
                           <Menu as="div" className="dropdown">
@@ -262,11 +282,6 @@ const Features: NextPage = () => {
                                     <span>پیکربندی</span>
                                   </button>
                                 </Menu.Item>
-                                <Menu.Item>
-                                  <button className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full">
-                                    <span>حذف</span>
-                                  </button>
-                                </Menu.Item>
                               </Menu.Items>
                             </Transition>
                           </Menu>
@@ -280,13 +295,15 @@ const Features: NextPage = () => {
                             <td className="text-start">
                               <div
                                 onClick={() => handlerEditFeatureModal(feature)}
-                                className="text-sm text-sky-500 cursor-pointer px-2"
+                                className={`text-sm ${
+                                  feature.name === 'رنگ' ? '' : ' text-sky-500'
+                                }  cursor-pointer px-2`}
                               >
                                 {feature.name}
                               </div>
                             </td>
                             <td className="text-center">
-                              <div className="text-sky-500 cursor-pointer">{digitsEnToFa(feature.valueCount)}</div>
+                              <div className="cursor-pointer">{digitsEnToFa(feature.valueCount)}</div>
                             </td>
                             <td className="text-center text-sm text-gray-600">
                               <div className="text-sky-500 cursor-pointer" onClick={() => handleChangePage(feature.id)}>
@@ -314,20 +331,22 @@ const Features: NextPage = () => {
                                 >
                                   <Menu.Items className="dropdown__items w-32 ">
                                     <Menu.Item>
-                                      <button
-                                        onClick={() => handleChangeRoute(feature.id)}
-                                        className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
-                                      >
-                                        <span>پیکربندی</span>
-                                      </button>
-                                    </Menu.Item>
-                                    <Menu.Item>
-                                      <button
-                                        onClick={() => handleDelete(feature)}
-                                        className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
-                                      >
-                                        <span>حذف</span>
-                                      </button>
+                                      <>
+                                        <button
+                                          onClick={() => handleChangeRoute(feature.id)}
+                                          className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
+                                        >
+                                          <span>پیکربندی</span>
+                                        </button>
+                                        {feature.name === 'رنگ' ? null : (
+                                          <button
+                                            onClick={() => handleDelete(feature)}
+                                            className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
+                                          >
+                                            <span>حذف</span>
+                                          </button>
+                                        )}
+                                      </>
                                     </Menu.Item>
                                   </Menu.Items>
                                 </Transition>
