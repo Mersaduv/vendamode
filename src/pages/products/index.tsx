@@ -56,7 +56,7 @@ const ProductsHome: NextPage = () => {
                     )}
                   </div>
                   <div className='w-full flex flex-col'>
-                  <div className='mb-6'>دسته بندی محصولات : <span className='text-[#00c3e1] font-bold'>وندامد</span></div>
+                  <div className='mb-6'>دسته بندی محصولات : <span className='text-[#00c3e1] font-bold'>{generalSetting?.title}</span></div>
                   <ProductSort />
                   </div>
          
@@ -64,7 +64,7 @@ const ProductsHome: NextPage = () => {
                 <div className="flex gap-x-3 py-2 flex-col">
                   <div className="w-full lg:flex flex-col hidden">
                     <div className="mb-6 text-gray-400 text-sm -mt-2 md:-mt-0 md:text-lg md:text-gray-800">
-                      دسته بندی محصولات : <span className="text-[#00c3e1] md:font-bold">وندامد</span>
+                      دسته بندی محصولات : <span className="text-[#00c3e1] md:font-bold">{generalSetting?.title}</span>
                     </div>
                     <ProductSort />
                   </div>

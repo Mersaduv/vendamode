@@ -39,7 +39,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   const categoriesData = dataCategory?.data?.categoryList ?? []
 
   return {
-    revalidate: config.revalidate,
+    // revalidate: config.revalidate,
     props: {
       sliders: slidersData,
       banners: bannersData,
@@ -76,7 +76,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
               <DiscountSlider />
             </div>
           </div>
-          <CategoryList childCategories={childCategories} name={'وندامد'} homePage />
+          <CategoryList childCategories={childCategories} name={generalSetting?.title ?? ''} homePage />
           <hr className="pb-8 mx-8 border-t-2" />
           <LargeBanner data={banners} />
           <hr className="pb-8 mx-8 border-t-2" />

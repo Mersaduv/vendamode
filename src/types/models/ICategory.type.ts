@@ -29,4 +29,6 @@ export interface ICategory {
   parentCategoriesTree?: ICategory[]
   childCategories?: ICategory[]
   categories?: ICategory[]
+  created: string
+  lastUpdated: string
 }

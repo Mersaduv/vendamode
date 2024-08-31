@@ -60,7 +60,7 @@ const Products: NextPage = () => {
   const dispatch = useDispatch()
   const isUpdated = useAppSelector((state) => state.stateUpdate.isUpdated)
   const { name } = useAppSelector((state) => state.stateString)
-
+  const { generalSetting } = useAppSelector((state) => state.design)
   // ? state
   const [tabKey, setTabKey] = useState('allProducts')
   const [selectedCategories, setSelectedCategories] = useState<SelectedCategories>(initialSelectedCategories)
@@ -79,12 +79,13 @@ const Products: NextPage = () => {
   })
   const [bulkAction, setBulkAction] = useState<string>('')
   const [bulkUpdateProduct] = useBulkUpdateProductMutation()
-  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined)
+  const [selectedCategory, setSelectedCategory] = useState<string>('default')
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(undefined)
   const [selectInStock, setSelectInStock] = useState<string | undefined>(undefined)
   const [selectInStockState, setSelectInStockState] = useState<string | undefined>(undefined)
   const [searchTerm, setSearchTerm] = useState('')
   const [singleCategory, setSingleCategory] = useState(false)
+  const [filterClickCategory, setFilterClickCategory] = useState(false)
 
   // ? Get Categories Query
   const { categoriesData } = useGetCategoriesTreeQuery(undefined, {
@@ -92,9 +93,6 @@ const Products: NextPage = () => {
       categoriesData: data?.data,
     }),
   })
-  if (productIds) {
-    console.log(productIds, 'productIds')
-  }
   // ? Querirs
   //* Get Products Data
   const [productsPagination, setProductsPagination] = useState<GetProductsResult>()
@@ -118,7 +116,7 @@ const Products: NextPage = () => {
       sizes: sizes,
       brands: brands,
       isAdmin: true,
-      singleCategory: singleCategory,
+      singleCategory: filterClickCategory,
       isActive: status === 'isActive',
       inActive: status === 'inActive',
       isDeleted: status === 'isDeleted',
@@ -297,12 +295,21 @@ const Products: NextPage = () => {
   }
 
   const handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedCategoryId = event.target.value
-    setSelectedCategory(selectedCategoryId !== '' ? selectedCategoryId : undefined)
+    const selectedCategoryIdValue = event.target.value
+    console.log(event.target.value, 'selectedCategoryId handleCategoryChange')
+
+    setSelectedCategory(selectedCategoryIdValue !== '' ? selectedCategoryIdValue : 'default')
   }
 
   const handleFilterClick = () => {
-    setSelectedCategoryId(selectedCategory !== undefined ? selectedCategory : undefined)
+    if (singleCategory) {
+      setFilterClickCategory(true)
+    } else {
+      setFilterClickCategory(false)
+    }
+    console.log(selectedCategory, 'selectedCategory-selectedCategory')
+
+    setSelectedCategoryId(selectedCategory !== undefined ? selectedCategory : 'default')
   }
 
   const handleBulkAction = async () => {
@@ -432,8 +439,8 @@ const Products: NextPage = () => {
       setSingleCategory(false)
     }
   }
-    console.log(categoryId , "categoryId")
-  
+  console.log(categoryId, 'categoryId')
+
   return (
     <>
       {/* Confirm Delete Product Modal */}
@@ -560,10 +567,10 @@ const Products: NextPage = () => {
                     className="w-44 text-sm focus:outline-none appearance-none border-none"
                     name="انتخاب"
                     id=""
-                    value={categoryId ?? ""}
+                    value={categoryId || selectedCategoryId}
                     onChange={handleCategoryChange}
                   >
-                    <option className="appearance-none text-sm" value="">
+                    <option className="appearance-none text-sm" value="default">
                       همه دسته بندی ها
                     </option>
                     {allCategories?.map((category) => (
@@ -789,9 +796,9 @@ const Products: NextPage = () => {
                                       {handleIsChangeable(product) ? 'متغیر' : 'ساده'}
                                     </td>
                                     <td className="text-center text-sm text-gray-600">
-                                      {handleIsChangeable(product) ? '✓' : digitsEnToFa('1')}
+                                      {handleIsChangeable(product) && product.inStock > 0 ? '✓' : digitsEnToFa('0')}
                                     </td>
-                                    <td className="text-center text-sm text-gray-600">وندامد</td>
+                                    <td className="text-center text-sm text-gray-600">{generalSetting?.title}</td>
                                     <td className="text-center">
                                       {product.isActive ? (
                                         <span className="text-sm text-green-500">فعال</span>
@@ -957,7 +964,7 @@ const Products: NextPage = () => {
                                     <td className="text-center text-sm text-gray-600">
                                       {handleIsChangeable(product) ? '✓' : digitsEnToFa('1')}
                                     </td>
-                                    <td className="text-center text-sm text-gray-600">وندامد</td>
+                                    <td className="text-center text-sm text-gray-600">{generalSetting?.title}</td>
                                     <td className="text-center">
                                       {product.isActive ? (
                                         <span className="text-sm text-green-500">فعال</span>
@@ -1123,7 +1130,7 @@ const Products: NextPage = () => {
                                     <td className="text-center text-sm text-gray-600">
                                       {handleIsChangeable(product) ? '✓' : digitsEnToFa('1')}
                                     </td>
-                                    <td className="text-center text-sm text-gray-600">وندامد</td>
+                                    <td className="text-center text-sm text-gray-600">{generalSetting?.title}</td>
                                     <td className="text-center">
                                       {product.isActive ? (
                                         <span className="text-sm text-green-500">فعال</span>
@@ -1289,7 +1296,7 @@ const Products: NextPage = () => {
                                     <td className="text-center text-sm text-gray-600">
                                       {handleIsChangeable(product) ? '✓' : digitsEnToFa('1')}
                                     </td>
-                                    <td className="text-center text-sm text-gray-600">وندامد</td>
+                                    <td className="text-center text-sm text-gray-600">{generalSetting?.title}</td>
                                     <td className="text-center">
                                       {product.isActive ? (
                                         <span className="text-sm text-green-500">فعال</span>

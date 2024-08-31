@@ -169,6 +169,7 @@ const ProductForm: React.FC<Props> = (props) => {
     resolver: yupResolver(productSchema) as unknown as Resolver<IProductForm>,
     defaultValues: {
       IsActive: true,
+      Title: '',
     },
   })
 
@@ -403,6 +404,11 @@ const ProductForm: React.FC<Props> = (props) => {
     }
   }
 
+  const titleWatch = watch('Title')
+  const categoryIdWatch = watch('CategoryId')
+  const mainFileWatch = watch('MainThumbnail')
+  console.log(titleWatch, 'titleWatch')
+
   const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (files) {
@@ -448,7 +454,7 @@ const ProductForm: React.FC<Props> = (props) => {
             )
           } else {
             validFiles.push(file)
-            setValue('MainThumbnail', file)
+            setValue('MainThumbnail', file, { shouldValidate: true })
             setMainSelectedFiles([...validFiles])
           }
         }
@@ -1061,28 +1067,39 @@ const ProductForm: React.FC<Props> = (props) => {
           </>
         )}
         {/* validation errors */}
-        <div className="flex flex-col">
-          <p className={`text-red-500 h-5 px-10 ${formErrors.Title ? 'visible' : 'invisible'}`}>
-            {formErrors.Title && formErrors.Title.message}
-          </p>
-
-          <p className={`text-red-500 h-5 px-10 ${formErrors.CategoryId ? 'visible' : 'invisible'}`}>
-            {formErrors.CategoryId && formErrors.CategoryId.message}
-          </p>
-
-          <p className={`text-red-500 h-5 px-10 ${formErrors.MainThumbnail ? 'visible' : 'invisible'}`}>
-            {formErrors.MainThumbnail && formErrors.MainThumbnail.message}
-          </p>
-        </div>
         <div className="flex justify-end w-full">
-          {' '}
-          <Button
-            isLoading={isLoadingCreate}
-            type="submit"
-            className={` px-11 py-3 ${!isValid ? 'bg-gray-300' : 'hover:bg-[#e90088c4] '}  mb-10 float-start`}
-          >
-            انتشار
-          </Button>
+          <div className="flex flex-col">
+            <p className={`text-red-500 h-5 px-10  visible`}>
+              {formErrors.Title ? formErrors.Title.message : titleWatch !== '' ? '' : 'وارد کردن نام محصول الزامی است'}
+            </p>
+
+            <p className={`text-red-500 h-5 px-10  visible`}>
+              {formErrors.CategoryId
+                ? formErrors.CategoryId.message
+                : categoryIdWatch
+                ? ''
+                : 'انتخاب دسته بندی برای محصول الزامی است'}
+            </p>
+
+            <p className={`text-red-500 h-5 px-10 visible `}>
+              {formErrors.MainThumbnail
+                ? formErrors.MainThumbnail.message
+                : mainFileWatch
+                ? ''
+                : 'انتخاب تصویر نگاره الزامی است'}
+            </p>
+          </div>
+
+          <div className=" w-fit">
+            {' '}
+            <Button
+              isLoading={isLoadingCreate}
+              type="submit"
+              className={` px-11 py-3 ${!isValid ? 'bg-gray-300' : 'hover:bg-[#e90088c4] '}  `}
+            >
+              انتشار
+            </Button>
+          </div>
         </div>
       </form>
     </section>
@@ -1458,7 +1475,7 @@ const Table: React.FC<PropTable> = (props) => {
                 )}
                 <td className="px-4 whitespace-nowrap text-center py-2">
                   {shouldHideHeader ? (
-                    <div className="relative mb-3">
+                    <div className="relative mb-3 w-full">
                       <input
                         dir="ltr"
                         type="text"
@@ -1492,7 +1509,7 @@ const Table: React.FC<PropTable> = (props) => {
                 </td>
                 <td className="px-4 text-center py-2">
                   {shouldHideHeader ? (
-                    <div className="relative mb-3">
+                    <div className="relative mb-3 w-full">
                       <input
                         dir="ltr"
                         type="text"
@@ -1522,22 +1539,24 @@ const Table: React.FC<PropTable> = (props) => {
                 </td>
                 <td className="px-4 text-center py-2">
                   {shouldHideHeader ? (
-                    <div className="relative mb-3 flex items-center">
-                      <input
-                        dir="ltr"
-                        type="text"
-                        className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
-                        id="floatingInput"
-                        placeholder="فروش فوق العاده"
-                        onChange={(e) => handleInputChange(idx, 'discount', digitsFaToEn(e.target.value))}
-                        value={digitsEnToFa(addCommas(stockItems[idx]?.discount || ''))}
-                      />
-                      <label
-                        htmlFor="floatingInput"
-                        className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
-                      >
-                        فروش فوق العاده
-                      </label>
+                    <div className='flex items-center'>
+                      <div className="relative mb-3 flex items-center w-full">
+                        <input
+                          dir="ltr"
+                          type="text"
+                          className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
+                          id="floatingInput"
+                          placeholder="فروش فوق العاده"
+                          onChange={(e) => handleInputChange(idx, 'discount', digitsFaToEn(e.target.value))}
+                          value={digitsEnToFa(addCommas(stockItems[idx]?.discount || ''))}
+                        />
+                        <label
+                          htmlFor="floatingInput"
+                          className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
+                        >
+                          فروش فوق العاده
+                        </label>
+                      </div>
                       <Menu as="div" className="relative inline-block text-left">
                         <div>
                           <MenuButton

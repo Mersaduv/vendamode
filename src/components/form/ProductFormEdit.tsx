@@ -198,6 +198,7 @@ const ProductFormEdit: React.FC<Props> = (props) => {
   //state management
   const { userInfo } = useAppSelector((state) => state.auth)
   const { query, back, push } = useRouter()
+  const { generalSetting } = useAppSelector((state) => state.design)
   // ? Form Hook
   const {
     handleSubmit,
@@ -1072,7 +1073,7 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                       <img className="w-5 h-5" src="/assets/svgs/duotone/barcode.svg" alt="" />
                       <span className="whitespace-nowrap text-center w-[113px]">کد محصول</span>
                     </div>
-                    <div className="w-full py-2 border-r text-center  bg-[#f5f8fa] rounded-r-none rounded-md ">
+                    <div className="w-full py-2 border text-center  bg-[#f5f8fa] rounded-r-none rounded-md ">
                       {digitsEnToFa(selectedProduct?.code ?? '')}
                     </div>
                   </div>
@@ -1085,11 +1086,11 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                   <h3 className=" text-gray-600">وضعیت محصول</h3>
                   <div className="flex gap-2">
                     <Link href={`/products/${selectedProduct?.slug}`}>
-                      <Button className="p-0  text-xs px-4 py-2 bg-blue-500 hover:bg-blue-600">نمایش</Button>
+                      <Button className="p-0  text-xs  w-20 py-2 bg-blue-500 hover:bg-blue-600">نمایش</Button>
                     </Link>
                     <Button
                       onClick={() => handleDeleteTrash(selectedProduct?.id ?? '')}
-                      className="p-0  text-xs px-4 py-2 bg-red-500 hover:bg-red-600"
+                      className="p-0  text-xs  w-20 py-2 bg-red-500 hover:bg-red-600"
                     >
                       زباله دان
                     </Button>
@@ -1102,7 +1103,7 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                       <span className="whitespace-nowrap text-center w-[113px]">انتشار توسط</span>
                     </div>
                     <div className="w-full text-sm py-2 border-r text-center  bg-[#f5f8fa] rounded-r-none rounded-md ">
-                      وندامد - {userInfo?.fullName}
+                      {generalSetting?.title} - {userInfo?.fullName}
                     </div>
                   </div>
                   <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-0">

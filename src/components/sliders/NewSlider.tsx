@@ -13,6 +13,7 @@ import { Button, ResponsiveImage, Skeleton } from '@/components/ui'
 
 import type { ICategory } from '@/types'
 import { Pagination, Navigation } from 'swiper/modules'
+import { useAppSelector } from '@/hooks'
 
 interface Props {
   currentCategory?: ICategory
@@ -21,7 +22,7 @@ interface Props {
 const NewSlider: React.FC<Props> = (props) => {
   // ? Props
   const { currentCategory } = props
-
+  const { generalSetting } = useAppSelector((state) => state.design)
   const { products, isFetching } = useGetProductsQuery(
     {
       sortBy: 'Created',
@@ -41,7 +42,7 @@ const NewSlider: React.FC<Props> = (props) => {
       <section className="hidden sm:flex absolute w-full -top-24 py-2.5">
         <div className="flex gap-8 flex-col bg-[#dee2e6]  z-50 items-center -ml-24 ab">
           <div className="w-full h-[86px] whitespace-nowrap text-center pt-6 text-2xl text-gray-400 bg-white pr-10">
-            جدید ترین های وندامد
+            جدید ترین های {generalSetting?.title}
           </div>
           <div className="flex gap-8 flex-col pl-8  items-center pr-10 px-2">
             <img width={260} src="/images/NEW.webp" alt="offer img" />
@@ -117,7 +118,7 @@ const NewSlider: React.FC<Props> = (props) => {
       <section className="flex flex-col-reverse sm:flex-row  sm:hidden absolute w-full -top-24 py-2.5">
         <div className=" gap-8 flex-col bg-[#dee2e6]  z-50 items-center sm:-ml-24">
           <div className="hidden whitespace-nowrap sm:block w-full h-[86px] text-center pt-6 text-lg text-gray-400 bg-white pr-10">
-            جدید ترین های وندامد
+            جدید ترین های {generalSetting?.title}
           </div>
           <div className="flex gap-8 flex-col pl-8  items-center pr-10 px-2">
             <img className="w-[200px]" src="/images/NEW.webp" alt="offer img" />
