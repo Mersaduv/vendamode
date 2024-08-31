@@ -2317,7 +2317,7 @@ const Table: React.FC<PropTable> = (props) => {
                                   }`}
                                 />
                                 {stockItems[idx]?.offerTime !== null && (
-                                  <span className="tooltip-text2">
+                                  <span className="tooltip-text">
                                     <div dir="ltr" className="">
                                       {digitsEnToFa(formatTime(stockItems[idx]?.offerTime || 0))}
                                     </div>
