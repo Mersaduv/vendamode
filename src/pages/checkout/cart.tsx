@@ -106,7 +106,7 @@ const Cart: NextPage = () => {
 
       <main className="mt-[220px]">
         <Head>
-          <title>وندامد | سبد خرید</title>
+          <title>{generalSetting?.title} | سبد خرید</title>
         </Head>
 
         <div className=" flex flex-col items-center px-4 md:px-8">

@@ -133,10 +133,10 @@ export const reviewSchema = Yup.object().shape({
 })
 
 export const productSchema = Yup.object().shape({
-  Title: Yup.string().required('نام محصول الزامی است'),
+  Title: Yup.string().required('وارد کردن نام محصول الزامی است'),
   IsActive: Yup.boolean(),
-  MainThumbnail: Yup.mixed().required('تصویر نگاره برای محصول الزامی است'),
-  CategoryId: Yup.string().required('دسته بندی برای محصول الزامی است'),
+  MainThumbnail: Yup.mixed().required('انتخاب تصویر نگاره الزامی است'),
+  CategoryId: Yup.string().required('انتخاب دسته بندی برای محصول الزامی است'),
   Description: Yup.string(),
   IsFake: Yup.boolean(),
   BrandId: Yup.string().nullable(),

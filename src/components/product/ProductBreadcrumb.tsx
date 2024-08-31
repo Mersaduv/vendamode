@@ -1,3 +1,4 @@
+import { useAppSelector } from '@/hooks'
 import type { CategoryWithAllParents, ICategoryLevel, IProduct } from '@/types'
 import Link from 'next/link'
 
@@ -8,10 +9,8 @@ interface Props {
 }
 
 const ProductBreadcrumb: React.FC<Props> = ({ categoryLevels, isAdmin, isSelector }) => {
+  const { generalSetting } = useAppSelector((state) => state.design)
   // ? Render(s)
-  if (categoryLevels) {
-    console.log(categoryLevels, 'categoryLevels')
-  }
   return (
     <>
       {isSelector ? (

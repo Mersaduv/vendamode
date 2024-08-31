@@ -25,7 +25,7 @@ interface Prop {
 
 const CategorySelector: React.FC<Props> = (props) => {
   const { selectedCategories, setSelectedCategories, categories, setIsSecondRequest } = props
-  console.log(selectedCategories, 'selectedCategories -- selectedCategories')
+  console.log(categories, 'categories -- categories CategorySelector')
 
   const [slugData, setSlugData] = useState<CategoryWithAllParents | null>(null)
   useEffect(() => {
@@ -57,49 +57,61 @@ const CategorySelector: React.FC<Props> = (props) => {
 
     return (
       <ul className="space-y-1">
-        {categories.map((category) => (
-          <li
-            onClick={() => {
-              if (setIsSecondRequest) {
-                setIsSecondRequest(true)
-              }
-            }}
-            key={category.id}
-            className={` space-y-1.5  ${category.level > 1 ? ' mr-5' : ''}`}
-          >
-            <label
-              title={`${category.isActiveProduct ? '' : 'اجازه ثبت محصول روی این دسته وجود ندارد'}`}
-              className="flex items-center whitespace-nowrap  cursor-pointer"
+        {[...categories]
+          .sort((a, b) => {
+            const allLevelOne = categories.every((category) => category.level === 1)
+
+            if (allLevelOne) {
+              const dateA = a.created ? new Date(a.created).getTime() : 0
+              const dateB = b.created ? new Date(b.created).getTime() : 0
+              return dateB - dateA
+            }
+
+            return 0 
+          })
+          .map((category) => (
+            <li
+              onClick={() => {
+                if (setIsSecondRequest) {
+                  setIsSecondRequest(true)
+                }
+              }}
+              key={category.id}
+              className={` space-y-1.5  ${category.level > 1 ? ' mr-5' : ''}`}
             >
-              <input
-                className={`checked:text-2xl cursor-pointer ${category.isActiveProduct ? '' : 'bg-red-200'}  pt-1 ${
-                  category.childCategories && category.childCategories.length > 0
-                    ? hasSelectedChild(category)
-                      ? 'bg-blue-400'
-                      : 'disabled'
-                    : ''
-                } ${
-                  category.childCategories && category.childCategories.length > 0
-                    ? 'bg-[#eff2f5] border border-gray-300 rounded w-[18px] h-[18px] ml-2'
-                    : 'border border-gray-300 rounded w-[18px] h-[18px] ml-2 bg-[#eff2f5]'
-                }`}
-                type="checkbox"
-                checked={selectedCategories.categorySelected?.id === category.id}
-                onChange={() => handleCheckboxChange(category)}
-                // disabled={category.childCategories && category.childCategories.length > 0}
-                disabled={!category.isActiveProduct}
-              />
-              {category.name}
-            </label>
-            {category.childCategories && (
-              <CategoryTree
-                categories={category.childCategories}
-                selectedCategories={selectedCategories}
-                setSelectedCategories={setSelectedCategories}
-              />
-            )}
-          </li>
-        ))}
+              <label
+                title={`${category.isActiveProduct ? '' : 'اجازه ثبت محصول روی این دسته وجود ندارد'}`}
+                className="flex items-center whitespace-nowrap  cursor-pointer"
+              >
+                <input
+                  className={`checked:text-2xl cursor-pointer ${category.isActiveProduct ? '' : 'bg-red-200'}  pt-1 ${
+                    category.childCategories && category.childCategories.length > 0
+                      ? hasSelectedChild(category)
+                        ? 'bg-blue-400'
+                        : 'disabled'
+                      : ''
+                  } ${
+                    category.childCategories && category.childCategories.length > 0
+                      ? 'bg-[#eff2f5] border border-gray-300 rounded w-[18px] h-[18px] ml-2'
+                      : 'border border-gray-300 rounded w-[18px] h-[18px] ml-2 bg-[#eff2f5]'
+                  }`}
+                  type="checkbox"
+                  checked={selectedCategories.categorySelected?.id === category.id}
+                  onChange={() => handleCheckboxChange(category)}
+                  // disabled={category.childCategories && category.childCategories.length > 0}
+                  disabled={!category.isActiveProduct}
+                />
+                {category.name}
+              </label>
+              {category.childCategories && (
+                <CategoryTree
+                  categories={category.childCategories}
+                  selectedCategories={selectedCategories}
+                  setSelectedCategories={setSelectedCategories}
+                />
+              )}
+            </li>
+          ))}
       </ul>
     )
   }

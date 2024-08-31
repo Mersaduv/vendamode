@@ -265,7 +265,7 @@ export const designApiSlice = baseApi.injectEndpoints({
         url: `/api/article/${id}`,
         method: 'GET',
       }),
-      providesTags: (result, error, arg) => [{ type: 'Product', id: arg.id }],
+      providesTags: (result, error, arg) => [{ type: 'Article', id: arg.id }],
     }),
 
     upsertBanner: builder.mutation<ServiceResponse<boolean>, FormData>({

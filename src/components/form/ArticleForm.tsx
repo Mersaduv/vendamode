@@ -8,7 +8,7 @@ import dynamic from 'next/dynamic'
 import { IArticle, IArticleForm, ICategory } from '@/types'
 import { articleFormValidationSchema } from '@/utils'
 import { useDeleteTrashArticleMutation, useGetAllCategoriesQuery, useGetCategoriesTreeQuery } from '@/services'
-import { useAppDispatch, useDisclosure } from '@/hooks'
+import { useAppDispatch, useAppSelector, useDisclosure } from '@/hooks'
 import { setStateStringSlice, showAlert } from '@/store'
 import jalaali from 'jalaali-js'
 import { digitsEnToFa } from '@persian-tools/persian-tools'
@@ -65,7 +65,7 @@ const CustomEditor = dynamic(() => import('@/components/form/TextEditor'), { ssr
 const ArticleForm: React.FC<Props> = (props) => {
   // ? Props
   const { mode, createHandler, isLoadingCreate, isLoadingUpdate, updateHandler, selectedArticle } = props
-
+  const { generalSetting } = useAppSelector((state) => state.design)
   // assets
   const dispatch = useAppDispatch()
   const { query, back, push } = useRouter()
@@ -135,7 +135,7 @@ const ArticleForm: React.FC<Props> = (props) => {
         setUpdateShamsiDate(`${hours}:${minutes}:${seconds} - ${jalaliDate.jy}/${jalaliDate.jm}/${jalaliDate.jd}`)
       }
     }
-  }, [selectedArticle])
+  }, [selectedArticle?.created])
 
   // ? Form Hook
   const {
@@ -357,7 +357,10 @@ const ArticleForm: React.FC<Props> = (props) => {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex flex-1">
               <div className="bg-white w-full rounded-md shadow-item">
-                <h3 className="border-b p-6 text-gray-600 ">{mode === 'edit' ? 'ویرایش مقاله' : 'مقاله جدید '}</h3>
+                <h3 className="border-b p-6 text-gray-600 flex gap-2">
+                  {mode === 'edit' ? 'ویرایش مقاله' : 'مقاله جدید '}:{' '}
+                  <div className="text-sky-500">{selectedArticle?.title}</div>
+                </h3>
                 <div className="flex flex-col">
                   {/* title  */}
                   <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-6">
@@ -375,6 +378,18 @@ const ArticleForm: React.FC<Props> = (props) => {
                       {...register('title')}
                     />
                   </div>
+                  {mode === 'edit' && (
+                    <div className="flex flex-col xs:flex-row px-10 pb-0 pt-6">
+                      <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]">
+                        <img className="w-5 h-5" src="/assets/svgs/duotone/barcode.svg" alt="" />
+                        <span className="whitespace-nowrap text-center w-[113px]">کد مقاله</span>
+                      </div>
+                      <div className="w-full py-2 border text-center  bg-[#f5f8fa] rounded-r-none rounded-md ">
+                        {digitsEnToFa(selectedArticle?.code ?? '')}
+                      </div>
+                    </div>
+                  )}
+
                   {/* place of display  */}
                   <div className="flex px-10 py-6 flex-col xs:flex-row">
                     <label
@@ -397,13 +412,13 @@ const ArticleForm: React.FC<Props> = (props) => {
                         خواندنی ها
                       </option>
                       <option value="2" className={''}>
-                        فروش در وندامد
+                        فروش در {generalSetting?.title}
                       </option>
                       <option value="3" className={''}>
-                        با وندامد
+                        با {generalSetting?.title}
                       </option>
                       <option value="4" className={''}>
-                        خرید از وندامد
+                        خرید از {generalSetting?.title}
                       </option>
                     </select>
                   </div>
@@ -482,20 +497,19 @@ const ArticleForm: React.FC<Props> = (props) => {
             {/* is active  */}
             <div className="flex flex-1">
               <div className="bg-white w-full rounded-md shadow-item">
-                <div className="flex items-center justify-between border-b p-6">
-                  <h3 className=" text-gray-600">وضعیت انتشار</h3>
+                <div className="flex items-center justify-between border-b p-6 py-5">
+                  <h3 className=" text-gray-600">وضعیت مقاله</h3>
                   {mode === 'edit' && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex gap-2">
                       <Link href={`/articles/${selectedArticle?.slug}`}>
-                        <Button className="px-3.5 py-2 text-sm bg-sky-500">نمایش</Button>
+                        <Button className="p-0  text-xs  w-20 py-2 bg-blue-500 hover:bg-blue-600">نمایش</Button>
                       </Link>
-
-                      <div
+                      <Button
                         onClick={() => handleDeleteTrash(selectedArticle?.id ?? '')}
-                        className="border border-red-600 rounded-md px-3 py-1.5 hover:bg-red-500 cursor-pointer"
+                        className="p-0  text-xs  w-20 py-2 bg-red-500 hover:bg-red-600"
                       >
-                        <img className="h-5 w-5" src="/assets/svgs/duotone/trash.svg" alt="trash" />
-                      </div>
+                        زباله دان
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -509,7 +523,7 @@ const ArticleForm: React.FC<Props> = (props) => {
                         <span className="whitespace-nowrap text-center w-[113px]">انتشار توسط</span>
                       </div>
                       <div className="w-full text-sm py-2 border-r text-center  bg-[#f5f8fa] rounded-r-none rounded-md ">
-                        وندامد - {author}
+                        {author}
                       </div>
                     </div>
                     <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-0">
@@ -587,7 +601,7 @@ const ArticleForm: React.FC<Props> = (props) => {
           {/*is show  add product descriptions*/}
           <div className="flex flex-1">
             <div className="bg-white w-full rounded-md shadow-item">
-              <h3 className="border-b p-6 text-gray-600">توضیحات مقاله</h3>
+              <h3 className="border-b p-6 text-gray-600">متن مقاله</h3>
               {/* <CustomEditor textEditor={textEditor} setTextEditor={setTextEditor} /> */}
               <CustomEditor
                 value={textEditor}
@@ -614,8 +628,8 @@ const ArticleForm: React.FC<Props> = (props) => {
 
           <div className="flex justify-end w-full">
             {' '}
-            <Button type="submit" className={`w-0 px-11 py-3 hover:text-gray-200 mb-10 float-start`}>
-              انتشار
+            <Button type="submit" className={`w-0 px-11 py-3 hover:bg-[#e90088b0] mb-10 float-start`}>
+              {mode === 'edit' ? 'بروزرسانی' : 'انتشار'}
             </Button>
           </div>
         </form>

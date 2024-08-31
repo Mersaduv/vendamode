@@ -13,6 +13,7 @@ import { Button, ResponsiveImage, Skeleton } from '@/components/ui'
 
 import type { ICategory } from '@/types'
 import { Pagination, Navigation } from 'swiper/modules'
+import { useAppSelector } from '@/hooks'
 
 interface Props {
   currentCategory?: ICategory
@@ -21,7 +22,7 @@ interface Props {
 const DiscountSlider: React.FC<Props> = (props) => {
   // ? Props
   const { currentCategory } = props
-
+  const { generalSetting } = useAppSelector((state) => state.design)
   const { products, isFetching } = useGetProductsQuery(
     {
       sortBy: 'Discount',
@@ -41,7 +42,7 @@ const DiscountSlider: React.FC<Props> = (props) => {
     <>
       <section className="hidden sm:flex absolute w-full -top-24 py-2.5">
         <div className="flex gap-8 flex-col bg-[#dcb6db]  z-50 items-center -ml-24 ab">
-          <div className="w-full h-[86px] text-center pt-6 text-2xl text-gray-400 bg-white pr-10">تخفیف های وندامد</div>
+          <div className="w-full h-[86px] text-center pt-6 text-2xl text-gray-400 bg-white pr-10">تخفیف های {generalSetting?.title}</div>
           <div className="flex gap-8 flex-col pl-8  items-center pr-10">
             <img width={260} src="/images/Offer.webp" alt="offer img" />
             <span className="text-white font-normal whitespace-nowrap text-lg">تخفیف های امروز از دست نده</span>
@@ -117,7 +118,7 @@ const DiscountSlider: React.FC<Props> = (props) => {
       <section className="flex flex-col-reverse sm:flex-row  sm:hidden absolute w-full -top-24 py-2.5">
         <div className=" gap-8 flex-col bg-[#dcb6db]  z-50 items-center sm:-ml-24">
           <div className="hidden sm:block w-full h-[86px] text-center pt-6 text-lg text-gray-400 bg-white pr-10">
-            تخفیف های وندامد
+            تخفیف های {generalSetting?.title}
           </div>
           <div className="flex gap-8 flex-col pl-8  items-center pr-10">
             <img className="w-[200px]" src="/images/Offer.webp" alt="offer img" />

@@ -10,13 +10,14 @@ import { DashboardAdminAside } from '@/components/shared'
 import type { NextPage } from 'next'
 import Link from 'next/link'
 import { DashboardLayout } from '@/components/Layouts'
-
+import { useAppSelector } from '@/hooks'
 const AdminPage: NextPage = () => {
+  const { generalSetting } = useAppSelector((state) => state.design)
   return (
     <ProtectedRouteWrapper allowedRoles={[roles.ADMIN, roles.SUPERADMIN]}>
       <div className="">
         <Head>
-          <title>وندامد | مدیریت</title>
+          <title>{generalSetting?.title} | مدیریت</title>
         </Head>
         <DashboardLayout>
           <div className=" flex " >

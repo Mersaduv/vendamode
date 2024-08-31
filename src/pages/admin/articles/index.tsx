@@ -27,6 +27,7 @@ const Articles: NextPage = () => {
   // ? Assets
   const { query, push } = useRouter()
   const articlePage = query.page ? +query.page : 1
+  const { generalSetting } = useAppSelector((state) => state.design)
   // ? States
   const { name } = useAppSelector((state) => state.stateString)
   const [tabKey, setTabKey] = useState('allArticles')
@@ -203,13 +204,13 @@ const Articles: NextPage = () => {
         placeString = 'خواندنی ها'
         break
       case 2:
-        placeString = 'فروش در وندامد'
+        placeString = `فروش در ${generalSetting?.title}`
         break
       case 3:
-        placeString = 'با وندامد'
+        placeString = `با ${generalSetting?.title}`
         break
       case 4:
-        placeString = 'خرید از وندامد'
+        placeString = `خرید از ${generalSetting?.title}`
         break
 
       default:
@@ -367,9 +368,9 @@ const Articles: NextPage = () => {
                       </option>
 
                       <option value={'1'}>خواندنی ها</option>
-                      <option value={'2'}>فروش در وندامد</option>
-                      <option value={'3'}>با وندامد</option>
-                      <option value={'4'}>خرید از وندامد</option>
+                      <option value={'2'}>فروش در {generalSetting?.title}</option>
+                      <option value={'3'}>با {generalSetting?.title}</option>
+                      <option value={'4'}>خرید از {generalSetting?.title}</option>
                     </select>
                     <div
                       className="bg-gray-100 hover:bg-gray-200 mr-[1px] rounded-l-md text-sm flex justify-center cursor-pointer items-center w-14"
@@ -501,89 +502,106 @@ const Articles: NextPage = () => {
                             </thead>
                             <tbody>
                               {articlesPagination?.data?.data &&
-                                articlesPagination?.data?.data.map((article, index) => (
-                                  <tr
-                                    key={article.id}
-                                    className={`h-16 border-b ${index % 2 === 0 ? 'bg-gray-50' : ''}`}
-                                  >
-                                    <td>
-                                      <img
-                                        className="w-[108px] h-[70px] rounded-md my-2 mr-2"
-                                        src={article.image.imageUrl}
-                                        alt="a-img"
-                                      />
-                                    </td>
-                                    <td className="text-sm text-gray-600 ">
-                                      <Link className="text-sky-500" href={`/articles/${article.slug}`}>
-                                        {article.title}
-                                      </Link>
-                                    </td>
-                                    <td className="text-center text-sm text-gray-600">{digitsEnToFa(article.code)}</td>
-                                    <td className="text-center text-sm text-gray-600">
-                                      {digitsEnToFa(CheckPlaceArticle(article.place))}
-                                    </td>
-                                    <td className="text-center text-sm text-gray-600">
-                                      {article.category === '' ? <span className="text-lg">-</span> : article.category}
-                                    </td>
-                                    <td className="text-center text-sm text-gray-600">
-                                      {digitsEnToFa(article.numReviews)}
-                                    </td>
-                                    <td className="text-center text-sm text-gray-600">{article.author}</td>
-                                    <td className="text-center">
-                                      {article.isActive ? (
-                                        <span className="text-sm text-green-500">فعال</span>
-                                      ) : (
-                                        <span className="text-sm text-red-500">غیر فعال</span>
-                                      )}
-                                    </td>
-                                    <td className="text-center text-sm text-gray-600">
-                                      <Menu as="div" className="dropdown">
-                                        <Menu.Button className="">
-                                          <div className="w-full flex justify-center items-center">
-                                            <span className="text-2xl hover:bg-gray-300 cursor-pointer  bg-gray-200 text-gray-700 p-1 pb-1.5 px-1.5 h-8 flex justify-center items-center rounded-md">
-                                              :
-                                            </span>
-                                          </div>
-                                        </Menu.Button>
+                                articlesPagination?.data?.data.map((article, index) => {
 
-                                        <Transition
-                                          as={Fragment}
-                                          enter="transition ease-out duration-100"
-                                          enterFrom="transform opacity-0 scale-95"
-                                          enterTo="transform opacity-100 scale-100"
-                                          leave="transition ease-in duration-75"
-                                          leaveFrom="transform opacity-100 scale-100"
-                                          leaveTo="transform opacity-0 scale-95"
-                                        >
-                                          <Menu.Items className="dropdown__items w-32 ">
-                                            <Menu.Item>
-                                              {({ close }) => (
-                                                <>
-                                                  <Link
-                                                    href={`/admin/articles/edit/${article.id}`}
-                                                    onClick={close}
-                                                    className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
-                                                  >
-                                                    <span>ویرایش</span>
-                                                  </Link>
-                                                  <button
-                                                    onClick={() => {
-                                                      handleDeleteTrash(article.id)
-                                                      close()
-                                                    }}
-                                                    className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
-                                                  >
-                                                    <span>زباله دان</span>
-                                                  </button>
-                                                </>
-                                              )}
-                                            </Menu.Item>
-                                          </Menu.Items>
-                                        </Transition>
-                                      </Menu>
-                                    </td>
-                                  </tr>
-                                ))}
+                                  console.log(article, ' article.author')
+
+                                  return (
+                                    <tr
+                                      key={article.id}
+                                      className={`h-16 border-b ${index % 2 === 0 ? 'bg-gray-50' : ''}`}
+                                    >
+                                      <td>
+                                        <img
+                                          className="w-[108px] h-[70px] rounded-md my-2 mr-2"
+                                          src={article.image.imageUrl}
+                                          alt="a-img"
+                                        />
+                                      </td>
+                                      <td className="text-sm text-gray-600 ">
+                                        <Link className="text-sky-500" href={`/articles/${article.slug}`}>
+                                          {article.title}
+                                        </Link>
+                                      </td>
+                                      <td className="text-center text-sm text-gray-600">
+                                        {digitsEnToFa(article.code)}
+                                      </td>
+                                      <td className="text-center text-sm text-gray-600">
+                                        {digitsEnToFa(CheckPlaceArticle(article.place))}
+                                      </td>
+                                      <td className="text-center text-sm text-gray-600">
+                                        {article.category === '' ? (
+                                          <span className="text-lg">-</span>
+                                        ) : (
+                                          article.category
+                                        )}
+                                      </td>
+                                      <td className="text-center text-sm text-gray-600">
+                                        {digitsEnToFa(article.numReviews)}
+                                      </td>
+                                      <td className="text-center text-sm text-gray-600">
+                                        {article.author !== ' ' ||
+                                        article.author !== undefined ||
+                                        article.author !== null
+                                          ? article.author
+                                          : '-'}
+                                      </td>
+                                      <td className="text-center">
+                                        {article.isActive ? (
+                                          <span className="text-sm text-green-500">فعال</span>
+                                        ) : (
+                                          <span className="text-sm text-red-500">غیر فعال</span>
+                                        )}
+                                      </td>
+                                      <td className="text-center text-sm text-gray-600">
+                                        <Menu as="div" className="dropdown">
+                                          <Menu.Button className="">
+                                            <div className="w-full flex justify-center items-center">
+                                              <span className="text-2xl hover:bg-gray-300 cursor-pointer  bg-gray-200 text-gray-700 p-1 pb-1.5 px-1.5 h-8 flex justify-center items-center rounded-md">
+                                                :
+                                              </span>
+                                            </div>
+                                          </Menu.Button>
+
+                                          <Transition
+                                            as={Fragment}
+                                            enter="transition ease-out duration-100"
+                                            enterFrom="transform opacity-0 scale-95"
+                                            enterTo="transform opacity-100 scale-100"
+                                            leave="transition ease-in duration-75"
+                                            leaveFrom="transform opacity-100 scale-100"
+                                            leaveTo="transform opacity-0 scale-95"
+                                          >
+                                            <Menu.Items className="dropdown__items w-32 ">
+                                              <Menu.Item>
+                                                {({ close }) => (
+                                                  <>
+                                                    <Link
+                                                      href={`/admin/articles/edit/${article.id}`}
+                                                      onClick={close}
+                                                      className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
+                                                    >
+                                                      <span>ویرایش</span>
+                                                    </Link>
+                                                    <button
+                                                      onClick={() => {
+                                                        handleDeleteTrash(article.id)
+                                                        close()
+                                                      }}
+                                                      className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
+                                                    >
+                                                      <span>زباله دان</span>
+                                                    </button>
+                                                  </>
+                                                )}
+                                              </Menu.Item>
+                                            </Menu.Items>
+                                          </Transition>
+                                        </Menu>
+                                      </td>
+                                    </tr>
+                                  )
+                                })}
                             </tbody>
                           </table>
                         </DataStateDisplay>

@@ -10,6 +10,7 @@ import { ArticleForm, ProductForm } from '@/components/form'
 import { useDispatch } from 'react-redux'
 import { setUpdated } from '@/store'
 import { FullScreenLoading } from '@/components/ui'
+import { useEffect } from 'react'
 
 interface Props {}
 const Edit: NextPage<Props> = () => {
@@ -23,15 +24,24 @@ const Edit: NextPage<Props> = () => {
 
   //*   Create Article
   const [updateArticle, { data, isSuccess, isLoading, isError, error }] = useUpsertArticleMutation()
+  console.log(selectedArticle, 'selectedArticle -- selectedArticle')
+
+  useEffect(() => {
+    if (isSuccess) {
+      refetch()
+    }
+  }, [isSuccess])
 
   // ? Handlers
   const updateHandler = (data: FormData) => {
-    console.log(data , "==========data");
-    
+    console.log(data, '==========data')
+
     updateArticle(data)
+    refetch()
   }
 
   const onSuccess = () => {
+    refetch() // این خط جدید
     push(`/admin/articles/edit/${data?.data}`)
   }
 
