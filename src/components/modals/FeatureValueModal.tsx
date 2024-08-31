@@ -52,12 +52,12 @@ const FeatureValueModal: React.FC<Props> = (props) => {
   })
 
   useEffect(() => {
-    if (productFeature?.values?.some((value) => value.name !== "رنگ")) {
+    if (productFeature?.name === 'رنگ') {
       setIsColor(true)
     } else {
       setIsColor(false)
     }
-  }, [productFeature?.values])
+  }, [productFeature])
 
   useEffect(() => {
     if (featureValue) {
@@ -131,9 +131,8 @@ const FeatureValueModal: React.FC<Props> = (props) => {
               {title === 'ویرایش' ? (
                 'ویرایش'
               ) : (
-                <div className='flex'>
-                  {title} {" "}
-                   مقدار {" "} برای {" "}<div className="text-sky-500 mx-2">{productFeature?.name}</div>{' '}
+                <div className="flex">
+                  {title} مقدار برای <div className="text-sky-500 mx-2">{productFeature?.name}</div>{' '}
                 </div>
               )}{' '}
               <div className="text-sky-500">{featureValue?.name}</div>
@@ -198,9 +197,7 @@ const FeatureValueModal: React.FC<Props> = (props) => {
                 </div>
                 <Button
                   type="submit"
-                  className={`bg-sky-500 px-5 py-2.5 hover:bg-sky-600 ${
-                    !isValid ? 'bg-gray-300' : ''
-                  } `}
+                  className={`bg-sky-500 px-5 py-2.5 hover:bg-sky-600 ${!isValid ? 'bg-gray-300' : ''} `}
                   isLoading={isLoadingCreate || isLoadingUpdate}
                 >
                   {title === 'افزودن' ? 'انتشار ' : 'بروزرسانی'}

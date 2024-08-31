@@ -54,3 +54,31 @@
     margin-right: 10px !important;
     }
 }
+
+
+
+
+.articlePageSwiper .swiper-button-prev,
+.articlePageSwiper .swiper-button-next {
+  color: #0ea5e9 !important;
+  background: #ffffff;
+  opacity: 100%;
+  border-radius: 5px;
+  width: 2rem !important;
+  height: 2rem !important;
+  z-index: 99;
+}
+.articlePageSwiper .swiper-button-next::after,
+.articlePageSwiper .swiper-button-prev::after {
+  font-size: 20px !important;
+}
+
+
+.articlePageSwiper .swiper-button-prev {
+  margin-right: 0px !important;
+  }
+@media (max-width: 450px) {
+  .articlePageSwiper .swiper-button-prev {
+    margin-right: 0px !important;
+    }
+}
