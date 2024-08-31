@@ -567,7 +567,7 @@ const Products: NextPage = () => {
                     className="w-44 text-sm focus:outline-none appearance-none border-none"
                     name="انتخاب"
                     id=""
-                    value={categoryId || selectedCategoryId}
+                    value={categoryId || selectedCategory}
                     onChange={handleCategoryChange}
                   >
                     <option className="appearance-none text-sm" value="default">

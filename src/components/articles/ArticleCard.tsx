@@ -28,7 +28,7 @@ const ArticleCard: React.FC<Props> = (props) => {
       >
         <>
           <ResponsiveImage
-            dimensions="h-[155px] xs:h-[210px] sm:h-[300px] lg:h-[280px] xl:h-[300px] w-full"
+            dimensions="h-[155px] w-[155px] xs:h-[210px] xs:w-[210px] sm:h-[200px] sm:w-[200px] lg:h-[280px] lg:w-[280px] xl:h-[250px] xl:w-[250px] w-full"
             className="mx-auto relative sm:object-center"
             src={article.image.imageUrl}
             blurDataURL={article.image.placeholder}

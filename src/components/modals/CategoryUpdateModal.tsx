@@ -150,7 +150,7 @@ const CategoryUpdateModal: React.FC<Props> = (props) => {
     const files = e.target.files
     if (files) {
       const validFiles: any[] = []
-      const maxFileSize = 30 * 1024 // 40 KB
+      const maxFileSize = 50 * 1024 // 40 KB
       const exactWidth = 200
       const exactHeight = 200
 

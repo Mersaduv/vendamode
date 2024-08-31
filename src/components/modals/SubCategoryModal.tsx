@@ -83,7 +83,7 @@ const SubCategoryModal: React.FC<Props> = (props) => {
     const files = e.target.files
     if (files) {
       const validFiles: any[] = []
-      const maxFileSize = 30 * 1024 // 30 KB
+      const maxFileSize = 50 * 1024 // 30 KB
       const exactWidth = 200
       const exactHeight = 200
 
@@ -103,7 +103,7 @@ const SubCategoryModal: React.FC<Props> = (props) => {
           dispatch(
             showAlert({
               status: 'error',
-              title: 'حجم عکس ها می بایست حداکثر 30 کیلوبایت باشد',
+              title: 'حجم عکس ها می بایست حداکثر 50 کیلوبایت باشد',
             })
           )
           return
