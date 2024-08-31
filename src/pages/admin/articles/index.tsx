@@ -108,25 +108,21 @@ const Articles: NextPage = () => {
   } = useFetchArticles('isDeleted')
 
   useEffect(() => {
-    console.log(allArticles, 'allArticles')
 
     if (allArticles) setArticlesPagination(allArticles)
   }, [allArticles])
 
   useEffect(() => {
-    console.log(activeArticles, 'activeArticles')
 
     if (activeArticles) setArticlesActivePagination(activeArticles)
   }, [activeArticles])
 
   useEffect(() => {
-    console.log(inactiveArticles, 'inactiveArticles')
 
     if (inactiveArticles) setArticlesInActivePagination(inactiveArticles)
   }, [inactiveArticles])
 
   useEffect(() => {
-    console.log(deletedArticles, 'deletedArticles')
 
     if (deletedArticles) setArticlesIsDeletedPagination(deletedArticles)
   }, [deletedArticles])

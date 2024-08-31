@@ -18,6 +18,8 @@ const MainSlider: React.FC<Props> = (props) => {
   // ? Props
   const { data } = props
   const { isActive } = useAppSelector((state) => state.headerTextState)
+
+  // ? Local Component
   const SliderImage = ({ item, index }: { item: ISlider; index: number }) => (
     <ResponsiveImage
       dimensions="w-full h-64 md:h-[480px] lg:h-[520px] xl:h-[560px]"
