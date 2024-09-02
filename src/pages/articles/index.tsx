@@ -75,7 +75,7 @@ const Articles: NextPage = () => {
                 emptyComponent={<EmptyCustomList />}
               >
                 {articleData && articleData.data && articleData.data.data && articleData.data.data.length > 0 && (
-                  <section className="flex flex-wrap">
+                  <section className="flex flex-wrap gap-4">
                     {articleData.data.data.map((item) => (
                       <ArticleCard article={item} key={item.id} />
                     ))}
@@ -94,7 +94,7 @@ const Articles: NextPage = () => {
             </div>
             {/* sticky content */}
             <div className="flex- flex-col ">
-              <aside className="sticky left-0 top-0 w-[274px] h-[405px] border rounded-lg p-3 shadow-item  px-4 mb-8">
+              <aside className="left-0 top-0 w-[274px] h-[405px] border rounded-lg p-3 shadow-item  px-4 mb-8">
                 <h3 className="my-2 mb-5 text-gray-600 text-center">پیشنهاد لحظه ای</h3>
                 <Swiper
                   pagination={{ clickable: true }}
@@ -125,7 +125,7 @@ const Articles: NextPage = () => {
                     })}
                 </Swiper>
               </aside>
-              <aside className="sticky left-0 top-0 w-[274px] h-auto border rounded-lg p-3 shadow-item  px-4">
+              <aside className="left-0 top-0 w-[274px] h-auto border rounded-lg p-3 shadow-item  px-4">
                 <h3 className="my-2 mb-5 text-gray-600 text-center">مطالب جدید</h3>
                 {latestArticlesData &&
                   latestArticlesData.data &&

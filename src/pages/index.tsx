@@ -5,7 +5,7 @@ import type { GetStaticProps, InferGetStaticPropsType, NextPage } from 'next'
 import { IBanner, ICategory, ISlider } from '@/types'
 import { getAllBanners, getCategories, getFooterBanner, getHeaderText, getSliders } from '@/services'
 import config from '@/configs'
-import { DiscountSlider, MainSlider, NewSlider } from '@/components/sliders'
+import { DiscountSlider, MainSlider, NewSlider, ReadableArticlePlace } from '@/components/sliders'
 import { Button } from '@/components/ui'
 import { CategoryList } from '@/components/categories'
 import { ArticleBanners, FooterBanner, LargeBanner } from '@/components/banners'
@@ -13,6 +13,7 @@ import { PriceRange } from '@/components/product'
 import { IHeaderText } from '@/types/IHeaderText.type'
 import { useAppSelector } from '@/hooks'
 import { MetaTags } from '@/components/shared'
+import Link from 'next/link'
 
 interface Props {
   sliders: ISlider[]
@@ -100,12 +101,16 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
             </div>
           </div> */}
 
-          {/* Readable Article slider */}
-          {/* <div className="relative w-full flex bg-slate-300">
-            <div className="bg-[#dee2e6] w-full h-[410px] xs:h-[330px] sm:h-[360px] relative">
-              <ReadableSlider />
+          {/* Readable Article Place slider */}
+          <div className=" pt-44 sm:pt-0">
+            <h1 className="text-center text-xl text-gray-500 border-t py-7">خواندنی ها</h1>
+            <ReadableArticlePlace />
+            <div className='text-center mt-4'>
+              <Link href={`/articles?place=1`} className="bg-red-500 hover:bg-red-400 rounded-lg py-3 px-5 text-white">
+                نمایش همه
+              </Link>
             </div>
-          </div> */}
+          </div>
 
           {/* Recently viewed products by you slider */}
           {/* <div className="relative w-full flex bg-slate-300">

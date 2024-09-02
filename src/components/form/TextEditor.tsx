@@ -348,322 +348,693 @@
 //     </div>
 //   )
 // }
-import { useState, useEffect, useRef } from 'react';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
+// import { useState, useEffect, useRef } from 'react';
+// import { CKEditor } from '@ckeditor/ckeditor5-react';
+
+// import {
+//     ClassicEditor,
+//     AccessibilityHelp,
+//     Alignment,
+//     Autoformat,
+//     AutoImage,
+//     AutoLink,
+//     Autosave,
+//     BalloonToolbar,
+//     Base64UploadAdapter,
+//     BlockQuote,
+//     Bold,
+//     CloudServices,
+//     Code,
+//     CodeBlock,
+//     Essentials,
+//     FindAndReplace,
+//     FontBackgroundColor,
+//     FontColor,
+//     FontFamily,
+//     FontSize,
+//     Heading,
+//     Highlight,
+//     HorizontalLine,
+//     GeneralHtmlSupport,
+//     ImageBlock,
+//     ImageCaption,
+//     ImageInline,
+//     ImageInsert,
+//     ImageInsertViaUrl,
+//     ImageResize,
+//     ImageStyle,
+//     ImageTextAlternative,
+//     ImageToolbar,
+//     ImageUpload,
+//     Indent,
+//     IndentBlock,
+//     Italic,
+//     Link,
+//     LinkImage,
+//     List,
+//     ListProperties,
+//     MediaEmbed,
+//     Mention,
+//     Paragraph,
+//     PasteFromOffice,
+//     RemoveFormat,
+//     SelectAll,
+//     SpecialCharacters,
+//     SpecialCharactersArrows,
+//     SpecialCharactersCurrency,
+//     SpecialCharactersEssentials,
+//     SpecialCharactersLatin,
+//     SpecialCharactersMathematical,
+//     SpecialCharactersText,
+//     Strikethrough,
+//     Subscript,
+//     Superscript,
+//     Style,
+//     Table,
+//     TableCaption,
+//     TableCellProperties,
+//     TableColumnResize,
+//     TableProperties,
+//     TableToolbar,
+//     TextTransformation,
+//     TodoList,
+//     Underline,
+//     Undo
+// } from 'ckeditor5';
+
+// import 'ckeditor5/ckeditor5.css';
+// import axios from 'axios';
+
+// interface EditorProps {
+//     onChange?: any;
+//     value?: any;
+//     placeholder?: string;
+// }
+
+// const Editor: React.FC<EditorProps> = ({ value, onChange, placeholder }) => {
+//     const editorContainerRef = useRef(null);
+//     const editorRef = useRef(null);
+//     const [isLayoutReady, setIsLayoutReady] = useState(false);
+
+//     useEffect(() => {
+//         setIsLayoutReady(true);
+
+//         return () => setIsLayoutReady(false);
+//     }, []);
+
+//     const editorConfig = {
+//         toolbar: {
+//             items: [
+//                 'undo',
+//                 'redo',
+//                 '|',
+//                 'heading',
+//                 '|',
+//                 'fontSize',
+//                 'alignment',
+//                 'outdent',
+//                 'indent',
+//                 '|',
+//                 'todoList',
+//                 'bulletedList',
+//                 'numberedList',
+//                 '|',
+//                 'insertImage',
+//                 'insertTable',
+//                 'link',
+//                 'mediaEmbed',
+//                 '|',
+//                 'blockQuote',
+//                 'code',
+//                 'codeBlock',
+//                 '|',
+//                 'specialCharacters',
+//                 'subscript',
+//                 'superscript',
+//                 'horizontalLine',
+//             ],
+//             shouldNotGroupWhenFull: false
+//         },
+//         plugins: [
+//             AccessibilityHelp,
+//             Alignment,
+//             Autoformat,
+//             AutoImage,
+//             AutoLink,
+//             Autosave,
+//             BalloonToolbar,
+//             Base64UploadAdapter,
+//             BlockQuote,
+//             Bold,
+//             CloudServices,
+//             Code,
+//             CodeBlock,
+//             Essentials,
+//             FindAndReplace,
+//             FontBackgroundColor,
+//             FontColor,
+//             FontFamily,
+//             FontSize,
+//             Heading,
+//             Highlight,
+//             HorizontalLine,
+//             GeneralHtmlSupport,
+//             ImageBlock,
+//             ImageCaption,
+//             ImageInline,
+//             ImageInsert,
+//             ImageInsertViaUrl,
+//             ImageResize,
+//             ImageStyle,
+//             ImageTextAlternative,
+//             ImageToolbar,
+//             ImageUpload,
+//             Indent,
+//             IndentBlock,
+//             Italic,
+//             Link,
+//             LinkImage,
+//             List,
+//             ListProperties,
+//             MediaEmbed,
+//             Mention,
+//             Paragraph,
+//             PasteFromOffice,
+//             RemoveFormat,
+//             SelectAll,
+//             Style,
+//             SpecialCharacters,
+//             SpecialCharactersArrows,
+//             SpecialCharactersCurrency,
+//             SpecialCharactersEssentials,
+//             SpecialCharactersLatin,
+//             SpecialCharactersMathematical,
+//             SpecialCharactersText,
+//             Strikethrough,
+//             Subscript,
+//             Superscript,
+//             Table,
+//             TableCaption,
+//             TableCellProperties,
+//             TableColumnResize,
+//             TableProperties,
+//             TableToolbar,
+//             TextTransformation,
+//             TodoList,
+//             Underline,
+//             Undo
+//         ],
+//         balloonToolbar: ['style', '|', 'bold', 'italic', 'underline', 'strikethrough', '|', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'highlight', '|', 'link', '|', 'removeFormat',],
+//         fontFamily: {
+//             supportAllValues: true
+//         },
+//         fontSize: {
+//             options: [10, 12, 14, 'default', 18, 20, 22],
+//             supportAllValues: true
+//         },
+//         heading: {
+//             options: [
+//                 {
+//                     model: 'paragraph',
+//                     title: 'Paragraph',
+//                     class: 'ck-heading_paragraph'
+//                 },
+//                 {
+//                     model: 'heading1',
+//                     view: 'h1',
+//                     title: 'Heading 1',
+//                     class: 'ck-heading_heading1'
+//                 },
+//                 {
+//                     model: 'heading2',
+//                     view: 'h2',
+//                     title: 'Heading 2',
+//                     class: 'ck-heading_heading2'
+//                 },
+//                 {
+//                     model: 'heading3',
+//                     view: 'h3',
+//                     title: 'Heading 3',
+//                     class: 'ck-heading_heading3'
+//                 },
+//                 {
+//                     model: 'heading4',
+//                     view: 'h4',
+//                     title: 'Heading 4',
+//                     class: 'ck-heading_heading4'
+//                 },
+//                 {
+//                     model: 'heading5',
+//                     view: 'h5',
+//                     title: 'Heading 5',
+//                     class: 'ck-heading_heading5'
+//                 },
+//                 {
+//                     model: 'heading6',
+//                     view: 'h6',
+//                     title: 'Heading 6',
+//                     class: 'ck-heading_heading6'
+//                 }
+//             ]
+//         },
+//         image: {
+//             toolbar: [
+//                 'toggleImageCaption',
+//                 'imageTextAlternative',
+//                 '|',
+//                 'imageStyle:inline',
+//                 'imageStyle:wrapText',
+//                 'imageStyle:breakText',
+//                 '|',
+//                 'resizeImage'
+//             ]
+//         },
+//         initialData: value || '',
+//         language: 'vi',
+//         link: {
+//             addTargetToExternalLinks: true,
+//             defaultProtocol: 'https://',
+//             decorators: {
+//                 toggleDownloadable: {
+//                     mode: 'manual',
+//                     label: 'Downloadable',
+//                     attributes: {
+//                         download: 'file'
+//                     }
+//                 }
+//             }
+//         },
+//         list: {
+//             properties: {
+//                 styles: true,
+//                 startIndex: true,
+//                 reversed: true
+//             }
+//         },
+//         mention: {
+//             feeds: [
+//                 {
+//                     marker: '@',
+//                     feed: [
+//                         /* See: https://ckeditor.com/docs/ckeditor5/latest/features/mentions.html */
+//                     ]
+//                 }
+//             ]
+//         },
+//         placeholder: placeholder || "",
+//         style: {
+//             definitions: [
+//                 {
+//                     name: 'Code (Dark)',
+//                     element: 'pre',
+//                     classes: ['fancy-code', 'fancy-code-dark']
+//                 },
+//                 {
+//                     name: 'Code (Light)',
+//                     element: 'pre',
+//                     classes: ['fancy-code', 'fancy-code-bright']
+//                 }
+//             ]
+//         },
+//         table: {
+//             contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
+//         },
+//     };
+
+//   const handleEditorReady = (editor: any) => {
+//     editor.plugins.get('FileRepository').createUploadAdapter = (loader: any) => {
+//       return {
+//         upload: async () => {
+//           const file = await loader.file
+//           const formData = new FormData()
+//           formData.append('Thumbnail', file)
+//           formData.append('Name', 'توضیحات')
+
+//           try {
+//             const response = await axios.post('https://localhost:7004/api/upload-media', formData, {
+//               headers: {
+//                 'Content-Type': 'multipart/form-data',
+//               },
+//             })
+
+//             const data = response.data
+//             console.log(data, 'data')
+
+//             return {
+//               default: data.data,
+//             }
+//           } catch (error) {
+//             console.error('Error uploading file:', error)
+//             throw new Error('File upload failed')
+//           }
+//         },
+
+//         abort: () => {
+//           console.log('Upload aborted')
+//         },
+//       }
+//     }
+//   }
+
+//     return (
+//         <div>
+//             <div className="w-full main-container">
+//                 <div className="w-full editor-container editor-container_classic-editor editor-container_include-style" ref={editorContainerRef}>
+//                     <div className="w-full editor-container__editor">
+//                         <div className='w-full' ref={editorRef} spellCheck="false">
+//                             {
+//                                 isLayoutReady &&
+//                                 <CKEditor
+//                                     editor={ClassicEditor}
+//                                     config={editorConfig as any}
+//                                     onChange={(event: any, editor: any) => {
+//                                         onChange?.(event, editor)
+//                                     }}
+//                                     onReady={handleEditorReady}
+//                                 />
+//                             }
+//                         </div>
+//                     </div>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// }
+
+// export default Editor;
+
+import { useState, useEffect, useRef } from 'react'
+import { CKEditor } from '@ckeditor/ckeditor5-react'
 
 import {
-    ClassicEditor,
-    AccessibilityHelp,
-    Alignment,
-    Autoformat,
-    AutoImage,
-    AutoLink,
-    Autosave,
-    BalloonToolbar,
-    Base64UploadAdapter,
-    BlockQuote,
-    Bold,
-    CloudServices,
-    Code,
-    CodeBlock,
-    Essentials,
-    FindAndReplace,
-    FontBackgroundColor,
-    FontColor,
-    FontFamily,
-    FontSize,
-    Heading,
-    Highlight,
-    HorizontalLine,
-    GeneralHtmlSupport,
-    ImageBlock,
-    ImageCaption,
-    ImageInline,
-    ImageInsert,
-    ImageInsertViaUrl,
-    ImageResize,
-    ImageStyle,
-    ImageTextAlternative,
-    ImageToolbar,
-    ImageUpload,
-    Indent,
-    IndentBlock,
-    Italic,
-    Link,
-    LinkImage,
-    List,
-    ListProperties,
-    MediaEmbed,
-    Mention,
-    Paragraph,
-    PasteFromOffice,
-    RemoveFormat,
-    SelectAll,
-    SpecialCharacters,
-    SpecialCharactersArrows,
-    SpecialCharactersCurrency,
-    SpecialCharactersEssentials,
-    SpecialCharactersLatin,
-    SpecialCharactersMathematical,
-    SpecialCharactersText,
-    Strikethrough,
-    Subscript,
-    Superscript,
-    Style,
-    Table,
-    TableCaption,
-    TableCellProperties,
-    TableColumnResize,
-    TableProperties,
-    TableToolbar,
-    TextTransformation,
-    TodoList,
-    Underline,
-    Undo
-} from 'ckeditor5';
+  ClassicEditor,
+  AccessibilityHelp,
+  Alignment,
+  Autoformat,
+  AutoImage,
+  AutoLink,
+  Autosave,
+  BalloonToolbar,
+  Base64UploadAdapter,
+  BlockQuote,
+  Bold,
+  CloudServices,
+  Code,
+  CodeBlock,
+  Essentials,
+  FindAndReplace,
+  FontBackgroundColor,
+  FontColor,
+  FontFamily,
+  FontSize,
+  Heading,
+  Highlight,
+  HorizontalLine,
+  GeneralHtmlSupport,
+  ImageBlock,
+  ImageCaption,
+  ImageInline,
+  ImageInsert,
+  ImageInsertViaUrl,
+  ImageResize,
+  ImageStyle,
+  ImageTextAlternative,
+  ImageToolbar,
+  ImageUpload,
+  Indent,
+  IndentBlock,
+  Italic,
+  Link,
+  LinkImage,
+  List,
+  ListProperties,
+  MediaEmbed,
+  Mention,
+  Paragraph,
+  PasteFromOffice,
+  RemoveFormat,
+  SelectAll,
+  SpecialCharacters,
+  SpecialCharactersArrows,
+  SpecialCharactersCurrency,
+  SpecialCharactersEssentials,
+  SpecialCharactersLatin,
+  SpecialCharactersMathematical,
+  SpecialCharactersText,
+  Strikethrough,
+  Subscript,
+  Superscript,
+  Style,
+  Table,
+  TableCaption,
+  TableCellProperties,
+  TableColumnResize,
+  TableProperties,
+  TableToolbar,
+  TextTransformation,
+  TodoList,
+  Underline,
+  Undo,
+} from 'ckeditor5'
 
-import translations from 'ckeditor5/translations/vi.js';
-
-import 'ckeditor5/ckeditor5.css';
-import axios from 'axios';
-
+import 'ckeditor5/ckeditor5.css'
+import axios from 'axios'
 
 interface EditorProps {
-    onChange?: any;
-    value?: any;
-    placeholder?: string;
+  onChange?: any
+  value?: any
+  placeholder?: string
 }
 
 const Editor: React.FC<EditorProps> = ({ value, onChange, placeholder }) => {
-    const editorContainerRef = useRef(null);
-    const editorRef = useRef(null);
-    const [isLayoutReady, setIsLayoutReady] = useState(false);
+  const editorContainerRef = useRef(null)
+  const editorRef = useRef(null)
+  const [isLayoutReady, setIsLayoutReady] = useState(false)
 
-    useEffect(() => {
-        setIsLayoutReady(true);
+  useEffect(() => {
+    setIsLayoutReady(true)
 
-        return () => setIsLayoutReady(false);
-    }, []);
+    return () => setIsLayoutReady(false)
+  }, [])
 
-    const editorConfig = {
-        toolbar: {
-            items: [
-                'undo',
-                'redo',
-                '|',
-                'heading',
-                '|',
-                'fontSize',
-                'alignment',
-                'outdent',
-                'indent',
-                '|',
-                'todoList',
-                'bulletedList',
-                'numberedList',
-                '|',
-                'insertImage',
-                'insertTable',
-                'link',
-                'mediaEmbed',
-                '|',
-                'blockQuote',
-                'code',
-                'codeBlock',
-                '|',
-                'specialCharacters',
-                'subscript',
-                'superscript',
-                'horizontalLine',
-            ],
-            shouldNotGroupWhenFull: false
+  const editorConfig = {
+    toolbar: {
+      items: [
+        'bold',
+        'underline',
+        'italic',
+        '|',
+        'fontSize',
+        'alignment',
+        'outdent',
+        'indent',
+        '|',
+        'todoList',
+        'bulletedList',
+        'numberedList',
+        '|',
+        'insertImage',
+        'insertTable',
+        'link',
+        'mediaEmbed',
+        '|',
+        'blockQuote',
+        'code',
+        'codeBlock',
+        '|',
+        'specialCharacters',
+        'subscript',
+        'superscript',
+        'horizontalLine',
+        '|',
+        'undo',
+        'redo',
+      ],
+      shouldNotGroupWhenFull: false,
+    },
+    plugins: [
+      AccessibilityHelp,
+      Alignment,
+      Autoformat,
+      AutoImage,
+      AutoLink,
+      Autosave,
+      BalloonToolbar,
+      Base64UploadAdapter,
+      BlockQuote,
+      Bold,
+      CloudServices,
+      Code,
+      CodeBlock,
+      Essentials,
+      FindAndReplace,
+      FontBackgroundColor,
+      FontColor,
+      FontFamily,
+      FontSize,
+      Heading,
+      Highlight,
+      HorizontalLine,
+      GeneralHtmlSupport,
+      ImageBlock,
+      ImageCaption,
+      ImageInline,
+      ImageInsert,
+      ImageInsertViaUrl,
+      ImageResize,
+      ImageStyle,
+      ImageTextAlternative,
+      ImageToolbar,
+      ImageUpload,
+      Indent,
+      IndentBlock,
+      Italic,
+      Link,
+      LinkImage,
+      List,
+      ListProperties,
+      MediaEmbed,
+      Mention,
+      Paragraph,
+      PasteFromOffice,
+      RemoveFormat,
+      SelectAll,
+      Style,
+      SpecialCharacters,
+      SpecialCharactersArrows,
+      SpecialCharactersCurrency,
+      SpecialCharactersEssentials,
+      SpecialCharactersLatin,
+      SpecialCharactersMathematical,
+      SpecialCharactersText,
+      Strikethrough,
+      Subscript,
+      Superscript,
+      Table,
+      TableCaption,
+      TableCellProperties,
+      TableColumnResize,
+      TableProperties,
+      TableToolbar,
+      TextTransformation,
+      TodoList,
+      Underline,
+      Undo,
+    ],
+    balloonToolbar: [
+      'style',
+      '|',
+      'bold',
+      'italic',
+      'underline',
+      'strikethrough',
+      '|',
+      'fontFamily',
+      'fontColor',
+      'fontBackgroundColor',
+      'highlight',
+      '|',
+      'link',
+      '|',
+      'removeFormat',
+    ],
+    heading: {
+      options: [
+        {
+          model: 'paragraph',
+          title: 'Paragraph',
+          class: 'ck-heading_paragraph',
         },
-        plugins: [
-            AccessibilityHelp,
-            Alignment,
-            Autoformat,
-            AutoImage,
-            AutoLink,
-            Autosave,
-            BalloonToolbar,
-            Base64UploadAdapter,
-            BlockQuote,
-            Bold,
-            CloudServices,
-            Code,
-            CodeBlock,
-            Essentials,
-            FindAndReplace,
-            FontBackgroundColor,
-            FontColor,
-            FontFamily,
-            FontSize,
-            Heading,
-            Highlight,
-            HorizontalLine,
-            GeneralHtmlSupport,
-            ImageBlock,
-            ImageCaption,
-            ImageInline,
-            ImageInsert,
-            ImageInsertViaUrl,
-            ImageResize,
-            ImageStyle,
-            ImageTextAlternative,
-            ImageToolbar,
-            ImageUpload,
-            Indent,
-            IndentBlock,
-            Italic,
-            Link,
-            LinkImage,
-            List,
-            ListProperties,
-            MediaEmbed,
-            Mention,
-            Paragraph,
-            PasteFromOffice,
-            RemoveFormat,
-            SelectAll,
-            Style,
-            SpecialCharacters,
-            SpecialCharactersArrows,
-            SpecialCharactersCurrency,
-            SpecialCharactersEssentials,
-            SpecialCharactersLatin,
-            SpecialCharactersMathematical,
-            SpecialCharactersText,
-            Strikethrough,
-            Subscript,
-            Superscript,
-            Table,
-            TableCaption,
-            TableCellProperties,
-            TableColumnResize,
-            TableProperties,
-            TableToolbar,
-            TextTransformation,
-            TodoList,
-            Underline,
-            Undo
-        ],
-        balloonToolbar: ['style', '|', 'bold', 'italic', 'underline', 'strikethrough', '|', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'highlight', '|', 'link', '|', 'removeFormat',],
-        fontFamily: {
-            supportAllValues: true
+        {
+          model: 'heading1',
+          view: 'h1',
+          title: 'Heading 1',
+          class: 'ck-heading_heading1',
         },
-        fontSize: {
-            options: [10, 12, 14, 'default', 18, 20, 22],
-            supportAllValues: true
+        {
+          model: 'heading2',
+          view: 'h2',
+          title: 'Heading 2',
+          class: 'ck-heading_heading2',
         },
-        heading: {
-            options: [
-                {
-                    model: 'paragraph',
-                    title: 'Paragraph',
-                    class: 'ck-heading_paragraph'
-                },
-                {
-                    model: 'heading1',
-                    view: 'h1',
-                    title: 'Heading 1',
-                    class: 'ck-heading_heading1'
-                },
-                {
-                    model: 'heading2',
-                    view: 'h2',
-                    title: 'Heading 2',
-                    class: 'ck-heading_heading2'
-                },
-                {
-                    model: 'heading3',
-                    view: 'h3',
-                    title: 'Heading 3',
-                    class: 'ck-heading_heading3'
-                },
-                {
-                    model: 'heading4',
-                    view: 'h4',
-                    title: 'Heading 4',
-                    class: 'ck-heading_heading4'
-                },
-                {
-                    model: 'heading5',
-                    view: 'h5',
-                    title: 'Heading 5',
-                    class: 'ck-heading_heading5'
-                },
-                {
-                    model: 'heading6',
-                    view: 'h6',
-                    title: 'Heading 6',
-                    class: 'ck-heading_heading6'
-                }
-            ]
+        {
+          model: 'heading3',
+          view: 'h3',
+          title: 'Heading 3',
+          class: 'ck-heading_heading3',
         },
-        image: {
-            toolbar: [
-                'toggleImageCaption',
-                'imageTextAlternative',
-                '|',
-                'imageStyle:inline',
-                'imageStyle:wrapText',
-                'imageStyle:breakText',
-                '|',
-                'resizeImage'
-            ]
+        {
+          model: 'heading4',
+          view: 'h4',
+          title: 'Heading 4',
+          class: 'ck-heading_heading4',
         },
-        initialData: value || '',
-        language: 'vi',
-        link: {
-            addTargetToExternalLinks: true,
-            defaultProtocol: 'https://',
-            decorators: {
-                toggleDownloadable: {
-                    mode: 'manual',
-                    label: 'Downloadable',
-                    attributes: {
-                        download: 'file'
-                    }
-                }
-            }
+        {
+          model: 'heading5',
+          view: 'h5',
+          title: 'Heading 5',
+          class: 'ck-heading_heading5',
         },
-        list: {
-            properties: {
-                styles: true,
-                startIndex: true,
-                reversed: true
-            }
+        {
+          model: 'heading6',
+          view: 'h6',
+          title: 'Heading 6',
+          class: 'ck-heading_heading6',
         },
-        mention: {
-            feeds: [
-                {
-                    marker: '@',
-                    feed: [
-                        /* See: https://ckeditor.com/docs/ckeditor5/latest/features/mentions.html */
-                    ]
-                }
-            ]
+      ],
+    },
+    image: {
+      toolbar: [
+        'toggleImageCaption',
+        'imageTextAlternative',
+        '|',
+        'imageStyle:inline',
+        'imageStyle:wrapText',
+        'imageStyle:breakText',
+        '|',
+        'resizeImage',
+      ],
+    },
+    language: 'ar',
+    link: {
+      addTargetToExternalLinks: true,
+      defaultProtocol: 'https://',
+      decorators: {
+        toggleDownloadable: {
+          mode: 'manual',
+          label: 'Downloadable',
+          attributes: {
+            download: 'file',
+          },
         },
-        placeholder: placeholder || "",
-        style: {
-            definitions: [
-                {
-                    name: 'Code (Dark)',
-                    element: 'pre',
-                    classes: ['fancy-code', 'fancy-code-dark']
-                },
-                {
-                    name: 'Code (Light)',
-                    element: 'pre',
-                    classes: ['fancy-code', 'fancy-code-bright']
-                }
-            ]
+      },
+    },
+    list: {
+      properties: {
+        styles: true,
+        startIndex: true,
+        reversed: true,
+      },
+    },
+    placeholder: placeholder || '',
+    style: {
+      definitions: [
+        {
+          name: 'Code (Dark)',
+          element: 'pre',
+          classes: ['fancy-code', 'fancy-code-dark'],
         },
-        table: {
-            contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
+        {
+          name: 'Code (Light)',
+          element: 'pre',
+          classes: ['fancy-code', 'fancy-code-bright'],
         },
-        translations: [translations]
-    };
+      ],
+    },
+    table: {
+      contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties'],
+    },
+  }
 
   const handleEditorReady = (editor: any) => {
     editor.plugins.get('FileRepository').createUploadAdapter = (loader: any) => {
@@ -700,29 +1071,31 @@ const Editor: React.FC<EditorProps> = ({ value, onChange, placeholder }) => {
     }
   }
 
-    return (
-        <div>
-            <div className="w-full main-container">
-                <div className="w-full editor-container editor-container_classic-editor editor-container_include-style" ref={editorContainerRef}>
-                    <div className="w-full editor-container__editor">
-                        <div className='w-full' ref={editorRef} spellCheck="false">
-                            {
-                                isLayoutReady &&
-                                <CKEditor
-                                    editor={ClassicEditor}
-                                    config={editorConfig as any}
-                                    onChange={(event: any, editor: any) => {
-                                        onChange?.(event, editor)
-                                    }}
-                                    onReady={handleEditorReady}
-                                />
-                            }
-                        </div>
-                    </div>
-                </div>
+  return (
+    <div>
+      <div className="w-full main-container">
+        <div
+          className="w-full editor-container editor-container_classic-editor editor-container_include-style"
+          ref={editorContainerRef}
+        >
+          <div className="w-full editor-container__editor">
+            <div className="w-full" ref={editorRef} spellCheck="false">
+              {isLayoutReady && (
+                <CKEditor
+                  editor={ClassicEditor}
+                  config={editorConfig as any}
+                  onChange={(event: any, editor: any) => {
+                    onChange?.(event, editor)
+                  }}
+                  onReady={handleEditorReady}
+                />
+              )}
             </div>
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  )
 }
 
-export default Editor;
+export default Editor
