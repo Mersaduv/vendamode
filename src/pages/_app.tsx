@@ -1,6 +1,8 @@
 import '../styles/main.css'
 import '../styles/browser-styles.css'
 import '../styles/swiper.css'
+import 'ckeditor5/ckeditor5.css';
+
 import { ComponentType, FC, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { Provider, useDispatch } from 'react-redux'

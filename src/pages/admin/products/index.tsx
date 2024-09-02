@@ -1382,5 +1382,4 @@ const Products: NextPage = () => {
     </>
   )
 }
-// ? Local Components
 export default dynamic(() => Promise.resolve(Products), { ssr: false })

@@ -152,7 +152,7 @@ const profileData: ProfilePath[] = [
         id: 5,
         name: 'کاربر جدید',
         Icon: TbPointFilled,
-        path: '/admin/users',
+        path: '/admin/users/create',
       },
       {
         id: 5,
@@ -164,7 +164,7 @@ const profileData: ProfilePath[] = [
         id: 5,
         name: 'سمت ها',
         Icon: TbPointFilled,
-        path: '/admin/users',
+        path: '/admin/user/roles',
       },
     ],
   },
