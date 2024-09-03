@@ -2,6 +2,7 @@ import baseApi from '@/services/baseApi'
 import { generateQueryParams, getToken } from '@/utils'
 import {
   ArticleBannerBulkForm,
+  ColumnFooterBulkForm,
   GetArticlesResult,
   HeaderTextUpsertQuery,
   IdQuery,
@@ -13,6 +14,9 @@ import {
   IArticleBanner,
   IArticleBannerForm,
   IBanner,
+  ICategory,
+  IColumnFooter,
+  ICopyright,
   IDesignItem,
   IGeneralSetting,
   IGeneralSettingForm,
@@ -64,6 +68,15 @@ export const designApiSlice = baseApi.injectEndpoints({
       providesTags: (result, error, arg) => (result?.data ? [{ type: 'Support', id: result.data.id }] : ['Support']),
     }),
 
+    getCopyright: builder.query<ServiceResponse<ICopyright>, void>({
+      query: () => ({
+        url: `/api/design/copyright`,
+        method: 'GET',
+      }),
+      providesTags: (result, error, arg) =>
+        result?.data ? [{ type: 'Copyright', id: result.data.id }] : ['Copyright'],
+    }),
+
     upsertSupport: builder.mutation<ServiceResponse<boolean>, ISupport>({
       query: (body) => ({
         url: '/api/design/support',
@@ -91,6 +104,25 @@ export const designApiSlice = baseApi.injectEndpoints({
         result?.data ? [{ type: 'GeneralSetting', id: result.data.id }] : ['GeneralSetting'],
     }),
 
+    getColumnFooters: builder.query<ServiceResponse<IColumnFooter[]>, void>({
+      query: () => {
+        return {
+          url: '/api/design/columnFooters',
+          method: 'GET',
+        }
+      },
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result.data.map(({ id }) => ({
+                type: 'ColumnFooter' as const,
+                id: id,
+              })),
+              'ColumnFooter',
+            ]
+          : ['ColumnFooter'],
+    }),
+
     upsertHeaderText: builder.mutation<ServiceResponse<boolean>, HeaderTextUpsertQuery>({
       query: (body) => ({
         url: '/api/design/headerText',
@@ -116,6 +148,24 @@ export const designApiSlice = baseApi.injectEndpoints({
         body,
       }),
       invalidatesTags: ['GeneralSetting'],
+    }),
+
+    upsertCopyright: builder.mutation<ServiceResponse<boolean>, ICopyright>({
+      query: (body) => ({
+        url: '/api/design/copyright',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Copyright'],
+    }),
+
+    upsertColumnFooter: builder.mutation<ServiceResponse<boolean>, ColumnFooterBulkForm>({
+      query: (body) => ({
+        url: '/api/design/columnFooters',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['ColumnFooter'],
     }),
 
     upsertDesignItems: builder.mutation<ServiceResponse<boolean>, FormData>({
@@ -260,6 +310,25 @@ export const designApiSlice = baseApi.injectEndpoints({
           : ['StoreCategories'],
     }),
 
+    getStoreCategoryList: builder.query<ServiceResponse<ICategory[]>, void>({
+      query: () => {
+        return {
+          url: '/api/design/storeCategoryList',
+          method: 'GET',
+        }
+      },
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result.data.map(({ id }) => ({
+                type: 'StoreCategories' as const,
+                id: id,
+              })),
+              'StoreCategories',
+            ]
+          : ['StoreCategories'],
+    }),
+
     getSingleArticle: builder.query<ServiceResponse<IArticle>, IdQuery>({
       query: ({ id }) => ({
         url: `/api/article/${id}`,
@@ -352,6 +421,7 @@ export const designApiSlice = baseApi.injectEndpoints({
       },
       invalidatesTags: ['Article'],
     }),
+
     restoreArticle: builder.mutation<ServiceResponse<boolean>, IdQuery>({
       query: ({ id }) => {
         return {
@@ -414,4 +484,9 @@ export const {
   useGetSupportQuery,
   useUpsertRedirectsMutation,
   useUpsertSupportMutation,
+  useUpsertCopyrightMutation,
+  useGetCopyrightQuery,
+  useGetColumnFootersQuery,
+  useUpsertColumnFooterMutation,
+  useGetStoreCategoryListQuery,
 } = designApiSlice

@@ -184,7 +184,7 @@ export default function Navbar() {
   return (
     <div className="group hidden lg:block">
       <button
-        className="flex-center gap-x-1 px-2 text-sm"
+        className="flex-center gap-x-1 px-2 text-sm py-3"
         onMouseOver={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
       >

@@ -53,30 +53,30 @@ const DesignItemForm: React.FC<Props> = ({
 
     if (files) {
       const validFiles: any[] = []
-      const maxFileSize = 150 * 1024 // 150 KB
-      const exactWidth = 1900
-      const exactHeight = 600
+      const maxFileSize = 15 * 1024 // 150 KB
+      const exactWidth = 50
+      const exactHeight = 50
 
       Array.from(files).forEach((file) => {
-        // if (file.type !== 'image/png') {
-        //   dispatch(
-        //     showAlert({
-        //       status: 'error',
-        //       title: 'فرمت عکس ها می بایست png باشد',
-        //     })
-        //   )
-        //   return
-        // }
+        if (file.type !== 'image/png') {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'فرمت عکس ها می بایست png باشد',
+            })
+          )
+          return
+        }
 
-        // if (file.size > maxFileSize) {
-        //   dispatch(
-        //     showAlert({
-        //       status: 'error',
-        //       title: 'حجم عکس ها می بایست حداکثر 150 کیلوبایت باشد',
-        //     })
-        //   )
-        //   return
-        // }
+        if (file.size > maxFileSize) {
+          dispatch(
+            showAlert({
+              status: 'error',
+              title: 'حجم عکس ها می بایست حداکثر 15 کیلوبایت باشد',
+            })
+          )
+          return
+        }
 
         const img = new Image()
         img.src = URL.createObjectURL(file)
@@ -84,18 +84,18 @@ const DesignItemForm: React.FC<Props> = ({
         img.onload = () => {
           URL.revokeObjectURL(img.src)
 
-          //   if (img.width !== exactWidth || img.height !== exactHeight) {
-          //     dispatch(
-          //       showAlert({
-          //         status: 'error',
-          //         title: 'سایز عکس ها می بایست 600*1900 پیکسل باشد',
-          //       })
-          //     )
-          //   } else {
+            if (img.width !== exactWidth || img.height !== exactHeight) {
+              dispatch(
+                showAlert({
+                  status: 'error',
+                  title: 'سایز عکس ها می بایست 50*50 پیکسل باشد',
+                })
+              )
+            } else {
           validFiles.push(file)
           newDesignItems[index].thumbnail = file
           setDesignItems(newDesignItems)
-          //   }
+            }
         }
       })
     } else {
@@ -132,7 +132,7 @@ const DesignItemForm: React.FC<Props> = ({
         </div>
         <div className="flex flex-col px-6 pb-7 pt-4">
           <div className="flex justify-end mb-4"></div>
-          <div className="grid justify-center sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 ">
+          <div className="grid justify-center sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 ">
             {designItems.length === 0 ? (
               <div className="flex justify-center col-span-5">
                 {' '}
@@ -171,7 +171,7 @@ const DesignItemForm: React.FC<Props> = ({
                             <img
                               src={URL.createObjectURL(designItem.thumbnail)}
                               alt="Design Item"
-                              className="w-[210px] h-[125px] object-cover rounded-md"
+                              className="w-[210px] h-[125px] object-contain rounded-md"
                             />
                           ) : (
                             <img
@@ -186,7 +186,7 @@ const DesignItemForm: React.FC<Props> = ({
                           id={`file-${type}-${index}`}
                           className="hidden"
                           onChange={(e) => handleFileChange(index, e)}
-                          accept="image/jpeg"
+                          accept="image/png"
                         />
                       </div>
                       <div className="flex flex-col gap-2 w-full">
@@ -245,7 +245,7 @@ const DesignItemForm: React.FC<Props> = ({
           {type === 'services' ? (
             <span className="font-normal text-[11px]">حجم تصاویر میبایست حداکثر 60 کیلوبایت باشد</span>
           ) : (
-            <span className="font-normal text-[11px]">حجم تصاویر میبایست حداکثر 10 کیلوبایت باشد</span>
+            <span className="font-normal text-[11px]">حجم تصاویر میبایست حداکثر 15 کیلوبایت باشد</span>
           )}
 
           <span className="font-normal text-[11px]">فرمت عکس می با یست png باشد</span>

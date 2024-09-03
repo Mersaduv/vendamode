@@ -32,7 +32,7 @@ const RedirectForm: React.FC = () => {
             <h3 className=" text-gray-600 whitespace-nowrap">ریدایرکت ها</h3>
           </div>
           <div className="flex flex-col sm:flex-row px-20 py-8 gap-4">
-            <div className="sm:w-[80%] flex items-center justify-center">قوانین و حریم خصوصی</div>
+            <div className="sm:w-[80%] flex items-center justify-start pr-20">قوانین و حریم خصوصی</div>
 
             <div className="flex flex-col items-start p-1 w-full">
               <div className="flex flex-col gap-2 w-full">
@@ -40,7 +40,7 @@ const RedirectForm: React.FC = () => {
                 <div className="flex gap-3 items-center">
                   <div className="flex border w-full rounded-lg">
                     <Controller
-                      name="redirect.articleId"
+                      name="redirects.articleId"
                       control={control}
                       render={({ field }) => (
                         <select

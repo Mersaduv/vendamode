@@ -14,7 +14,7 @@ const GeneralSettingForm: React.FC = () => {
       <div className="bg-white flex flex-col justify-between w-full rounded-md shadow-item">
         <div>
           <div className="flex justify-between items-center border-b p-5 px-6">
-            <h3 className=" text-gray-600 whitespace-nowrap">تنظیمات عمومی</h3>
+            <h3 className=" text-gray-600 whitespace-nowrap">معرفی سایت</h3>
           </div>
           <div className="flex flex-col px-10 py-10 pt-6 gap-4">
             <Controller
