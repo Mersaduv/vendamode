@@ -9,9 +9,17 @@ import { Sidebar, Navbar } from '@/components/shared'
 import { useState } from 'react'
 import TextMarquee from '../ui/TextMarquee'
 import { useAppSelector } from '@/hooks'
+import { useGetDesignItemsQuery, useGetStoreCategoriesQuery } from '@/services'
 const Header = () => {
   const [isShowSearch, setIsShowSearch] = useState(false)
   const { logoImages } = useAppSelector((state) => state.design)
+
+  const {
+    data: designItemsData,
+    isLoading: isLoadingDesignItems,
+    isError: isErrorDesignItems,
+  } = useGetDesignItemsQuery()
+
   return (
     <>
       <header className="bg-white shadow xl:inset-x-0 top-0 fixed w-full z-[101] transition duration-700 ease-in-out">
@@ -22,7 +30,11 @@ const Header = () => {
             <div className="inline-flex w-full items-center justify-between border-b lg:ml-8 lg:max-w-min lg:border-b-0">
               <Sidebar />
               <Link className="w-32 md:w-52" passHref href="/">
-                <img width={250} src={logoImages?.orgImage && logoImages?.orgImage.imageUrl || ''} alt="online shop" />
+                <img
+                  width={250}
+                  src={(logoImages?.orgImage && logoImages?.orgImage.imageUrl) || ''}
+                  alt="online shop"
+                />
               </Link>
               <Question className="icon lg:hidden" />
             </div>
@@ -37,8 +49,30 @@ const Header = () => {
               </div>
             </div>
           </div>
-          <div className="relative flex max-w-[1700px] justify-start w-full sm:py-8">
+          <div className="relative gap-8 flex max-w-[1700px] justify-start w-full ">
             <Navbar />
+            <div className="flex gap-8">
+              {designItemsData &&
+                designItemsData.data
+                  ?.filter((item) => item.type === 'lists')
+                  .map((designItem) => {
+                    return (
+                      <div
+                        className="flex gap-2 border-[#e90089] hover:border-b-2 cursor-pointer py-3"
+                        key={designItem.id}
+                      >
+                        <div>
+                          <img
+                            className="w-5 h-5 rounded-lg opacity-55"
+                            src={designItem.image.imageUrl}
+                            alt={designItem.title}
+                          />
+                        </div>
+                        <div className='text-sm'>{designItem.title}</div>
+                      </div>
+                    )
+                  })}
+            </div>
             {/* <AddressBar /> */}
           </div>
 

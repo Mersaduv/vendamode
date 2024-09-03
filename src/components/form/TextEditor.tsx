@@ -804,9 +804,10 @@ interface EditorProps {
   onChange?: any
   value?: any
   placeholder?: string
+  isSupport?: boolean
 }
 
-const Editor: React.FC<EditorProps> = ({ value, onChange, placeholder }) => {
+const Editor: React.FC<EditorProps> = ({ value, onChange, placeholder , isSupport }) => {
   const editorContainerRef = useRef(null)
   const editorRef = useRef(null)
   const [isLayoutReady, setIsLayoutReady] = useState(false)
@@ -1073,7 +1074,7 @@ const Editor: React.FC<EditorProps> = ({ value, onChange, placeholder }) => {
 
   return (
     <div>
-      <div className="w-full main-container">
+      <div className={`w-full  main-container`}>
         <div
           className="w-full editor-container editor-container_classic-editor editor-container_include-style"
           ref={editorContainerRef}

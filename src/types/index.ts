@@ -19,6 +19,8 @@ export type * from './models/IStoreCategory.type'
 export type * from './models/ISloganFooter.type'
 export type * from './models/IRedirects.type'
 export type * from './models/ISupport.type'
+export type * from './models/IColumnFooter.type'
+export type * from './models/ICopyright.type'
 
 export type { default as ICategoriesList } from './ICategoriesList.type'
 export type { default as IPagination } from './IPagination.type'

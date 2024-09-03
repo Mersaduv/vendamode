@@ -99,12 +99,6 @@ const profileData: ProfilePath[] = [
     subItem: [
       {
         id: 2,
-        name: 'صفحه اصلی',
-        Icon: TbPointFilled,
-        path: '/admin/ads/main',
-      },
-      {
-        id: 2,
         name: 'پیشنهاد شگفت انگیز',
         Icon: TbPointFilled,
         path: '/admin/sub',
@@ -214,29 +208,42 @@ const profileData: ProfilePath[] = [
   },
   {
     id: 8,
-    name: 'تنظیمات',
+    name: 'نمای سایت',
     Icon: IoSettings,
     subItem: [
       {
         id: 8,
         name: 'دیزاین',
         Icon: TbPointFilled,
-        path: '/admin/design',
+        path: '/admin/design/siteItems',
       },
       {
         id: 8,
+        name: 'صفحه اصلی',
+        Icon: TbPointFilled,
+        path: '/admin/ads/main',
+      },
+    ],
+  },
+  {
+    id: 9,
+    name: 'تنظیمات',
+    Icon: IoSettings,
+    subItem: [
+      {
+        id: 9,
         name: 'پیکربندی محصول',
         Icon: TbPointFilled,
         path: '/admin/product-configuration/categories',
       },
       {
-        id: 8,
+        id: 9,
         name: 'مبالغ و هزینه ها',
         Icon: TbPointFilled,
         path: '/admin/setting',
       },
       {
-        id: 8,
+        id: 9,
         name: 'دپارتمان',
         Icon: TbPointFilled,
         path: '/admin/setting',
@@ -279,7 +286,7 @@ export default function DashboardAdminAside(props: Props) {
   }
 
   return (
-    <div className='lg2:w-[265px]'>
+    <div className="lg2:w-[265px]">
       <aside className="fixed top-[74px] w-[265px] bg-[#1e1e2d] hidden lg2:block">
         <div className="py-5 flex flex-col justify-between h-screen">
           <div className="overflow-auto">
@@ -376,7 +383,7 @@ export default function DashboardAdminAside(props: Props) {
 
       <Drawer open={openRight} side="right" setOpen={setOpenRight}>
         {openRight && (
-         <aside className="fixed top-[74px] w-[265px] bg-[#1e1e2d] hidden lg2:block">
+          <aside className="fixed top-[74px] w-[265px] bg-[#1e1e2d] hidden lg2:block">
             <div className="py-5 flex flex-col justify-between h-screen">
               <div className="overflow-auto">
                 {profilePaths.map((item, index) =>

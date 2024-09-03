@@ -431,7 +431,12 @@ const MainPageAdsForm: React.FC = () => {
       isUpsertSuccessSlider ||
       isUpsertSuccessBanner ||
       isUpsertSuccessFooterBanner ||
-      isUpsertSuccessArticleBanner
+      isUpsertSuccessArticleBanner ||
+      isUpsertErrorHeaderText ||
+      isUpsertErrorSlider ||
+      isUpsertErrorBanner ||
+      isUpsertErrorFooterBanner ||
+      isUpsertErrorArticleBanner
     ) {
       dispatch(
         showAlert({

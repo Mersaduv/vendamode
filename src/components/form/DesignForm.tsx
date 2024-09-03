@@ -1,4 +1,5 @@
 import {
+  IColumnFooter,
   IDesignItemForm,
   IGeneralSettingForm,
   ILogosForm,
@@ -31,7 +32,14 @@ import {
 } from '@/services'
 import { showAlert } from '@/store'
 import { useAppDispatch } from '@/hooks'
-import { DesignItemForm, RedirectForm, SloganFooterForm, StoreCategoryForm, SupportForm } from '../designs'
+import {
+  AdditionalForm,
+  DesignItemForm,
+  RedirectForm,
+  SloganFooterForm,
+  StoreCategoryForm,
+  SupportForm,
+} from '../designs'
 import { StoreCategoryBulkForm } from '@/services/design/types'
 
 const fetchImageAsFile = async (url: string): Promise<File> => {
@@ -56,6 +64,7 @@ interface FormData {
   sloganFooter: ISloganFooter
   support: ISupport
   redirects: IRedirect
+  columnFooters: IColumnFooter[]
 }
 
 const DesignForm: React.FC = () => {
@@ -70,7 +79,8 @@ const DesignForm: React.FC = () => {
   const [storeCategories, setStoreCategories] = useState<IStoreCategory[]>([])
   const [deletedStoreCategories, setDeletedStoreCategories] = useState<IStoreCategory[]>([])
   const [articleRedirect, setArticleRedirect] = useState<IRedirect[]>([])
-
+  const [columnFooter, setColumnFooter] = useState<IColumnFooter[]>([])
+  const [deletedColumnFooter, setDeletedColumnFooter] = useState<IColumnFooter[]>([])
   const [selectedMainFile, setMainSelectedFiles] = useState<any[]>([])
   const [selectedFaviconFile, setFaviconFile] = useState<any[]>([])
 
@@ -88,6 +98,7 @@ const DesignForm: React.FC = () => {
       sloganFooter: {},
       redirects: {},
       support: {},
+      columnFooters: [],
     },
   })
 
@@ -245,12 +256,13 @@ const DesignForm: React.FC = () => {
       )
     }
 
-    // support
+    // redirects
     if (data.redirects) {
       const upsertRedirectPromise = (async () => {
         const upsertData: IRedirect = {
           id: data.redirects.id || undefined,
           articleId: data.redirects.articleId,
+          copyright: data.redirects.copyright,
         }
         await upsertRedirect(upsertData)
       })()
@@ -263,7 +275,7 @@ const DesignForm: React.FC = () => {
         const upsertData: ISupport = {
           id: data.support.id || undefined,
           contactAndSupport: data.support.contactAndSupport,
-          copyright: data.support.copyright,
+          address: data.support.address,
         }
         await upsertSupport(upsertData)
       })()
@@ -351,82 +363,92 @@ const DesignForm: React.FC = () => {
   }
 
   // load data
-useEffect(() => {
-  const loadAllData = async () => {
-    const logoImages = logoImagesData?.data ? await Promise.all(
-      logoImagesData.data.map(async (logoImage) => {
-        const imageMainFile = logoImage.orgImage ? await fetchImageAsFile(logoImage.orgImage.imageUrl) : null
-        const imageFaviconFile = logoImage.faviconImage
-          ? await fetchImageAsFile(logoImage.faviconImage.imageUrl)
-          : null
+  useEffect(() => {
+    const loadAllData = async () => {
+      const logoImages = logoImagesData?.data
+        ? await Promise.all(
+            logoImagesData.data.map(async (logoImage) => {
+              const imageMainFile = logoImage.orgImage ? await fetchImageAsFile(logoImage.orgImage.imageUrl) : null
+              const imageFaviconFile = logoImage.faviconImage
+                ? await fetchImageAsFile(logoImage.faviconImage.imageUrl)
+                : null
 
-        return {
-          id: logoImage.id,
-          orgThumbnail: imageMainFile,
-          faviconThumbnail: imageFaviconFile,
-        }
+              return {
+                id: logoImage.id,
+                orgThumbnail: imageMainFile,
+                faviconThumbnail: imageFaviconFile,
+              }
+            })
+          )
+        : []
+
+      const listItems: IDesignItemForm[] = []
+      const serviceItems: IDesignItemForm[] = []
+      const socialMediaItems: IDesignItemForm[] = []
+
+      if (designItemsData?.data) {
+        await Promise.all(
+          designItemsData.data.map(async (designItem) => {
+            const imageFile = designItem.image ? await fetchImageAsFile(designItem.image.imageUrl) : null
+            const item: IDesignItemForm = {
+              id: designItem.id,
+              thumbnail: imageFile,
+              title: designItem.title,
+              link: designItem.link,
+              type: designItem.type,
+              index: designItem.index,
+              created: designItem.created,
+              lastUpdated: designItem.lastUpdated,
+            }
+
+            if (designItem.type === 'lists') listItems.push(item)
+            else if (designItem.type === 'services') serviceItems.push(item)
+            else if (designItem.type === 'socialMedia') socialMediaItems.push(item)
+          })
+        )
+      }
+
+      setListItems(listItems)
+      setServiceItems(serviceItems)
+      setSocialMediaItems(socialMediaItems)
+
+      if (logoImages.length > 0) {
+        setMainSelectedFiles(logoImages[0].orgThumbnail ? [logoImages[0].orgThumbnail] : [])
+        setFaviconFile(logoImages[0].faviconThumbnail ? [logoImages[0].faviconThumbnail] : [])
+      }
+
+      if (storeCategoriesData?.data) {
+        setStoreCategories(storeCategoriesData.data)
+      }
+
+      methods.reset({
+        generalSetting: generalSettingData?.data
+          ? {
+              id: generalSettingData.data.id || '',
+              title: generalSettingData.data.title || '',
+              shortIntroduction: generalSettingData.data.shortIntroduction || '',
+              googleTags: generalSettingData.data.googleTags || '',
+            }
+          : {},
+        logoImages: logoImages.length > 0 ? logoImages[0] : {},
+        storeCategories: storeCategoriesData?.data || [],
+        sloganFooter: sloganFooterData?.data || {},
+        support: supportData?.data || {},
+        redirects: redirectData?.data || {},
       })
-    ) : []
-
-    const listItems: IDesignItemForm[] = []
-    const serviceItems: IDesignItemForm[] = []
-    const socialMediaItems: IDesignItemForm[] = []
-
-    if (designItemsData?.data) {
-      await Promise.all(
-        designItemsData.data.map(async (designItem) => {
-          const imageFile = designItem.image ? await fetchImageAsFile(designItem.image.imageUrl) : null
-          const item: IDesignItemForm = {
-            id: designItem.id,
-            thumbnail: imageFile,
-            title: designItem.title,
-            link: designItem.link,
-            type: designItem.type,
-            index: designItem.index,
-            created: designItem.created,
-            lastUpdated: designItem.lastUpdated,
-          }
-
-          if (designItem.type === 'lists') listItems.push(item)
-          else if (designItem.type === 'services') serviceItems.push(item)
-          else if (designItem.type === 'socialMedia') socialMediaItems.push(item)
-        })
-      )
     }
 
-    setListItems(listItems)
-    setServiceItems(serviceItems)
-    setSocialMediaItems(socialMediaItems)
-
-    if (logoImages.length > 0) {
-      setMainSelectedFiles(logoImages[0].orgThumbnail ? [logoImages[0].orgThumbnail] : [])
-      setFaviconFile(logoImages[0].faviconThumbnail ? [logoImages[0].faviconThumbnail] : [])
-    }
-
-    if (storeCategoriesData?.data) {
-      setStoreCategories(storeCategoriesData.data)
-    }
-
-    methods.reset({
-      generalSetting: generalSettingData?.data
-        ? {
-            id: generalSettingData.data.id || '',
-            title: generalSettingData.data.title || '',
-            shortIntroduction: generalSettingData.data.shortIntroduction || '',
-            googleTags: generalSettingData.data.googleTags || '',
-          }
-        : {},
-      logoImages: logoImages.length > 0 ? logoImages[0] : {},
-      storeCategories: storeCategoriesData?.data || [],
-      sloganFooter: sloganFooterData?.data || {},
-      support: supportData?.data || {},
-      redirects: redirectData?.data || {},
-    })
-  }
-
-  loadAllData()
-}, [generalSettingData, sloganFooterData, redirectData, supportData, logoImagesData, designItemsData, methods])
-
+    loadAllData()
+  }, [
+    generalSettingData,
+    sloganFooterData,
+    redirectData,
+    supportData,
+    logoImagesData,
+    designItemsData,
+    storeCategoriesData,
+    methods,
+  ])
 
   // handle success alert
   useEffect(() => {
@@ -567,7 +589,11 @@ useEffect(() => {
           <SloganFooterForm />
 
           <SupportForm />
-
+          <AdditionalForm
+            columnFooters={columnFooter}
+            setColumnFooter={setColumnFooter}
+            setDeletedColumnFooter={setDeletedColumnFooter}
+          />
           <RedirectForm />
           <div className="w-full flex justify-end mt-6">
             <Button
