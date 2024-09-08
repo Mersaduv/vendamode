@@ -57,15 +57,6 @@ const GeneralSettings: NextPage = () => {
     },
   })
 
-  // Queries
-  const {
-    data: generalSettingData,
-    isLoading: isLoadingGeneralSetting,
-    isError: isErrorGeneralSetting,
-  } = useGetGeneralSettingQuery()
-
-  const { data: logoImagesData, isLoading: isLoadingLogoImages, isError: isErrorLogoImages } = useGetLogoImagesQuery()
-
   // ? State
   const [storeCategories, setStoreCategories] = useState<IStoreCategory[]>([])
   const [deletedStoreCategories, setDeletedStoreCategories] = useState<IStoreCategory[]>([])
@@ -222,8 +213,6 @@ const GeneralSettings: NextPage = () => {
   useEffect(() => {
     const loadAllData = async () => {
       const listItems: IDesignItemForm[] = []
-      const serviceItems: IDesignItemForm[] = []
-      const socialMediaItems: IDesignItemForm[] = []
 
       if (designItemsData?.data) {
         await Promise.all(
@@ -249,7 +238,6 @@ const GeneralSettings: NextPage = () => {
       if (storeCategoriesData?.data) {
         setStoreCategories(storeCategoriesData.data)
       }
-console.log(redirectData , "redirectData");
 
       methods.reset({
         storeCategories: storeCategoriesData?.data || [],
@@ -262,7 +250,7 @@ console.log(redirectData , "redirectData");
 
   //   handle success alert
   useEffect(() => {
-    let alertMessage = 'عملیات بروزرسانی با موفقیت انجام شد'
+    let alertMessage = 'بروزرسانی با موفقیت انجام شد'
 
     const errors = []
 
@@ -272,7 +260,7 @@ console.log(redirectData , "redirectData");
     if (isUpsertErrorStoreCategory) {
       errors.push('به‌روزرسانی دسته بندی')
     }
-    if (isUpsertSuccessRedirect) {
+    if (isUpsertErrorRedirect) {
       errors.push('به‌روزرسانی ریدایرکت')
     }
 
@@ -331,6 +319,7 @@ console.log(redirectData , "redirectData");
           type: type,
           isActive: false,
           index: listItems.length,
+          created: new Date().toISOString(),
         }
         setListItems([...listItems, newItem])
         break

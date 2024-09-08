@@ -32,18 +32,10 @@ const MainSlider: React.FC<Props> = (props) => {
   )
 
   // ? Render(s)
-  if (data?.length === 0)
+  if (data?.filter((item) => item.isActive).length === 0)
     return (
-      <div className="w-full h-64 md:h-[480px] lg:h-[520px] xl:h-[560px] mt-24 py-8">
-        {' '}
-        <ResponsiveImage
-          dimensions="w-full h-64 md:h-[480px] lg:h-[520px] xl:h-[560px]"
-          imageStyles="object-cover object-[72%] lg:object-center "
-          src={'/logo/Logo.png'}
-          alt={`اسلایدر`}
-          unoptimized={true}
-          blurDataURL={'/logo/'}
-        />
+      <div className="w-full mt-24 ">
+ 
       </div>
     )
 
@@ -76,6 +68,7 @@ const MainSlider: React.FC<Props> = (props) => {
             </SwiperSlide>
           ))}
       </Swiper>
+      <hr className="pb-8 mx-8 border-t-2" />
     </section>
   )
 }

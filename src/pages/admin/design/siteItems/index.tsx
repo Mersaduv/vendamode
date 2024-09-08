@@ -162,7 +162,7 @@ const SiteItems: NextPage = () => {
 
   // handle success alert
   useEffect(() => {
-    let alertMessage = 'عملیات بروزرسانی با موفقیت انجام شد'
+    let alertMessage = ' بروزرسانی با موفقیت انجام شد'
 
     const errors = []
 

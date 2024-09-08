@@ -64,6 +64,7 @@ const Articles: NextPage = () => {
       <ClientLayout>
         <main className="lg:container overflow-y-auto lg:max-w-[1700px] lg:px-3 xl:mt-10 relative">
           <h1 className="mt-10 sm:mt-20 xl:mt-10">مقالات</h1>
+
           <div className="flex flex-col sm:flex-row relative">
             {' '}
             {/* articles */}

@@ -796,7 +796,7 @@ const Products: NextPage = () => {
                                       {handleIsChangeable(product) ? 'متغیر' : 'ساده'}
                                     </td>
                                     <td className="text-center text-sm text-gray-600">
-                                      {handleIsChangeable(product) && product.inStock > 0 ? '✓' : digitsEnToFa('0')}
+                                      {handleIsChangeable(product) && product.inStock > 0 ? '✓' : digitsEnToFa(product.inStock)}
                                     </td>
                                     <td className="text-center text-sm text-gray-600">{generalSetting?.title}</td>
                                     <td className="text-center">

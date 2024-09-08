@@ -10,7 +10,7 @@ import { showAlert } from '@/store'
 import { useAppDispatch } from '@/hooks'
 import { MdClose } from 'react-icons/md'
 import { digitsEnToFa } from '@persian-tools/persian-tools'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 const CustomEditor = dynamic(() => import('@/components/form/TextEditor'), { ssr: false })
 interface Props {
   setColumnFooter: React.Dispatch<React.SetStateAction<IColumnFooter[]>>
@@ -18,8 +18,10 @@ interface Props {
   setDeletedColumnFooter: React.Dispatch<React.SetStateAction<IColumnFooter[]>>
 }
 const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDeletedColumnFooter }) => {
-  const { control,setValue } = useFormContext()
+  const { control, setValue } = useFormContext()
   const dispatch = useAppDispatch()
+
+  const [nextIndex , setNextIndex] = useState(2)
 
   useEffect(() => {
     const columnFootersWithThumbnail = columnFooters.filter((slider) => slider.name !== '')
@@ -36,8 +38,15 @@ const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDe
       )
       return
     }
-    setColumnFooter([...columnFooters, { id: '', name: '' }])
+
+//  let columnIndex = nextIndex +1
+
+    setColumnFooter([
+      ...columnFooters,
+      { id: '', name: '', index: nextIndex },
+    ])
   }
+
   const handleDelete = (index: number, columnFooter: IColumnFooter) => {
     if (columnFooter.id) {
       setDeletedColumnFooter((prevDeleted) => [...prevDeleted, columnFooter])

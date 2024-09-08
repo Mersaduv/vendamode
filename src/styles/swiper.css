@@ -1,3 +1,4 @@
+
 .swiper-button-prev,
 .swiper-button-next {
   color: #0ea5e9 !important;
@@ -18,17 +19,7 @@
 .swiper-button-next::after,
 .swiper-button-prev::after {
   font-size: 20px !important;
-}
-
-
-.swiper-button-prev {
-  margin-right: 120px !important;
-  }
-@media (max-width: 640px) {
-  .swiper-button-prev {
-    margin-right: 10px !important;
-    }
-}
+} 
 
 .detailSwiper .swiper-button-prev,
 .detailSwiper .swiper-button-next {
@@ -119,3 +110,4 @@
     margin-right: 0px !important;
     }
 }
+

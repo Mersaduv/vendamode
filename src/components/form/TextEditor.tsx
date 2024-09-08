@@ -1085,6 +1085,7 @@ const Editor: React.FC<EditorProps> = ({ value, onChange, placeholder , isSuppor
                 <CKEditor
                   editor={ClassicEditor}
                   config={editorConfig as any}
+                  data={value}
                   onChange={(event: any, editor: any) => {
                     onChange?.(event, editor)
                   }}

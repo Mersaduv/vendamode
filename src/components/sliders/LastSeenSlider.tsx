@@ -9,6 +9,7 @@ import { useAppSelector } from '@/hooks'
 import dynamic from 'next/dynamic'
 import 'owl.carousel/dist/assets/owl.carousel.css'
 import 'owl.carousel/dist/assets/owl.theme.default.css'
+import { TbRuler2 } from 'react-icons/tb'
 interface Props {
   currentCategory?: ICategory
 }
@@ -16,22 +17,10 @@ const OwlCarousel = dynamic(() => import('react-owl-carousel'), {
   ssr: false,
 })
 
-const NewSlider: React.FC<Props> = (props) => {
+const LastSeenSlider: React.FC<Props> = (props) => {
   const { currentCategory } = props
   const { generalSetting } = useAppSelector((state) => state.design)
-  const { products, isFetching } = useGetProductsQuery(
-    {
-      sortBy: 'Created',
-      pageSize: 30,
-    },
-    {
-      selectFromResult: ({ data, isFetching }) => ({
-        products: data?.data?.pagination.data,
-        isFetching,
-      }),
-    }
-  )
-
+  const { lastSeen: products } = useAppSelector((state) => state.lastSeen)
   const carouselOptions = {
     margin: 10,
     nav: true,
@@ -62,10 +51,6 @@ const NewSlider: React.FC<Props> = (props) => {
     ],
   }
 
-  if (isFetching) {
-    return <div>Loading...</div>
-  }
-
   return (
     <>
       {/**************** There is a responsive issue here, which is why duplicate code was created *****************/}
@@ -76,20 +61,17 @@ const NewSlider: React.FC<Props> = (props) => {
           dir="ltr"
         >
           {products?.map((product) => {
-            const stockItemWithDiscount = product.stockItems.find((stockItem) => stockItem.discount! > 0)
-            const stockItemWithOutDiscount = product.stockItems.find((stockItem) => stockItem.discount === null)
-
             return (
               <div
-                key={product.id}
+                key={product.productID}
                 className="w-[150px] sm:w-[200px] z-50 shadow hover:shadow-item rounded-lg mb-2 bg-white"
               >
                 <Link href={`/products/${product.slug}`}>
                   <ResponsiveImage
                     dimensions="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] lg:w-[200px] lg:h-[200px]"
                     className="mx-auto relative"
-                    src={product.mainImageSrc.imageUrl}
-                    blurDataURL={product.mainImageSrc.placeholder}
+                    src={product.image.imageUrl}
+                    blurDataURL={product.image.placeholder}
                     alt={product.title}
                     imageStyles="object-center rounded-t-lg"
                   />
@@ -99,7 +81,7 @@ const NewSlider: React.FC<Props> = (props) => {
                       <ProductPriceDisplay
                         inStock={product.inStock}
                         discount={0}
-                        price={stockItemWithOutDiscount?.price ?? stockItemWithDiscount?.price ?? 0}
+                        price={product?.price ?? product?.price ?? 0}
                       />
                     </div>
                   </div>
@@ -117,20 +99,17 @@ const NewSlider: React.FC<Props> = (props) => {
           dir="ltr"
         >
           {products?.map((product) => {
-            const stockItemWithDiscount = product.stockItems.find((stockItem) => stockItem.discount! > 0)
-            const stockItemWithOutDiscount = product.stockItems.find((stockItem) => stockItem.discount === null)
-
             return (
               <div
-                key={product.id}
+                key={product.productID}
                 className="w-[150px] sm:w-[200px] z-50 shadow hover:shadow-item rounded-lg mb-2 bg-white"
               >
                 <Link href={`/products/${product.slug}`}>
                   <ResponsiveImage
                     dimensions="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] lg:w-[200px] lg:h-[200px]"
                     className="mx-auto relative"
-                    src={product.mainImageSrc.imageUrl}
-                    blurDataURL={product.mainImageSrc.placeholder}
+                    src={product.image.imageUrl}
+                    blurDataURL={product.image.placeholder}
                     alt={product.title}
                     imageStyles="object-center rounded-t-lg"
                   />
@@ -140,7 +119,7 @@ const NewSlider: React.FC<Props> = (props) => {
                       <ProductPriceDisplay
                         inStock={product.inStock}
                         discount={0}
-                        price={stockItemWithOutDiscount?.price ?? stockItemWithDiscount?.price ?? 0}
+                        price={product?.price ?? product?.price ?? 0}
                       />
                     </div>
                   </div>
@@ -151,13 +130,13 @@ const NewSlider: React.FC<Props> = (props) => {
 
           <div>
             <div className="line-clamp-2 overflow-hidden text-ellipsis text-center -mt-16 text-lg text-gray-400 px-3 w-full">
-              جدید ترین های {generalSetting?.title}
+              بازدید های اخیر شما{' '}
             </div>
             <div className="mt-10 flex justify-center">
               <img className="w-[120px] xs2:w-[180px] static-img" src="/images/NEW.webp" alt="offer" />
             </div>
             <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">
-              تخفیف های امروز رو از دست نده
+              بازدید های اخیر رو اینجا ببین{' '}
             </p>
             <div className="w-full sm:flex justify-center hidden">
               <Link href={`/products?sortBy=Created`}>
@@ -171,4 +150,4 @@ const NewSlider: React.FC<Props> = (props) => {
   )
 }
 
-export default NewSlider
+export default LastSeenSlider
