@@ -24,6 +24,7 @@ const ReadableArticlePlace: React.FC<Props> = (props) => {
     data: articleData,
     isLoading: isLoadingArticle,
     isError: isErrorArticle,
+    isFetching
   } = useGetArticlesQuery({
     page: 1,
     pageSize: 99999,
@@ -56,7 +57,9 @@ const ReadableArticlePlace: React.FC<Props> = (props) => {
       `<button class="custom-next"><img className='h-3 w-3' src='/icons/right.png' alt="right" /></button>`,
     ],
   }
-
+  if (isFetching) {
+    return <div>Loading...</div>
+  }
   return (
     <>
       <div className="new-products-slider-containers  relative w-full ">
