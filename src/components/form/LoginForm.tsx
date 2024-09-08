@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { digitsEnToFa } from '@persian-tools/persian-tools'
 import React, { forwardRef } from 'react'
 import { Control, FieldError, useController } from 'react-hook-form'
+import { useGetRedirectsQuery } from '@/services'
 
 interface Props {
   onSubmit: (data: ILoginForm) => void
@@ -30,6 +31,7 @@ const LoginForm: React.FC<Props> = (props) => {
   const { onSubmit, isLoading } = props
 
   const [stage, setStage] = useState<'mobileNumber' | 'password'>('mobileNumber')
+  const { data: redirectData, isLoading: isLoadingRedirect, isError: isErrorRedirect } = useGetRedirectsQuery()
 
   const {
     handleSubmit,
@@ -42,8 +44,8 @@ const LoginForm: React.FC<Props> = (props) => {
     defaultValues: { mobileNumber: '', password: '' },
   })
 
-  const mobileNumberRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
+  const mobileNumberRef = useRef<HTMLInputElement>(null)
+  const passwordRef = useRef<HTMLInputElement>(null)
 
   const handleMobileNumberSubmit = async () => {
     const isValid = await trigger('mobileNumber')
@@ -65,7 +67,6 @@ const LoginForm: React.FC<Props> = (props) => {
       passwordRef.current?.focus()
     }
   }, [stage, setFocus])
-  
 
   return (
     <form className="space-y-0.5" onSubmit={handleSubmit(onSubmit)}>
@@ -85,6 +86,15 @@ const LoginForm: React.FC<Props> = (props) => {
           <LoginButton isLoading={isLoading} onClick={handleMobileNumberSubmit}>
             ادامه
           </LoginButton>
+          <div className="pt-4 flex items-center w-full">
+            <div className=" text-gray-800 text-sm flex">
+              شرایط استفاده از{' '}
+              <Link href={`/articles/${redirectData?.data?.slug}`} className="text-blue-400 text-sm mx-1">
+                قوانین و حریم خصوصی{' '}
+              </Link>{' '}
+              وندامد را میپذیرم
+            </div>
+          </div>
         </>
       )}
 
@@ -123,16 +133,15 @@ const TextField = forwardRef<HTMLInputElement, FieldProps>((props, ref) => {
   const direction = /^[a-zA-Z0-9]+$/.test(field.value?.[0]) ? 'ltr' : 'ltr'
   const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value
-  
+
     // فیلتر کردن کاراکترهای غیر عددی
     const filteredValue = inputValue.replace(/[^0-9۰-۹]/g, '')
-  
+
     // تبدیل اعداد انگلیسی به فارسی
     const faInputValue = digitsEnToFa(filteredValue)
-  
+
     field.onChange(faInputValue)
   }
-  
 
   return (
     <div>

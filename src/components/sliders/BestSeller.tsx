@@ -83,7 +83,7 @@ const BestSeller: React.FC<Props> = (props) => {
             return (
               <div
                 key={product.id}
-                className="w-[150px] sm:w-[200px] z-50 shadow hover:shadow-item rounded-lg mb-2 bg-white"
+                className="w-[150px] sm:w-[200px] z-50 shadow-article rounded-lg mb-3 bg-white"
               >
                 <Link href={`/products/${product.slug}`}>
                   <ResponsiveImage
@@ -124,7 +124,7 @@ const BestSeller: React.FC<Props> = (props) => {
             return (
               <div
                 key={product.id}
-                className="w-[150px] sm:w-[200px] z-50 shadow hover:shadow-item rounded-lg mb-2 bg-white"
+                className="w-[150px] sm:w-[200px] z-50 shadow-article rounded-lg mb-3 bg-white"
               >
                 <Link href={`/products/${product.slug}`}>
                   <ResponsiveImage
@@ -162,7 +162,7 @@ const BestSeller: React.FC<Props> = (props) => {
             </p>
             <div className="w-full sm:flex justify-center hidden">
               <Link href={`/products?bestSelling=true`}>
-                <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-3 px-5 text-white">نمایش همه</Button>
+                <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
               </Link>
             </div>
           </div>

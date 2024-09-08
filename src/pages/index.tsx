@@ -83,13 +83,13 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
                     جدید ترین های {generalSetting?.title}
                   </div>
                 </div>
-                <div className="mt-14 flex justify-center">
+                <div className="mt-20 flex justify-center">
                   <img className="w-[220px]" src="/images/NEW.webp" alt="offer" />
                 </div>
                 <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">بروز باش</p>
                 <div className="w-full  sm:flex justify-center hidden">
                   <Link href={`/products?sortBy=Created`}>
-                    <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-3 px-5 text-white">نمایش همه</Button>
+                    <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
                   </Link>
                 </div>
               </div>
@@ -99,7 +99,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
             </div>
             <div className="w-full  sm:hidden justify-center flex absolute bottom-3">
               <Link href={`/products?sortBy=Created`}>
-                <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-3 px-5 text-white">نمایش همه</Button>
+                <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
               </Link>
             </div>
           </div>
@@ -126,7 +126,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
                     تخفیف های {generalSetting?.title}
                   </div>
                 </div>
-                <div className="mt-14 flex justify-center">
+                <div className="mt-20 flex justify-center">
                   <img className="w-[220px]" src="/images/Offer.webp" alt="offer" />
                 </div>
                 <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">
@@ -134,7 +134,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
                 </p>
                 <div className="w-full  sm:flex justify-center hidden">
                   <Link href={`/products?sortBy=Discount&discount=true`}>
-                    <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-3 px-5 text-white">نمایش همه</Button>
+                    <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
                   </Link>
                 </div>
               </div>
@@ -144,7 +144,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
             </div>
             <div className="w-full  sm:hidden justify-center flex absolute bottom-3">
               <Link href={`/products?sortBy=Discount&discount=true`}>
-                <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-3 px-5 text-white">نمایش همه</Button>
+                <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
               </Link>
             </div>
           </div>
@@ -168,7 +168,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
                     {generalSetting?.title}
                   </div>
                 </div>
-                <div className="mt-14 flex justify-center">
+                <div className="mt-20 flex justify-center">
                   <img className="w-[220px]" src="/images/NEW.webp" alt="offer" />
                 </div>
                 <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">
@@ -176,7 +176,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
                 </p>
                 <div className="w-full  sm:flex justify-center hidden">
                   <Link href={`/products?bestSelling=true`}>
-                    <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-3 px-5 text-white">نمایش همه</Button>
+                    <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
                   </Link>
                 </div>
               </div>
@@ -186,7 +186,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
             </div>
             <div className="w-full  sm:hidden justify-center flex absolute bottom-3">
               <Link href={`/products?bestSelling=true`}>
-                <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-3 px-5 text-white">نمایش همه</Button>
+                <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
               </Link>
             </div>
           </div>
@@ -203,7 +203,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
                     بازدید های اخیر شما
                   </div>
                 </div>
-                <div className="mt-14 flex justify-center">
+                <div className="mt-20 flex justify-center">
                   <img className="w-[220px]" src="/images/Recent Visited.webp" alt="offer" />
                 </div>
                 <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">
@@ -211,7 +211,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
                 </p>
                 <div className="w-full  sm:flex justify-center hidden">
                   <Link href={`/products`}>
-                    <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-3 px-5 text-white">نمایش همه</Button>
+                    <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
                   </Link>
                 </div>
               </div>
@@ -221,7 +221,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
             </div>
             <div className="w-full  sm:hidden justify-center flex absolute bottom-3">
               <Link href={`/products`}>
-                <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-3 px-5 text-white">نمایش همه</Button>
+                <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
               </Link>
             </div>
           </div>
@@ -231,7 +231,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
             <h1 className="text-center text-xl text-gray-500 border-t py-7 ">خواندنی ها</h1>
             <ReadableArticlePlace />
             <div className="text-center mt-48">
-              <Link href={`/articles?place=1`} className="bg-red-500 hover:bg-red-400 rounded-lg py-3 px-5 text-white">
+              <Link href={`/articles?place=1`} className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">
                 نمایش همه
               </Link>
             </div>
