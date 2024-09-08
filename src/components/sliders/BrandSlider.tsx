@@ -23,6 +23,7 @@ const BrandSlider: React.FC<Props> = (props) => {
   const {
     data: brandData,
     isLoading: isLoadingArticle,
+    isFetching,
     isError: isErrorArticle,
   } = useGetBrandsQuery({
     page: 1,
@@ -60,7 +61,9 @@ const BrandSlider: React.FC<Props> = (props) => {
   if (brandData) {
     console.log(brandData, 'brandData')
   }
-
+  if (isFetching) {
+    return <div>Loading...</div>
+  }
   return (
     <>
       <h1 className="w-full text-center text-gray-400 font-normal text-lg pb-4">

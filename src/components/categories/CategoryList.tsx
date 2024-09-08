@@ -21,8 +21,12 @@ const CategoryList: React.FC<Props> = (props) => {
     data: storeCategoriesData,
     isLoading: isLoadingStoreCategories,
     isError: isErrorStoreCategories,
+    isFetching
   } = useGetStoreCategoryListQuery()
 
+  if (isFetching) {
+    return <div>Loading...</div>
+  }
   // ? Re-Renders
   if (childCategories.categories.length > 0) {
     return (
