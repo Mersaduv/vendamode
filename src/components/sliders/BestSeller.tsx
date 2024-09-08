@@ -9,6 +9,7 @@ import { useAppSelector } from '@/hooks'
 import dynamic from 'next/dynamic'
 import 'owl.carousel/dist/assets/owl.carousel.css'
 import 'owl.carousel/dist/assets/owl.theme.default.css'
+import { TbRuler2 } from 'react-icons/tb'
 interface Props {
   currentCategory?: ICategory
 }
@@ -16,12 +17,12 @@ const OwlCarousel = dynamic(() => import('react-owl-carousel'), {
   ssr: false,
 })
 
-const NewSlider: React.FC<Props> = (props) => {
+const BestSeller: React.FC<Props> = (props) => {
   const { currentCategory } = props
   const { generalSetting } = useAppSelector((state) => state.design)
   const { products, isFetching } = useGetProductsQuery(
     {
-      sortBy: 'Created',
+      bestSelling: true,
       pageSize: 30,
     },
     {
@@ -151,16 +152,16 @@ const NewSlider: React.FC<Props> = (props) => {
 
           <div>
             <div className="line-clamp-2 overflow-hidden text-ellipsis text-center -mt-16 text-lg text-gray-400 px-3 w-full">
-              جدید ترین های {generalSetting?.title}
+              پرفروش های {generalSetting?.title}
             </div>
             <div className="mt-10 flex justify-center">
               <img className="w-[120px] xs2:w-[180px] static-img" src="/images/NEW.webp" alt="offer" />
             </div>
             <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">
-              تخفیف های امروز رو از دست نده
+              محصولات پرفروش رو اینجا ببین
             </p>
             <div className="w-full sm:flex justify-center hidden">
-              <Link href={`/products?sortBy=Created`}>
+              <Link href={`/products?bestSelling=true`}>
                 <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-3 px-5 text-white">نمایش همه</Button>
               </Link>
             </div>
@@ -171,4 +172,4 @@ const NewSlider: React.FC<Props> = (props) => {
   )
 }
 
-export default NewSlider
+export default BestSeller

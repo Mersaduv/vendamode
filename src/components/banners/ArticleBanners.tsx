@@ -12,37 +12,23 @@ const ArticleBanners: React.FC = (props) => {
   if (articleBannerData?.data?.length === 0) return null
 
   return (
+    <div className="grid max-w-[1370px] grid-cols-1 xs2:grid-cols-2 gap-4 justify-center px-4 mx-auto">
+      {articleBannerData?.data?.map((articleBanner) => {
+        return (
+          <div className='relative' key={articleBanner.id}>
+            <div className='rounded-lg p-[13px] rounded-r-none absolute bottom-[30px] right-0 bg-[#f7f7f5] shadow-article-banner '>
 
-    <div className="grid grid-cols-2 gap-2 justify-center">
-    <div>
-      <img
-        className="h-auto max-w-full rounded-lg"
-        src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image-1.jpg"
-        alt=""
-      />
+            <div className='line-clamp-1 overflow-hidden text-ellipsis max-w-96'>{articleBanner.title}</div>
+            </div>
+            <img
+              className="h-auto max-w-full rounded-lg"
+              src={articleBanner.imagesSrc?.imageUrl}
+              alt={articleBanner.title}
+            />
+          </div>
+        )
+      })}
     </div>
-    <div>
-      <img
-        className="h-auto max-w-full rounded-lg"
-        src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image-2.jpg"
-        alt=""
-      />
-    </div>
-    <div>
-      <img
-        className="h-auto max-w-full rounded-lg"
-        src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image-3.jpg"
-        alt=""
-      />
-    </div>
-    <div>
-      <img
-        className="h-auto max-w-full rounded-lg"
-        src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image-4.jpg"
-        alt=""
-      />
-    </div>
-  </div>
   )
 }
 

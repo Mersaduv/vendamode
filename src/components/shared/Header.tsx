@@ -51,7 +51,7 @@ const Header = () => {
           </div>
           <div className="relative gap-8 flex max-w-[1700px] justify-start w-full ">
             <Navbar />
-            <div className="flex gap-8">
+            <div className=" gap-8 hidden lg:flex">
               {designItemsData &&
                 designItemsData.data
                   ?.filter((item) => item.type === 'lists')

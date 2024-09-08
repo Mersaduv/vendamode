@@ -109,7 +109,6 @@ const SingleProduct: NextPage<Props> = (props) => {
   const { tempSize, tempColor, tempObjectValue } = useAppSelector((state) => state.cart)
   // ? Add To LastSeen
   useEffect(() => {
-    if (tempColor && tempSize) {
       dispatch(
         addToLastSeen({
           productID: product.id,
@@ -121,7 +120,6 @@ const SingleProduct: NextPage<Props> = (props) => {
           inStock: product.inStock,
         })
       )
-    }
   }, [product.id])
 
   // modal

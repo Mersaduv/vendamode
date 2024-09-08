@@ -43,6 +43,8 @@ const SloganFooterForm: React.FC = () => {
             <CustomEditor
               value={field.value}
               onChange={(event: any, editor: any) => {
+                console.log(field , "fieldfieldfieldfield");
+                
                 const data = editor.getData()
                 field.onChange(data)
               }}

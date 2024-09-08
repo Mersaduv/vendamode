@@ -183,6 +183,7 @@ const Footer: NextPage = () => {
         const columnFooters: IColumnFooter[] = data.columnFooters.map((columnFooter, index) => ({
           id: columnFooter.id || undefined,
           name: columnFooter.name,
+          index: columnFooter.index,
         }))
 
         const jsonData: ColumnFooterBulkForm = {
@@ -300,7 +301,7 @@ const Footer: NextPage = () => {
 
   // handle success alert
   useEffect(() => {
-    let alertMessage = 'عملیات بروزرسانی با موفقیت انجام شد'
+    let alertMessage = ' بروزرسانی با موفقیت انجام شد'
 
     const errors = []
 
@@ -376,6 +377,7 @@ const Footer: NextPage = () => {
           type: type,
           isActive: false,
           index: serviceItems.length,
+          created: new Date().toISOString(),
         }
         setServiceItems([...serviceItems, newItem])
         break
@@ -393,6 +395,7 @@ const Footer: NextPage = () => {
           type: type,
           isActive: false,
           index: socialMediaItems.length,
+          created: new Date().toISOString(),
         }
         setSocialMediaItems([...socialMediaItems, newItem])
         break

@@ -14,11 +14,18 @@ module.exports = {
       },
     ],
   },
-  webpack(config) {
+  webpack(config, { buildId, dev, isServer, defaultLoaders, webpack }) {
     config.module.rules.push({
       test: /\.svg$/,
       use: '@svgr/webpack',
     })
+    config.plugins.push(
+			new webpack.ProvidePlugin({
+				$: 'jquery',
+				jQuery: 'jquery',
+				'window.jQuery': 'jquery',
+			})
+		);
     return config
   },
 }

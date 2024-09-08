@@ -16,7 +16,7 @@ const RedirectForm: React.FC = () => {
     refetch,
   } = useGetArticlesQuery({
     pageSize: 9999,
-    place: '0',
+    isActive: true,
   })
 
   const handleArticleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -68,8 +68,8 @@ const RedirectForm: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="bg-gray-50 h-[56px] w-full rounded-b-lg px-8 flex flex-col pb-2">
-          <span className="font-normal text-[11px] pt-2">.....</span>
+        <div className="bg-gray-50  w-full rounded-b-lg px-8 py-2">
+          <span className="font-normal text-[11px] pt-2">از بین مقالات ریدایرکت مورد نظر را انتخاب کنید</span>
         </div>
       </div>
     </div>

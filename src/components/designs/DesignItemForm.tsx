@@ -11,7 +11,7 @@ interface Props {
   designItems: IDesignItemForm[]
   setDesignItems: React.Dispatch<React.SetStateAction<IDesignItemForm[]>>
   setDeletedDesignItems: React.Dispatch<React.SetStateAction<IDesignItemForm[]>>
-  onAddDesignItem: () => void 
+  onAddDesignItem: () => void
 }
 
 const DesignItemForm: React.FC<Props> = ({
@@ -53,9 +53,18 @@ const DesignItemForm: React.FC<Props> = ({
 
     if (files) {
       const validFiles: any[] = []
-      const maxFileSize = 15 * 1024 // 150 KB
-      const exactWidth = 50
-      const exactHeight = 50
+
+      // تعیین مقادیر پیش‌فرض
+      let maxFileSize = 15 * 1024 // 15 کیلوبایت
+      let exactWidth = 50
+      let exactHeight = 50
+
+      // بررسی نوع آیتم
+      if (newDesignItems[index].type === 'services') {
+        maxFileSize = 60 * 1024 // 60 کیلوبایت
+        exactWidth = 250
+        exactHeight = 250
+      }
 
       Array.from(files).forEach((file) => {
         if (file.type !== 'image/png') {
@@ -72,7 +81,7 @@ const DesignItemForm: React.FC<Props> = ({
           dispatch(
             showAlert({
               status: 'error',
-              title: 'حجم عکس ها می بایست حداکثر 15 کیلوبایت باشد',
+              title: `حجم عکس ها می بایست حداکثر ${maxFileSize / 1024} کیلوبایت باشد`,
             })
           )
           return
@@ -84,18 +93,18 @@ const DesignItemForm: React.FC<Props> = ({
         img.onload = () => {
           URL.revokeObjectURL(img.src)
 
-            if (img.width !== exactWidth || img.height !== exactHeight) {
-              dispatch(
-                showAlert({
-                  status: 'error',
-                  title: 'سایز عکس ها می بایست 50*50 پیکسل باشد',
-                })
-              )
-            } else {
-          validFiles.push(file)
-          newDesignItems[index].thumbnail = file
-          setDesignItems(newDesignItems)
-            }
+          if (img.width !== exactWidth || img.height !== exactHeight) {
+            dispatch(
+              showAlert({
+                status: 'error',
+                title: `سایز عکس ها می بایست ${exactWidth}*${exactHeight} پیکسل باشد`,
+              })
+            )
+          } else {
+            validFiles.push(file)
+            newDesignItems[index].thumbnail = file
+            setDesignItems(newDesignItems)
+          }
         }
       })
     } else {
@@ -134,7 +143,7 @@ const DesignItemForm: React.FC<Props> = ({
           <div className="flex justify-end mb-4"></div>
           <div className="grid justify-center sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 ">
             {designItems.length === 0 ? (
-              <div className="flex justify-center col-span-5">
+              <div className="flex justify-center col-span-6">
                 {' '}
                 {type === 'lists'
                   ? 'فهرست '
@@ -151,6 +160,7 @@ const DesignItemForm: React.FC<Props> = ({
                   const dateA = b.created ? new Date(b.created).getTime() : 0
                   const dateB = a.created ? new Date(a.created).getTime() : 0
                   return dateB - dateA
+                  // return dateA - dateB
                 })
                 .map((designItem, index) => (
                   <div key={index} className="mb-4 border w-fit flex-1 rounded-lg shadow-item relative">

@@ -5,9 +5,14 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { FaArrowDownLong } from 'react-icons/fa6'
 import { Button, Modal } from '@/components/ui'
 import dynamic from 'next/dynamic'
-import { IArticle, IArticleForm, ICategory } from '@/types'
+import { IArticle, IArticleForm, ICategory, IColumnFooter } from '@/types'
 import { articleFormValidationSchema } from '@/utils'
-import { useDeleteTrashArticleMutation, useGetAllCategoriesQuery, useGetCategoriesTreeQuery } from '@/services'
+import {
+  useDeleteTrashArticleMutation,
+  useGetAllCategoriesQuery,
+  useGetCategoriesTreeQuery,
+  useGetColumnFootersQuery,
+} from '@/services'
 import { useAppDispatch, useAppSelector, useDisclosure } from '@/hooks'
 import { setStateStringSlice, showAlert } from '@/store'
 import jalaali from 'jalaali-js'
@@ -90,6 +95,12 @@ const ArticleForm: React.FC<Props> = (props) => {
       }),
     }
   )
+
+  const {
+    data: columnFootersData,
+    isLoading: isLoadingColumnFooter,
+    isError: isErrorColumnFooter,
+  } = useGetColumnFootersQuery()
 
   useEffect(() => {
     if (selectedArticle && selectedArticle.created) {
@@ -230,6 +241,8 @@ const ArticleForm: React.FC<Props> = (props) => {
     setIsActive(event.target.value)
   }
   const handleChangePlace = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    console.log(event.target.value, 'event.target.value')
+
     setPlace(event.target.value)
   }
   const handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -401,7 +414,7 @@ const ArticleForm: React.FC<Props> = (props) => {
                     </label>
                     <select
                       className={`w-full text-center rounded-md rounded-r-none border border-gray-300`}
-                      id="isActive"
+                      id="place"
                       value={place}
                       {...register('place', { onChange: handleChangePlace })}
                     >
@@ -411,15 +424,23 @@ const ArticleForm: React.FC<Props> = (props) => {
                       <option value="1" className={''}>
                         خواندنی ها
                       </option>
-                      <option value="2" className={''}>
-                        فروش در {generalSetting?.title}
+                      {/* <option value="2" className={''}>
+                        فروش در
                       </option>
                       <option value="3" className={''}>
-                        با {generalSetting?.title}
+                        با
                       </option>
                       <option value="4" className={''}>
-                        خرید از {generalSetting?.title}
-                      </option>
+                        خرید از
+                      </option> */}
+                      {columnFootersData?.data &&
+                        columnFootersData.data.map((columnFooter, index) => {
+                          return (
+                            <option key={index} value={`${columnFooter.index}`} className={''}>
+                              {columnFooter.name}
+                            </option>
+                          )
+                        })}
                     </select>
                   </div>
                   {/*select category  */}
