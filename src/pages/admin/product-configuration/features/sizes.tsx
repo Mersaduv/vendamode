@@ -62,7 +62,7 @@ const Sizes: NextPage = () => {
     refetch,
     ...sizesQueryProps
   } = useGetSizesQuery({
-    pageSize: 20,
+    pageSize: 8,
     page: sizePage,
     search: searchTerm,
   })

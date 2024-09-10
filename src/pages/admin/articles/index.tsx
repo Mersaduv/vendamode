@@ -8,6 +8,7 @@ import {
   useDeleteArticleMutation,
   useDeleteTrashArticleMutation,
   useGetArticlesQuery,
+  useGetCategoriesTreeQuery,
   useGetColumnFootersQuery,
   useRestoreArticleMutation,
 } from '@/services'
@@ -19,16 +20,27 @@ import { ConfirmDeleteModal, ConfirmUpdateModal } from '@/components/modals'
 import { Menu, Tab, TabGroup, TabList, TabPanel, TabPanels, Transition } from '@headlessui/react'
 import { ArrowDown } from '@/icons'
 import { digitsEnToFa } from '@persian-tools/persian-tools'
-import { IArticle } from '@/types'
+import { IArticle, ICategory } from '@/types'
 import { TableSkeleton } from '@/components/skeleton'
 import { Pagination } from '@/components/navigation'
 import { LuSearch } from 'react-icons/lu'
 import { ProductBreadcrumb } from '@/components/product'
 
+const extractChildCategories = (category: ICategory): ICategory[] => {
+  let childCategories: ICategory[] = []
+  if (category.childCategories && category.childCategories.length > 0) {
+    category.childCategories.forEach((child) => {
+      childCategories.push(child)
+      childCategories = childCategories.concat(extractChildCategories(child))
+    })
+  }
+  return childCategories
+}
 const Articles: NextPage = () => {
   // ? Assets
   const { query, push } = useRouter()
   const articlePage = query.page ? +query.page : 1
+  const categoryId = (query.categoryId as string) ?? ''
   const { generalSetting } = useAppSelector((state) => state.design)
   // ? States
   const { name } = useAppSelector((state) => state.stateString)
@@ -45,12 +57,18 @@ const Articles: NextPage = () => {
   const [selectedPlace, setSelectedPlace] = useState<string | undefined>(undefined)
   const [selectedPlaceNum, setSelectedPlaceNum] = useState<string | undefined>(undefined)
   const [searchTerm, setSearchTerm] = useState('')
-
+  const [allCategories, setAllCategories] = useState<ICategory[]>([])
   const [isShowConfirmDeleteModal, confirmDeleteModalHandlers] = useDisclosure()
   const [isShowConfirmTrashDeleteModal, confirmTrashDeleteModalHandlers] = useDisclosure()
   const [isShowConfirmUpdateModal, confirmUpdateModalHandlers] = useDisclosure()
-
+  const [selectedCategory, setSelectedCategory] = useState<string>('default')
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(undefined)
   // ? Querirs
+  const { categoriesData } = useGetCategoriesTreeQuery(undefined, {
+    selectFromResult: ({ data }) => ({
+      categoriesData: data?.data,
+    }),
+  })
   const {
     data: columnFootersData,
     isLoading: isLoadingColumnFooter,
@@ -65,10 +83,11 @@ const Articles: NextPage = () => {
   const useFetchArticles = (status: string) => {
     const commonQueryParams = {
       sortBy: 'LastUpdated',
-      pageSize: 20,
+      pageSize: 6,
       page: articlePage,
       search: searchTerm,
       place: selectedPlaceNum,
+      categoryId: selectedCategoryId || categoryId,
       isActive: status === 'isActive',
       inActive: status === 'inActive',
       isDeleted: status === 'isDeleted',
@@ -149,6 +168,17 @@ const Articles: NextPage = () => {
     }
   }, [name])
 
+  useEffect(() => {
+    if (categoriesData) {
+      let allCats: ICategory[] = []
+      categoriesData.forEach((category: ICategory) => {
+        allCats.push(category)
+        allCats = allCats.concat(extractChildCategories(category))
+      })
+      setAllCategories(allCats)
+    }
+  }, [categoriesData])
+
   //*    Delete Article
   const [
     deleteArticle,
@@ -183,8 +213,17 @@ const Articles: NextPage = () => {
   ] = useRestoreArticleMutation()
 
   // ? Handlers
+  const handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedCategoryIdValue = event.target.value
+
+    setSelectedCategory(selectedCategoryIdValue !== '' ? selectedCategoryIdValue : 'default')
+  }
+
   const handleFilterClick = () => {
-    setSelectedPlaceNum(selectedPlace !== undefined ? selectedPlace : undefined)
+    setSelectedPlaceNum(selectedPlace)
+  }
+  const handleFilterByCategoryClick = () => {
+    setSelectedCategoryId(selectedCategory !== undefined ? selectedCategory : 'default')
   }
   const handlePlaceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedPlace = event.target.value
@@ -355,6 +394,38 @@ const Articles: NextPage = () => {
                 {/* filter control  */}
                 <div className="flex justify-end px-4 gap-x-6 gap-y-2.5 flex-wrap py-4">
                   {/* category filter */}
+                  {selectedPlace === '1' && (
+                    <div className="flex border w-fit rounded-lg">
+                      <select
+                        className="w-44 text-sm focus:outline-none appearance-none border-none  rounded-r-lg"
+                        name="انتخاب"
+                        id=""
+                        value={categoryId || selectedCategory}
+                        onChange={handleCategoryChange}
+                      >
+                        <option className="appearance-none text-sm" value="default">
+                          همه دسته بندی ها
+                        </option>
+                        {allCategories?.map((category) => (
+                          <option
+                            className={category.level === 0 ? 'text-blue-600' : ''}
+                            key={category.id}
+                            value={category.id}
+                          >
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
+                      <div
+                        className="bg-gray-100 hover:bg-gray-200 mr-[1px] rounded-l-md text-sm flex justify-center cursor-pointer items-center w-14"
+                        onClick={handleFilterByCategoryClick}
+                      >
+                        صافی
+                      </div>
+                    </div>
+                  )}
+
+                  {/* place filter */}
                   <div className="flex border w-fit rounded-lg">
                     <select
                       className="w-44 text-sm focus:outline-none appearance-none border-none rounded-r-lg"
@@ -365,16 +436,12 @@ const Articles: NextPage = () => {
                       <option className="appearance-none text-sm" value="">
                         همه مقالات
                       </option>
-
-                      <option value={'1'}>خواندنی ها</option>
-                      {columnFootersData?.data &&
-                        columnFootersData.data.map((columnFooter, index) => {
-                          return (
-                            <option key={index} value={`${columnFooter.index}`} className={''}>
-                              {columnFooter.name}
-                            </option>
-                          )
-                        })}
+                      <option className="appearance-none text-sm" value="1">
+                        با دسته بندی
+                      </option>{' '}
+                      <option className="appearance-none text-sm" value="2">
+                        بدون دسته بندی
+                      </option>
                     </select>
                     <div
                       className="bg-gray-100 hover:bg-gray-200 mr-[1px] rounded-l-md text-sm flex justify-center cursor-pointer items-center w-14"
@@ -498,7 +565,6 @@ const Articles: NextPage = () => {
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal whitespace-nowrap">
                                   کد مقاله
                                 </th>
-                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">جایگاه</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal whitespace-nowrap">
                                   دسته بندی{' '}
                                 </th>
@@ -536,11 +602,6 @@ const Articles: NextPage = () => {
                                       <td className="text-center text-sm text-gray-600">
                                         {digitsEnToFa(article.code)}
                                       </td>
-                                      <td className="text-center text-sm text-gray-600">
-                                        <div className="line-clamp-1 overflow-hidden text-ellipsis">
-                                          {digitsEnToFa(CheckPlaceArticle(article.place))}
-                                        </div>
-                                      </td>
                                       {/* <td className="text-center text-sm text-gray-600">
                                         {article.category === '' ? (
                                           <span className="text-lg">-</span>
@@ -559,7 +620,10 @@ const Articles: NextPage = () => {
                                         )}
                                       </td>
                                       <td className="text-center text-sm text-gray-600">
-                                        {digitsEnToFa(article.numReviews)}
+                                        <Link className="text-sky-500" href={`/`}>
+                                          {' '}
+                                          {digitsEnToFa(article.numReviews)}
+                                        </Link>
                                       </td>
                                       <td
                                         title={

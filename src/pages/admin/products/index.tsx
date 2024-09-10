@@ -104,7 +104,7 @@ const Products: NextPage = () => {
   const useFetchProducts = (status: string) => {
     const commonQueryParams = {
       sortBy: 'LastUpdated',
-      pageSize: 20,
+      pageSize: 8,
       page: productPage, // یا مقدار مناسب دیگری
       categoryId: selectedCategoryId || categoryId,
       inStock: selectInStockState,
@@ -513,125 +513,121 @@ const Products: NextPage = () => {
           <title>مدیریت | محصولات</title>
         </Head>
         <DashboardLayout>
-          <div className="w-full  mt-7 mb-4">
-            <div className=" bg-white p-4 rounded-lg shadow-item mx-3">
-              <div className="bg-[#e90089] cursor-pointer hover:bg-[#c70174] w-fit px-3 py-2.5 rounded-lg text-white text-sm">
-                همه محصولات
-              </div>
-            </div>
-          </div>
           <section id="_adminProducts" className=" w-full">
             <div className="bg-white rounded-lg shadow-item mx-3">
-              {/* filter control  */}
-              <div className="flex justify-end px-4 gap-x-6 gap-y-2.5 flex-wrap py-4">
-                {/* first group work */}
-                <div className="flex border w-fit rounded-lg">
-                  <select
-                    className="w-44 text-sm focu appearance-none border-none rounded-r-lg"
-                    name="انتخاب "
-                    id=""
-                    value={bulkAction}
-                    onChange={(e) => setBulkAction(e.target.value)}
-                  >
-                    <option className="appearance-none text-sm" value="">
-                      کارهای گروهی
-                    </option>
-                    {tabKey !== 'activeProducts' && tabKey !== 'deletedProducts' && (
-                      <option value="1">فعال کردن</option>
-                    )}
-                    {tabKey !== 'inactiveProducts' && tabKey !== 'deletedProducts' && (
-                      <option value="2">غیر فعال کردن</option>
-                    )}
-                    {tabKey !== 'deletedProducts' && <option value="3">انتقال به زباله دان</option>}
-                    {tabKey === 'deletedProducts' && <option value="4">بازگردانی محصول</option>}
-                    {tabKey === 'deletedProducts' && <option value="5">حذف</option>}
-                  </select>
-                  <div
-                    className="bg-gray-100 cursor-pointer hover:bg-gray-200 mr-[1px] rounded-l-md text-sm flex justify-center items-center w-14"
-                    onClick={handleBulkAction}
-                  >
-                    اجرا
-                  </div>
-                </div>
-                {/* category filter */}
-                <div className="flex border w-fit rounded-lg">
-                  <label
-                    title="نمایش محصولات زیر دسته"
-                    className="bg-gray-100 hover:bg-gray-200 rounded-r-md text-sm flex justify-center cursor-pointer items-center w-14"
-                  >
-                    <input
-                      onChange={handleTheOnlyCategory}
-                      checked={singleCategory}
-                      type="checkbox"
-                      name=""
+              <div className='flex justify-between mt-7'>
+              <h2 className="p-4 text-gray-600">همه محصولات</h2>
+                {/* filter control  */}
+                <div className="flex justify-end px-4 gap-x-6 gap-y-2.5 flex-wrap py-4">
+                  {/* first group work */}
+                  <div className="flex border w-fit rounded-lg">
+                    <select
+                      className="w-44 text-sm focu appearance-none border-none rounded-r-lg"
+                      name="انتخاب "
                       id=""
-                      className="appearance-none border border-gray-300 checked:bg-sky-500 focus:ring-offset-0 focus:outline-offset-0 focus:outline-0 cursor-pointer focus:ring-0 rounded-md text-xl w-5 h-5"
-                    />
-                  </label>
-                  <select
-                    className="w-44 text-sm focus:outline-none appearance-none border-none"
-                    name="انتخاب"
-                    id=""
-                    value={categoryId || selectedCategory}
-                    onChange={handleCategoryChange}
-                  >
-                    <option className="appearance-none text-sm" value="default">
-                      همه دسته بندی ها
-                    </option>
-                    {allCategories?.map((category) => (
-                      <option
-                        className={category.level === 0 ? 'text-blue-600' : ''}
-                        key={category.id}
-                        value={category.id}
-                      >
-                        {category.name}
+                      value={bulkAction}
+                      onChange={(e) => setBulkAction(e.target.value)}
+                    >
+                      <option className="appearance-none text-sm" value="">
+                        کارهای گروهی
                       </option>
-                    ))}
-                  </select>
-                  <div
-                    className="bg-gray-100 hover:bg-gray-200 mr-[1px] rounded-l-md text-sm flex justify-center cursor-pointer items-center w-14"
-                    onClick={handleFilterClick}
-                  >
-                    صافی
+                      {tabKey !== 'activeProducts' && tabKey !== 'deletedProducts' && (
+                        <option value="1">فعال کردن</option>
+                      )}
+                      {tabKey !== 'inactiveProducts' && tabKey !== 'deletedProducts' && (
+                        <option value="2">غیر فعال کردن</option>
+                      )}
+                      {tabKey !== 'deletedProducts' && <option value="3">انتقال به زباله دان</option>}
+                      {tabKey === 'deletedProducts' && <option value="4">بازگردانی محصول</option>}
+                      {tabKey === 'deletedProducts' && <option value="5">حذف</option>}
+                    </select>
+                    <div
+                      className="bg-gray-100 cursor-pointer hover:bg-gray-200 mr-[1px] rounded-l-md text-sm flex justify-center items-center w-14"
+                      onClick={handleBulkAction}
+                    >
+                      اجرا
+                    </div>
                   </div>
-                </div>
-                {/* stock filter */}
-                <div className="flex border w-fit rounded-lg">
-                  <select
-                    className="w-44 text-sm focus:outline-none appearance-none border-none rounded-r-lg"
-                    name="انتخاب"
-                    id=""
-                    onChange={handleStockChange}
-                  >
-                    <option className="appearance-none text-sm" value="">
-                      فیلتر بر اساس موجودی
-                    </option>
-                    <option value="1">موجود در انبار</option>
-                    <option value="2">پایان موجودی</option>
-                  </select>
-                  <div
-                    onClick={handleInStockClick}
-                    className="bg-gray-100 hover:bg-gray-200 mr-[1px] rounded-l-md text-sm flex justify-center cursor-pointer items-center w-14 "
-                  >
-                    صافی
+                  {/* category filter */}
+                  <div className="flex border w-fit rounded-lg">
+                    <label
+                      title="نمایش محصولات زیر دسته"
+                      className="bg-gray-100 hover:bg-gray-200 rounded-r-md text-sm flex justify-center cursor-pointer items-center w-14"
+                    >
+                      <input
+                        onChange={handleTheOnlyCategory}
+                        checked={singleCategory}
+                        type="checkbox"
+                        name=""
+                        id=""
+                        className="appearance-none border border-gray-300 checked:bg-sky-500 focus:ring-offset-0 focus:outline-offset-0 focus:outline-0 cursor-pointer focus:ring-0 rounded-md text-xl w-5 h-5"
+                      />
+                    </label>
+                    <select
+                      className="w-44 text-sm focus:outline-none appearance-none border-none"
+                      name="انتخاب"
+                      id=""
+                      value={categoryId || selectedCategory}
+                      onChange={handleCategoryChange}
+                    >
+                      <option className="appearance-none text-sm" value="default">
+                        همه دسته بندی ها
+                      </option>
+                      {allCategories?.map((category) => (
+                        <option
+                          className={category.level === 0 ? 'text-blue-600' : ''}
+                          key={category.id}
+                          value={category.id}
+                        >
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                    <div
+                      className="bg-gray-100 hover:bg-gray-200 mr-[1px] rounded-l-md text-sm flex justify-center cursor-pointer items-center w-14"
+                      onClick={handleFilterClick}
+                    >
+                      صافی
+                    </div>
                   </div>
-                </div>
-                {/* search filter */}
-                <div className="flex border w-fit rounded-lg">
-                  <label
-                    htmlFor="search"
-                    className="bg-gray-100 hover:bg-gray-200 ml-[1px] rounded-r-md flex justify-center cursor-pointer items-center w-14"
-                  >
-                    <LuSearch className="icon text-gray-500" />
-                  </label>
-                  <input
-                    id="search"
-                    type="text"
-                    className="w-44 text-sm placeholder:text-center focus:outline-none appearance-none border-none rounded-l-lg"
-                    placeholder="جستجو"
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                  />
+                  {/* stock filter */}
+                  <div className="flex border w-fit rounded-lg">
+                    <select
+                      className="w-44 text-sm focus:outline-none appearance-none border-none rounded-r-lg"
+                      name="انتخاب"
+                      id=""
+                      onChange={handleStockChange}
+                    >
+                      <option className="appearance-none text-sm" value="">
+                        فیلتر بر اساس موجودی
+                      </option>
+                      <option value="1">موجود در انبار</option>
+                      <option value="2">پایان موجودی</option>
+                    </select>
+                    <div
+                      onClick={handleInStockClick}
+                      className="bg-gray-100 hover:bg-gray-200 mr-[1px] rounded-l-md text-sm flex justify-center cursor-pointer items-center w-14 "
+                    >
+                      صافی
+                    </div>
+                  </div>
+                  {/* search filter */}
+                  <div className="flex border w-fit rounded-lg">
+                    <label
+                      htmlFor="search"
+                      className="bg-gray-100 hover:bg-gray-200 ml-[1px] rounded-r-md flex justify-center cursor-pointer items-center w-14"
+                    >
+                      <LuSearch className="icon text-gray-500" />
+                    </label>
+                    <input
+                      id="search"
+                      type="text"
+                      className="w-44 text-sm placeholder:text-center focus:outline-none appearance-none border-none rounded-l-lg"
+                      placeholder="جستجو"
+                      value={searchTerm}
+                      onChange={handleSearchChange}
+                    />
+                  </div>
                 </div>
               </div>
               {/* tab changed  */}

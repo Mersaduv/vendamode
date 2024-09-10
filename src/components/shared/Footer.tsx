@@ -195,7 +195,7 @@ const Footer = () => {
             {/* <img src="logo-samandehi.png" alt="Samandehi Logo" className="w-12 h-12" /> */}
             <p className="text-sm">
               طراحی شده در{' '}
-              <a href="www.vendateam.ir" className="text-sky-500">
+              <a target="_blank" href="https://vendateam.ir/" className="text-sky-500">
                 ونداتیم
               </a>
             </p>

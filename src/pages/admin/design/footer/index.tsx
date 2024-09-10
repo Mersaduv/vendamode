@@ -208,6 +208,7 @@ const Footer: NextPage = () => {
           id: columnFooter.id || undefined,
           name: columnFooter.name,
           index: columnFooter.index,
+          footerArticleColumn: columnFooter.footerArticleColumn,
         }))
 
         const jsonData: ColumnFooterBulkForm = {
@@ -383,6 +384,17 @@ const Footer: NextPage = () => {
     isUpsertErrorCopyright,
     isUpsertErrorColumnFooter,
   ])
+
+  useEffect(() => {
+    if (columnFooters.length === 0) {
+      setColumnFooters([
+        { index: 1, id: '', name: '', footerArticleColumn: [] },
+        { index: 2, id: '', name: '', footerArticleColumn: [] },
+        { index: 3, id: '', name: '', footerArticleColumn: [] },
+        { index: 4, id: '', name: '', footerArticleColumn: [] },
+      ])
+    }
+  }, [columnFooters])
 
   const handleAddDesignItem = (type: string) => {
     let newItem: IDesignItemForm

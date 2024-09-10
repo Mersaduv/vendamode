@@ -19,7 +19,7 @@ function NotFoundPage() {
         />
         <p className="text-base font-semibold text-black">صفحه‌ای که دنبال آن بودید پیدا نشد!</p>
         <ArrowLink path="/">صفحه اصلی</ArrowLink>
-        <ResponsiveImage dimensions="w-full max-w-lg h-72" src="/icons/page-not-found.png" alt="404" />
+        <ResponsiveImage dimensions="w-full max-w-lg h-72" src="/gifs/404-gif.gif" alt="404" />
       </main>
     </ClientLayout>
   )

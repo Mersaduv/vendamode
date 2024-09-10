@@ -70,7 +70,7 @@ const Brands: NextPage = () => {
   // })
   const useFetchBrands = (status: string) => {
     const commonBrandQueryParams = {
-      pageSize: 20,
+      pageSize: 8,
       page: brandPage,
       search: searchTerm,
       isActive: status === 'isActive',
@@ -114,13 +114,6 @@ const Brands: NextPage = () => {
     refetch: refetchInactiveBrands,
   } = useFetchBrands('inActive')
 
-  const {
-    data: activeSliderBrands,
-    isError: isActiveSliderBrandsError,
-    isFetching: isActiveSliderBrandsFetching,
-    isSuccess: isActiveSliderBrandsSuccess,
-    refetch: refetchActiveSliderBrands,
-  } = useFetchBrands('isActiveSlider')
 
   useEffect(() => {
     if (allBrands) {
@@ -139,13 +132,6 @@ const Brands: NextPage = () => {
       setBrandsInActivePagination(inactiveBrands)
     }
   }, [inactiveBrands])
-
-  useEffect(() => {
-    if (activeSliderBrands) {
-      setBrandsIsActiveSliderPagination(activeSliderBrands)
-    }
-  }, [activeSliderBrands])
-
   //*    Delete Category
   const [
     deleteBrand,
@@ -207,7 +193,6 @@ const Brands: NextPage = () => {
 
   const handleAllRefetch = () => {
     refetchAllBrands()
-    refetchActiveSliderBrands()
     refetchInactiveBrands()
     refetchActiveBrands()
   }
@@ -288,9 +273,6 @@ const Brands: NextPage = () => {
                     case 2:
                       setBrandTabKey('inactiveBrands')
                       break
-                    case 3:
-                      setBrandTabKey('activeSliderBrands')
-                      break
                     default:
                       setBrandTabKey('allBrands')
                   }
@@ -316,7 +298,7 @@ const Brands: NextPage = () => {
                           } px-4 py-2 rounded cursor-pointer text-sm`
                         }
                       >
-                        وضعیت فعال ({digitsEnToFa(brandsActivePagination?.data?.totalCount ?? 0)})
+                         فعال ({digitsEnToFa(brandsActivePagination?.data?.totalCount ?? 0)})
                       </Tab>
                       <Tab
                         className={({ selected }) =>
@@ -325,16 +307,7 @@ const Brands: NextPage = () => {
                           } px-4 py-2 rounded cursor-pointer text-sm`
                         }
                       >
-                        وضعیت غیرفعال ({digitsEnToFa(brandsInActivePagination?.data?.totalCount ?? 0)})
-                      </Tab>
-                      <Tab
-                        className={({ selected }) =>
-                          `whitespace-nowrap ${
-                            selected ? 'text-sky-500' : 'hover:text-sky-500'
-                          } px-4 py-2 rounded cursor-pointer text-sm`
-                        }
-                      >
-                        اسلایدر فعال ({digitsEnToFa(brandsIsActiveSliderPagination?.data?.totalCount ?? 0)})
+                         غیرفعال ({digitsEnToFa(brandsInActivePagination?.data?.totalCount ?? 0)})
                       </Tab>
                     </div>
                   </div>{' '}
@@ -382,11 +355,14 @@ const Brands: NextPage = () => {
                             <tr>
                               <th className="text-sm py-3 px-2 text-gray-600 font-normal w-1/12">عکس</th>
                               <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[18%] text-center">
-                                <div className="">نام برند</div>
+                                <div className="">نام فارسی</div>
+                              </th>
+                              <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[18%] text-center">
+                                <div className="">نام انگلیسی</div>
                               </th>
                               <th className="text-sm py-3 px-2 text-gray-600 font-normal">توضیحات</th>
                               <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[18%]">محصولات مرتبط</th>
-                              <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[18%]">نمایش در اسلایدر</th>
+                              
                               <th className="text-sm py-3 px-2 text-gray-600 font-normal">وضعیت</th>
                               <th className="text-sm py-3 px-2 text-gray-600 font-normal">عملیات</th>
                             </tr>
@@ -401,7 +377,7 @@ const Brands: NextPage = () => {
                                         <img
                                           className="w-[100px] object-contain rounded-lg h-[70px]"
                                           src={brand.imagesSrc.imageUrl}
-                                          alt={brand.name}
+                                          alt={brand.nameFa}
                                         />
                                       </div>
                                     </td>
@@ -410,7 +386,16 @@ const Brands: NextPage = () => {
                                         onClick={() => handlerEditBrandModal(brand)}
                                         className="text-sm text-sky-500 cursor-pointer px-2"
                                       >
-                                        {brand.name}
+                                        {brand.nameFa}
+                                      </div>
+                                    </td>
+
+                                    <td className="text-center">
+                                      <div
+                                        onClick={() => handlerEditBrandModal(brand)}
+                                        className="text-sm text-sky-500 cursor-pointer px-2"
+                                      >
+                                        {brand.nameEn}
                                       </div>
                                     </td>
 
@@ -425,19 +410,7 @@ const Brands: NextPage = () => {
                                         {digitsEnToFa(brand.count)}
                                       </div>
                                     </td>
-                                    <td className="text-center">
-                                      <div className="flex justify-center">
-                                        {brand.inSlider ? (
-                                          <div className="  w-[24px] h-[26px] pt-0.5 flex items-center justify-center rounded ">
-                                            ✓
-                                          </div>
-                                        ) : (
-                                          <div className=" w-[24px] h-[26px] pt-0.5 flex items-center justify-center rounded ">
-                                            -
-                                          </div>
-                                        )}
-                                      </div>{' '}
-                                    </td>
+                                    
 
                                     <td className="text-center">
                                       <div>
@@ -521,9 +494,12 @@ const Brands: NextPage = () => {
                               <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[18%] text-center">
                                 <div className="">نام برند</div>
                               </th>
+                              <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[18%] text-center">
+                                <div className="">نام انگلیسی</div>
+                              </th>
                               <th className="text-sm py-3 px-2 text-gray-600 font-normal">توضیحات</th>
                               <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[18%]">محصولات مرتبط</th>
-                              <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[18%]">نمایش در اسلایدر</th>
+                              
                               <th className="text-sm py-3 px-2 text-gray-600 font-normal">وضعیت</th>
                               <th className="text-sm py-3 px-2 text-gray-600 font-normal">عملیات</th>
                             </tr>
@@ -538,7 +514,7 @@ const Brands: NextPage = () => {
                                         <img
                                           className="w-[100px] object-contain rounded-lg h-[70px]"
                                           src={brand.imagesSrc.imageUrl}
-                                          alt={brand.name}
+                                          alt={brand.nameFa}
                                         />
                                       </div>
                                     </td>
@@ -547,10 +523,17 @@ const Brands: NextPage = () => {
                                         onClick={() => handlerEditBrandModal(brand)}
                                         className="text-sm text-sky-500 cursor-pointer px-2"
                                       >
-                                        {brand.name}
+                                        {brand.nameFa}
                                       </div>
                                     </td>
-
+                                    <td className="text-center">
+                                      <div
+                                        onClick={() => handlerEditBrandModal(brand)}
+                                        className="text-sm text-sky-500 cursor-pointer px-2"
+                                      >
+                                        {brand.nameEn}
+                                      </div>
+                                    </td>
                                     <td className="text-center">
                                       <div className="">{brand.description !== '' ? '✓' : '-'}</div>
                                     </td>
@@ -562,19 +545,7 @@ const Brands: NextPage = () => {
                                         {digitsEnToFa(brand.count)}
                                       </div>
                                     </td>
-                                    <td className="text-center">
-                                      <div className="flex justify-center">
-                                        {brand.inSlider ? (
-                                          <div className="  w-[24px] h-[26px] pt-0.5 flex items-center justify-center rounded ">
-                                            ✓
-                                          </div>
-                                        ) : (
-                                          <div className=" w-[24px] h-[26px] pt-0.5 flex items-center justify-center rounded ">
-                                            -
-                                          </div>
-                                        )}
-                                      </div>{' '}
-                                    </td>
+                                    
 
                                     <td className="text-center">
                                       <div>
@@ -660,9 +631,12 @@ const Brands: NextPage = () => {
                               <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[18%] text-center">
                                 <div className="">نام برند</div>
                               </th>
+                              <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[18%] text-center">
+                                <div className="">نام انگلیسی</div>
+                              </th>
                               <th className="text-sm py-3 px-2 text-gray-600 font-normal">توضیحات</th>
                               <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[18%]">محصولات مرتبط</th>
-                              <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[18%]">نمایش در اسلایدر</th>
+                              
                               <th className="text-sm py-3 px-2 text-gray-600 font-normal">وضعیت</th>
                               <th className="text-sm py-3 px-2 text-gray-600 font-normal">عملیات</th>
                             </tr>
@@ -677,7 +651,7 @@ const Brands: NextPage = () => {
                                         <img
                                           className="w-[100px] object-contain rounded-lg h-[70px]"
                                           src={brand.imagesSrc.imageUrl}
-                                          alt={brand.name}
+                                          alt={brand.nameFa}
                                         />
                                       </div>
                                     </td>
@@ -686,10 +660,17 @@ const Brands: NextPage = () => {
                                         onClick={() => handlerEditBrandModal(brand)}
                                         className="text-sm text-sky-500 cursor-pointer px-2"
                                       >
-                                        {brand.name}
+                                        {brand.nameFa}
                                       </div>
                                     </td>
-
+                                    <td className="text-center">
+                                      <div
+                                        onClick={() => handlerEditBrandModal(brand)}
+                                        className="text-sm text-sky-500 cursor-pointer px-2"
+                                      >
+                                        {brand.nameEn}
+                                      </div>
+                                    </td>
                                     <td className="text-center">
                                       <div className="">{brand.description !== '' ? '✓' : '-'}</div>
                                     </td>
@@ -701,19 +682,7 @@ const Brands: NextPage = () => {
                                         {digitsEnToFa(brand.count)}
                                       </div>
                                     </td>
-                                    <td className="text-center">
-                                      <div className="flex justify-center">
-                                        {brand.inSlider ? (
-                                          <div className="  w-[24px] h-[26px] pt-0.5 flex items-center justify-center rounded ">
-                                            ✓
-                                          </div>
-                                        ) : (
-                                          <div className=" w-[24px] h-[26px] pt-0.5 flex items-center justify-center rounded ">
-                                            -
-                                          </div>
-                                        )}
-                                      </div>{' '}
-                                    </td>
+                                    
 
                                     <td className="text-center">
                                       <div>
@@ -777,151 +746,6 @@ const Brands: NextPage = () => {
                             <Pagination
                               pagination={brandsInActivePagination?.data}
                               section="_adminInActiveBrands"
-                              client
-                            />
-                          </div>
-                        )}
-                    </div>
-                  </Tab.Panel>
-
-                  <Tab.Panel>
-                    <div id="_adminActiveSliderBrands">
-                      <DataStateDisplay
-                        isError={isActiveSliderBrandsError}
-                        refetch={refetchActiveSliderBrands}
-                        isFetching={isActiveSliderBrandsFetching}
-                        isSuccess={isActiveSliderBrandsSuccess}
-                        dataLength={
-                          brandsIsActiveSliderPagination?.data?.data
-                            ? brandsIsActiveSliderPagination.data?.data.length
-                            : 0
-                        }
-                        loadingComponent={<TableSkeleton count={20} />}
-                      >
-                        <table className="w-[700px] md:w-full mx-auto">
-                          <thead className="bg-sky-300">
-                            <tr>
-                              <th className="text-sm py-3 px-2 text-gray-600 font-normal w-1/12">عکس</th>
-                              <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[18%] text-center">
-                                <div className="">نام برند</div>
-                              </th>
-                              <th className="text-sm py-3 px-2 text-gray-600 font-normal">توضیحات</th>
-                              <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[18%]">محصولات مرتبط</th>
-                              <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[18%]">نمایش در اسلایدر</th>
-                              <th className="text-sm py-3 px-2 text-gray-600 font-normal">وضعیت</th>
-                              <th className="text-sm py-3 px-2 text-gray-600 font-normal">عملیات</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {brandsIsActiveSliderPagination?.data?.data &&
-                              brandsIsActiveSliderPagination?.data?.data.map((brand, index) => {
-                                return (
-                                  <tr key={brand.id} className={`h-16 border-b ${index % 2 === 0 ? 'bg-gray-50' : ''}`}>
-                                    <td className="">
-                                      <div className="w-full flex justify-center">
-                                        <img
-                                          className="w-[100px] object-contain rounded-lg h-[70px]"
-                                          src={brand.imagesSrc.imageUrl}
-                                          alt={brand.name}
-                                        />
-                                      </div>
-                                    </td>
-                                    <td className="text-center">
-                                      <div
-                                        onClick={() => handlerEditBrandModal(brand)}
-                                        className="text-sm text-sky-500 cursor-pointer px-2"
-                                      >
-                                        {brand.name}
-                                      </div>
-                                    </td>
-
-                                    <td className="text-center">
-                                      <div className="">{brand.description !== '' ? '✓' : '-'}</div>
-                                    </td>
-                                    <td className="text-center text-sm text-gray-600">
-                                      <div
-                                        className="text-sky-500 cursor-pointer"
-                                        onClick={() => handleChangePage(brand.id)}
-                                      >
-                                        {digitsEnToFa(brand.count)}
-                                      </div>
-                                    </td>
-                                    <td className="text-center">
-                                      <div className="flex justify-center">
-                                        {brand.inSlider ? (
-                                          <div className="  w-[24px] h-[26px] pt-0.5 flex items-center justify-center rounded ">
-                                            ✓
-                                          </div>
-                                        ) : (
-                                          <div className=" w-[24px] h-[26px] pt-0.5 flex items-center justify-center rounded ">
-                                            -
-                                          </div>
-                                        )}
-                                      </div>{' '}
-                                    </td>
-
-                                    <td className="text-center">
-                                      <div>
-                                        {brand.isActive ? (
-                                          <span className="text-sm text-green-500  px-1.5 rounded">فعال</span>
-                                        ) : (
-                                          <span className="text-sm text-red-500 px-1.5 rounded ">غیر فعال</span>
-                                        )}
-                                      </div>
-                                    </td>
-                                    <td className="text-center text-sm text-gray-600">
-                                      <Menu as="div" className="dropdown">
-                                        <Menu.Button className="">
-                                          <div className="w-full flex justify-center items-center">
-                                            <span className="text-2xl hover:bg-gray-300 cursor-pointer bg-gray-200 text-gray-700 p-1 pb-1.5 px-1.5 h-8 flex justify-center items-center rounded-md">
-                                              :
-                                            </span>
-                                          </div>
-                                        </Menu.Button>
-
-                                        <Transition
-                                          as={Fragment}
-                                          enter="transition ease-out duration-100"
-                                          enterFrom="transform opacity-0 scale-95"
-                                          enterTo="transform opacity-100 scale-100"
-                                          leave="transition ease-in duration-75"
-                                          leaveFrom="transform opacity-100 scale-100"
-                                          leaveTo="transform opacity-0 scale-95"
-                                        >
-                                          <Menu.Items className="dropdown__items w-32 ">
-                                            <Menu.Item>
-                                              {({ close }) => (
-                                                <>
-                                                  <button
-                                                    onClick={() => {
-                                                      handleDelete(brand)
-                                                      close()
-                                                    }}
-                                                    className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
-                                                  >
-                                                    <span>حذف</span>
-                                                  </button>
-                                                </>
-                                              )}
-                                            </Menu.Item>
-                                          </Menu.Items>
-                                        </Transition>
-                                      </Menu>
-                                    </td>
-                                  </tr>
-                                )
-                              })}
-                          </tbody>
-                        </table>
-                      </DataStateDisplay>
-
-                      {brandsIsActiveSliderPagination?.data?.data &&
-                        brandsIsActiveSliderPagination?.data?.data?.length > 0 &&
-                        brandsIsActiveSliderPagination.data?.data && (
-                          <div className="mx-auto py-4 lg:max-w-5xl">
-                            <Pagination
-                              pagination={brandsIsActiveSliderPagination?.data}
-                              section="_adminActiveSliderBrands"
                               client
                             />
                           </div>

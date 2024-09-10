@@ -53,7 +53,7 @@ const Features: NextPage = () => {
     refetch,
     ...featuresQueryProps
   } = useGetFeaturesQuery({
-    pageSize: 20,
+    pageSize: 8,
     page: featurePage,
     search: searchTerm,
   })

@@ -24,7 +24,7 @@ const OrderPage: NextPage = () => {
   const { generalSetting } = useAppSelector((state) => state.design)
   // ? Get Orders Data
   const { data, ...ordersQueryProps } = useGetOrdersQuery({
-    pageSize: 20,
+    pageSize: 8,
     page: query.page ? +query.page : 1,
   })
   return (

@@ -41,7 +41,7 @@ const Categories: NextPage = () => {
   const { query, push } = useRouter()
   const categoryPage = query.page ? +query.page : 1
   const { data, refetch, ...categoriesQueryProps } = useGetAllCategoriesQuery({
-    pageSize: 20,
+    pageSize: 8,
     page: categoryPage,
     search: searchTerm,
   })

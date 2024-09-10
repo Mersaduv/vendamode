@@ -1,5 +1,5 @@
 import { GeneralSettingForm, LogoImagesForm } from '@/components/ads'
-import { DesignItemForm, RedirectForm, StoreCategoryForm } from '@/components/designs'
+import { DesignItemForm, RedirectForm, StoreBrandForm, StoreCategoryForm } from '@/components/designs'
 import { DashboardLayout } from '@/components/Layouts'
 import DesignTabDashboardLayout from '@/components/Layouts/DesignTabDashboardLayout'
 import { Button } from '@/components/ui'
@@ -346,6 +346,11 @@ const GeneralSettings: NextPage = () => {
                 onAddDesignItem={() => handleAddDesignItem('lists')}
               />
               <StoreCategoryForm
+                setDeletedStoreCategories={setDeletedStoreCategories}
+                setStoreCategories={setStoreCategories}
+                storeCategories={storeCategories}
+              />
+              <StoreBrandForm
                 setDeletedStoreCategories={setDeletedStoreCategories}
                 setStoreCategories={setStoreCategories}
                 storeCategories={storeCategories}

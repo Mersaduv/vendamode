@@ -36,7 +36,7 @@ const BrandModal: React.FC<Props> = (props) => {
     inSlider: false,
     isActive: false,
   }
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null)
   const [
     createBrand,
     {
@@ -72,10 +72,10 @@ const BrandModal: React.FC<Props> = (props) => {
   useEffect(() => {
     if (isShow && inputRef.current) {
       setTimeout(() => {
-        inputRef.current?.focus(); 
-      }, 100); 
+        inputRef.current?.focus()
+      }, 100)
     }
-  }, [isShow]);
+  }, [isShow])
   useEffect(() => {
     const loadData = async () => {
       if (brand) {
@@ -89,7 +89,8 @@ const BrandModal: React.FC<Props> = (props) => {
           }
           reset({
             id: brand.id,
-            name: brand.name,
+            nameFa: brand.nameFa,
+            nameEn: brand.nameEn,
             isActive: brand.isActive,
             inSlider: brand.inSlider,
             description: brand.description,
@@ -99,7 +100,8 @@ const BrandModal: React.FC<Props> = (props) => {
         } else {
           reset({
             id: brand.id,
-            name: brand.name,
+            nameFa: brand.nameFa,
+            nameEn: brand.nameEn,
             isActive: brand.isActive,
             inSlider: brand.inSlider,
             description: brand.description,
@@ -115,7 +117,8 @@ const BrandModal: React.FC<Props> = (props) => {
   const onConfirm: SubmitHandler<IBrandForm> = (data) => {
     const formData = new FormData()
 
-    formData.append('Name', data.name)
+    formData.append('NameFa', data.nameFa)
+    formData.append('NameEn', data.nameEn)
     formData.append('Thumbnail', data.Thumbnail)
     formData.append('InSlider', data.inSlider.toString())
     formData.append('IsActive', data.isActive.toString())
@@ -247,7 +250,7 @@ const BrandModal: React.FC<Props> = (props) => {
             <div className="text-start text-base flex gap-2">
               {' '}
               {title} {title === 'افزودن' && ' برند'}
-              <div className="text-sky-500">{brand?.name}</div>
+              <div className="text-sky-500">{brand?.nameFa}</div>
             </div>
           </Modal.Header>
           <Modal.Body>
@@ -259,19 +262,41 @@ const BrandModal: React.FC<Props> = (props) => {
                       <input
                         type="text"
                         className="peer m-0 pr-3 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
-                        id={`nameInput-${mode}`}
-                        placeholder="نام"
-                        {...register('name')}
+                        id={`nameFaInput-${mode}`}
+                        placeholder="نام فارسی"
+                        {...register('nameFa')}
                         ref={(e) => {
-                          register('name').ref(e); // ادغام ref از register
-                          inputRef.current = e; // تنظیم ref دستی
+                          register('nameFa').ref(e)
+                          inputRef.current = e
                         }}
                       />
                       <label
-                        htmlFor={`nameInput-${mode}`}
+                        htmlFor={`nameFaInput-${mode}`}
                         className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
                       >
-                        نام
+                        نام فارسی
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center w-full gap-x-12 px-6">
+                    <div className="relative mb-3 w-full">
+                      <input dir='ltr'
+                        type="text"
+                        className="peer m-0 pr-3 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
+                        id={`nameEnInput-${mode}`}
+                        placeholder="نام انگلیسی"
+                        {...register('nameEn')}
+                        ref={(e) => {
+                          register('nameEn').ref(e)
+                          inputRef.current = e
+                        }}
+                      />
+                      <label
+                        htmlFor={`nameEnInput-${mode}`}
+                        className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
+                      >
+                        نام انگلیسی
                       </label>
                     </div>
                   </div>
@@ -304,17 +329,6 @@ const BrandModal: React.FC<Props> = (props) => {
                         customStyle="bg-sky-500"
                       />
                     </label>
-                    {isActive && (
-                      <label htmlFor={`isSlider-${mode}`} className="flex items-center gap-x-2">
-                        <CustomCheckbox
-                          name={`isSlider-${mode}`}
-                          checked={isSlider}
-                          onChange={handleIsSliderChange}
-                          label="نمایش در اسلایدر"
-                          customStyle="bg-sky-500"
-                        />
-                      </label>
-                    )}
                   </div>
                 </div>
                 {/* thumbnail  */}
@@ -358,13 +372,13 @@ const BrandModal: React.FC<Props> = (props) => {
                   <span className="font-normal text-[11px] text-start">نوع عکس میبایست png باشد</span>
                 </div>
                 <div className="flex flex-col">
-                  {formErrors.name && <p className="text-red-500 px-10">{formErrors.name.message}</p>}
+                  {formErrors.nameFa && <p className="text-red-500 px-10">{formErrors.nameFa.message}</p>}
+                  {formErrors.nameEn && <p className="text-red-500 px-10">{formErrors.nameEn.message}</p>}
+                  {formErrors.Thumbnail && <p className="text-red-500 px-10">{formErrors.Thumbnail.message}</p>}
                 </div>
                 <Button
                   type="submit"
-                  className={`bg-sky-500 px-5 py-2.5 hover:bg-sky-600 ${
-                    !isValid ? 'bg-gray-300' : ''
-                  } `}
+                  className={`bg-sky-500 px-5 py-2.5 hover:bg-sky-600 ${!isValid ? 'bg-gray-300' : ''} `}
                   isLoading={isLoadingCreate || isLoadingUpdate}
                 >
                   {title === 'افزودن' ? 'انتشار ' : 'بروزرسانی'}

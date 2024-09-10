@@ -40,7 +40,7 @@ const MainSlider: React.FC<Props> = (props) => {
     )
 
   return (
-    <section className={`section-swiper ${isActive ? 'mt-24' : ''} relative`}>
+    <section className={`section-swiper ${isActive ? '' : ''} relative`}>
       <Swiper
         pagination={{ clickable: true }}
         autoplay={{

@@ -14,7 +14,7 @@ const TextMarquee: React.FC = () => {
   return (
     <>
       {headerTextData?.data?.isActive && (
-        <div className="w-full h-10 sm:h-12 md:h-14 lg:h-16 bg-[#e90089] overflow-hidden flex justify-start items-center text-white">
+        <div className="w-full h-10 static sm:h-12 md:h-14 lg:h-16 bg-[#e90089] overflow-hidden flex justify-start items-center text-white">
           <div className="whitespace-nowrap text-sm sm:text-base  md:text-lg font-bold px-5 inline-block marquee w-full">
             {headerTextData.data.name}
           </div>

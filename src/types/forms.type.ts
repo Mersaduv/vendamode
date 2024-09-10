@@ -37,7 +37,8 @@ export type AddressFormBody = {
 
 export interface IBrandForm {
   id?: string
-  name: string
+  nameFa: string
+  nameEn: string
   Thumbnail: File
   inSlider: boolean
   isActive: boolean
@@ -177,6 +178,7 @@ export interface IArticleBannerForm {
   articleId?: string
   isActive: boolean
 }
+
 export interface IFooterBannerForm {
   id?: string
   thumbnail?: File | null

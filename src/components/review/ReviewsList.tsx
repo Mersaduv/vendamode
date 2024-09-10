@@ -13,12 +13,11 @@ import { IArticle, IPagination, IProduct, IReview } from '@/types'
 interface Props {
   numReviews: number
   product: IProduct
-  article: IArticle
 }
 
 const ReviewsList: React.FC<Props> = (props) => {
   // ? Props
-  const { numReviews, product, article } = props
+  const { numReviews, product } = props
 
   // ? Assets
   const { query } = useRouter()

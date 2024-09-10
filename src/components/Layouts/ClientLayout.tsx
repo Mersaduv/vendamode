@@ -9,7 +9,7 @@ const ClientLayout: React.FC<Props> = ({ children, isAccount }) => {
   return (
     <>
       <Header />
-      <main className=' pt-10 sm:pt-32'>
+      <main className=''>
       {children}
       </main>
       {!isAccount && <Footer />}
