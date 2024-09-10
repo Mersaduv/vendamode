@@ -5,6 +5,7 @@ import DesignTabDashboardLayout from '@/components/Layouts/DesignTabDashboardLay
 import { Button } from '@/components/ui'
 import { useAppDispatch } from '@/hooks'
 import {
+  useDeleteColumnFooterMutation,
   useDeleteDesignItemsMutation,
   useGetColumnFootersQuery,
   useGetCopyrightQuery,
@@ -160,6 +161,16 @@ const Footer: NextPage = () => {
       isLoading: isLoadingDelete,
     },
   ] = useDeleteDesignItemsMutation()
+  const [
+    deleteColumnFooter,
+    {
+      isSuccess: isSuccessColumnFooterDelete,
+      isError: isErrorColumnFooterDelete,
+      error: errorColumnFooterDelete,
+      data: dataColumnFooterDelete,
+      isLoading: isLoadingColumnFooterDelete,
+    },
+  ] = useDeleteColumnFooterMutation()
 
   const onSubmit = async (data: FormData) => {
     console.log(data, 'data all')
@@ -177,6 +188,19 @@ const Footer: NextPage = () => {
         )
       )
     }
+    // ? delete Column Footer
+    if (deletedColumnFooter.length > 0) {
+      promises.push(
+        Promise.all(
+          deletedColumnFooter.map((deletedColumnFooterItem) => {
+            if (deletedColumnFooterItem.id) {
+              return deleteColumnFooter(deletedColumnFooterItem.id)
+            }
+          })
+        )
+      )
+    }
+
     //  columnFooters
     if (data.columnFooters && data.columnFooters.length > 0) {
       const upsertColumnFooterPromise = (async () => {

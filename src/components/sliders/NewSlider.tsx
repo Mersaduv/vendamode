@@ -1,36 +1,26 @@
 import Link from 'next/link'
 import { useGetProductsQuery } from '@/services'
 
-import { ProductPriceDisplay } from '@/components/product'
+import { ProductDiscountTag, ProductPriceDisplay } from '@/components/product'
 import { Button, ResponsiveImage } from '@/components/ui'
 
-import type { ICategory } from '@/types'
+import type { ICategory, IProduct } from '@/types'
 import { useAppSelector } from '@/hooks'
 import dynamic from 'next/dynamic'
 import 'owl.carousel/dist/assets/owl.carousel.css'
 import 'owl.carousel/dist/assets/owl.theme.default.css'
 interface Props {
   currentCategory?: ICategory
+  products : IProduct[]
+  isFetching: boolean
 }
 const OwlCarousel = dynamic(() => import('react-owl-carousel'), {
   ssr: false,
 })
 
 const NewSlider: React.FC<Props> = (props) => {
-  const { currentCategory } = props
+  const { currentCategory,products ,isFetching} = props
   const { generalSetting } = useAppSelector((state) => state.design)
-  const { products, isFetching } = useGetProductsQuery(
-    {
-      sortBy: 'Created',
-      pageSize: 30,
-    },
-    {
-      selectFromResult: ({ data, isFetching }) => ({
-        products: data?.data?.pagination.data,
-        isFetching,
-      }),
-    }
-  )
 
   const carouselOptions = {
     margin: 10,
@@ -65,6 +55,7 @@ const NewSlider: React.FC<Props> = (props) => {
   if (isFetching) {
     return <div>Loading...</div>
   }
+  console.log(products, 'product -- product')
 
   return (
     <>
@@ -77,33 +68,50 @@ const NewSlider: React.FC<Props> = (props) => {
         >
           {products?.map((product) => {
             const stockItemWithDiscount = product.stockItems.find((stockItem) => stockItem.discount! > 0)
-            const stockItemWithOutDiscount = product.stockItems.find((stockItem) => stockItem.discount === null)
+            const stockItemWithOutDiscount = product.stockItems.find((stockItem) => stockItem.discount === 0)
 
             return (
               <div
                 key={product.id}
-                className="w-[150px] sm:w-[200px] z-50 shadow-article rounded-lg mb-3 bg-white"
+                className="w-[150px] sm:w-[200px] z-50 shadow-item2 rounded-lg mb-3 bg-white h-[328px]"
               >
-                <Link href={`/products/${product.slug}`}>
-                  <ResponsiveImage
-                    dimensions="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] lg:w-[200px] lg:h-[200px]"
-                    className="mx-auto relative"
-                    src={product.mainImageSrc.imageUrl}
-                    blurDataURL={product.mainImageSrc.placeholder}
-                    alt={product.title}
-                    imageStyles="object-center rounded-t-lg"
-                  />
-                  <div className="flex flex-col gap-y-4 py-4">
-                    <h2 className="text-center line-clamp-2 overflow-hidden text-ellipsis">{product.title}</h2>
-                    <div className="mt-1.5 flex justify-center gap-x-2 px-2">
-                      <ProductPriceDisplay
-                        inStock={product.inStock}
-                        discount={0}
-                        price={stockItemWithOutDiscount?.price ?? stockItemWithDiscount?.price ?? 0}
-                      />
+                <div className="h-slider">
+                  <Link href={`/products/${product.slug}`}>
+                    <ResponsiveImage
+                      dimensions="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] lg:w-[200px] lg:h-[200px]"
+                      className="mx-auto relative"
+                      src={product.mainImageSrc.imageUrl}
+                      blurDataURL={product.mainImageSrc.placeholder}
+                      alt={product.title}
+                      imageStyles="object-center rounded-t-lg"
+                    />
+                    <div className="flex flex-col justify-between gap-y-1 py-3 h-[130px] ">
+                      <h2 dir="rtl" className="text-right line-clamp-2 overflow-hidden text-ellipsis px-2 text-sm">
+                        {product.title}
+                      </h2>
+                      <div className="mt-1.5 flex justify-center gap-x-2 px-2 relative">
+                        <div className="">
+                          {stockItemWithOutDiscount === undefined && (
+                            <ProductDiscountTag
+                              price={stockItemWithDiscount?.price ?? 0}
+                              discount={stockItemWithDiscount?.discount ?? 0}
+                              isSlider
+                            />
+                          )}
+                        </div>
+                        <ProductPriceDisplay
+                          inStock={product.inStock}
+                          discount={stockItemWithDiscount?.discount || 0}
+                          price={
+                            stockItemWithDiscount?.discount === undefined
+                              ? stockItemWithOutDiscount?.price!
+                              : stockItemWithDiscount?.price ?? 0
+                          }
+                        />
+                      </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                </div>
               </div>
             )
           })}
@@ -118,51 +126,63 @@ const NewSlider: React.FC<Props> = (props) => {
         >
           {products?.map((product) => {
             const stockItemWithDiscount = product.stockItems.find((stockItem) => stockItem.discount! > 0)
-            const stockItemWithOutDiscount = product.stockItems.find((stockItem) => stockItem.discount === null)
-
+            const stockItemWithOutDiscount = product.stockItems.find((stockItem) => stockItem.discount === 0)
+            
             return (
               <div
                 key={product.id}
-                className="w-[150px] sm:w-[200px] z-50 shadow-article rounded-lg mb-3 bg-white"
+                className="w-[150px] sm:w-[200px] z-50 shadow-item2 rounded-lg mb-3 bg-white h-[300px]"
               >
-                <Link href={`/products/${product.slug}`}>
-                  <ResponsiveImage
-                    dimensions="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] lg:w-[200px] lg:h-[200px]"
-                    className="mx-auto relative"
-                    src={product.mainImageSrc.imageUrl}
-                    blurDataURL={product.mainImageSrc.placeholder}
-                    alt={product.title}
-                    imageStyles="object-center rounded-t-lg"
-                  />
-                  <div className="flex flex-col gap-y-4 py-4">
-                    <h2 className="text-center line-clamp-2 overflow-hidden text-ellipsis">{product.title}</h2>
-                    <div className="mt-1.5 flex justify-center gap-x-2 px-2">
-                      <ProductPriceDisplay
-                        inStock={product.inStock}
-                        discount={0}
-                        price={stockItemWithOutDiscount?.price ?? stockItemWithDiscount?.price ?? 0}
-                      />
+                <div className="h-slider">
+                  <Link href={`/products/${product.slug}`}>
+                    <ResponsiveImage
+                      dimensions="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] lg:w-[200px] lg:h-[200px]"
+                      className="mx-auto relative"
+                      src={product.mainImageSrc.imageUrl}
+                      blurDataURL={product.mainImageSrc.placeholder}
+                      alt={product.title}
+                      imageStyles="object-center rounded-t-lg"
+                    />
+                    <div className="flex flex-col justify-between py-3 h-[150px] ">
+                      <h2 dir="rtl" className="text-right line-clamp-2 overflow-hidden text-ellipsis px-2 text-sm">
+                        {product.title}
+                      </h2>
+                      <div className="mt-1.5 flex justify-center gap-x-2 px-2 relative">
+                        <div className="">
+                          {stockItemWithOutDiscount === undefined && (
+                            <ProductDiscountTag
+                              price={stockItemWithDiscount?.price ?? 0}
+                              discount={stockItemWithDiscount?.discount ?? 0}
+                              isSlider
+                            />
+                          )}
+                        </div>
+                        <ProductPriceDisplay
+                          inStock={product.inStock}
+                          discount={stockItemWithDiscount?.discount || 0}
+                          price={
+                            stockItemWithDiscount?.discount === undefined
+                              ? stockItemWithOutDiscount?.price!
+                              : stockItemWithDiscount?.price ?? 0
+                          }
+                        />
+                      </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                </div>
               </div>
             )
           })}
 
           <div>
-            <div className="line-clamp-2 overflow-hidden text-ellipsis text-center -mt-16 text-lg text-gray-400 px-3 w-full">
-              جدید ترین های {generalSetting?.title}
-            </div>
             <div className="mt-10 flex justify-center">
               <img className="w-[120px] xs2:w-[180px] static-img" src="/images/NEW.webp" alt="offer" />
             </div>
-            <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">
-              تخفیف های امروز رو از دست نده
-            </p>
+            <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">به روز باش </p>
             <div className="w-full sm:flex justify-center hidden">
-              <Link href={`/products?sortBy=Created`}>
+              {/* <Link href={`/products?sortBy=Created`}>
                 <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
-              </Link>
+              </Link> */}
             </div>
           </div>
         </OwlCarousel>

@@ -241,10 +241,10 @@ const Features: NextPage = () => {
                     {featurePage === 1 && (
                       <tr className={`h-16 border-b bg-gray-50 ${shouldHideSizeRow ? 'hidden' : ''}`}>
                         <td className="text-start">
-                          <div className="text-sm cursor-pointer px-2">سایزبندی</div>
+                          <div className="text-sm px-2">سایزبندی</div>
                         </td>
                         <td className="text-center">
-                          <div className=" cursor-pointer">{digitsEnToFa(sizeDb?.data?.data?.length ?? 0)}</div>
+                          <div className="">{digitsEnToFa(sizeDb?.data?.data?.length ?? 0)}</div>
                         </td>
                         <td className="text-center text-sm text-gray-600">
                           <div
@@ -297,13 +297,13 @@ const Features: NextPage = () => {
                                 onClick={() => handlerEditFeatureModal(feature)}
                                 className={`text-sm ${
                                   feature.name === 'رنگ' ? '' : ' text-sky-500'
-                                }  cursor-pointer px-2`}
+                                }   px-2`}
                               >
                                 {feature.name}
                               </div>
                             </td>
                             <td className="text-center">
-                              <div className="cursor-pointer">{digitsEnToFa(feature.valueCount)}</div>
+                              <div className="">{digitsEnToFa(feature.valueCount)}</div>
                             </td>
                             <td className="text-center text-sm text-gray-600">
                               <div className="text-sky-500 cursor-pointer" onClick={() => handleChangePage(feature.id)}>

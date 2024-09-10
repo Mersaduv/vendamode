@@ -57,9 +57,9 @@ export interface GetStockItems {
   featureValueId?: string[]
   sizeId?: string
   idx?: string
-  quantity?: number
+  quantity: number
   price: number
-  discount?: number
+  discount: number
   discountRemainingTime?: string
   [key: string]: any
 }

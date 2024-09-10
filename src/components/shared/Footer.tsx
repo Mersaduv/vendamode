@@ -1,14 +1,20 @@
 import { useAppSelector } from '@/hooks'
 import {
+  useGetArticlesQuery,
+  useGetColumnFootersQuery,
   useGetCopyrightQuery,
   useGetDesignItemsQuery,
   useGetRedirectsQuery,
   useGetSloganFooterQuery,
   useGetSupportQuery,
 } from '@/services'
+import { IArticle } from '@/types'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 const Footer = () => {
+  // ? States
+  const [columnFooters, setColumnFooters] = useState<IArticle[]>([])
   //  ? Query
   const { data: copyrightData, isLoading: isLoadingCopyright, isError: isErrorCopyright } = useGetCopyrightQuery()
   const {
@@ -22,6 +28,27 @@ const Footer = () => {
     isError: isErrorSloganFooter,
   } = useGetSloganFooterQuery()
   const { data: supportData, isLoading: isLoadingSupport, isError: isErrorSupport } = useGetSupportQuery()
+  const {
+    data: articlesData,
+    isLoading: isLoadingArticle,
+    isError: isErrorArticle,
+  } = useGetArticlesQuery({
+    pageSize: 9999,
+  })
+
+  useEffect(() => {
+    if (articlesData) {
+      const filteredArticles = (articlesData.data?.data || []).filter(
+        (article: IArticle) => article.place !== 1 && article.place !== 0
+      )
+
+      const sortedArticles = filteredArticles.sort((a: IArticle, b: IArticle) => a.place - b.place)
+
+      setColumnFooters(sortedArticles)
+    }
+  }, [articlesData])
+
+  console.log(columnFooters, 'columnFooters')
 
   // ? States
   const { logoImages } = useAppSelector((state) => state.design)
@@ -107,67 +134,53 @@ const Footer = () => {
                 dangerouslySetInnerHTML={{ __html: supportData?.data?.address || '' }}
               />
             </div>
-            {/* خرید از وندامد */}
+            {/*column footers*/}
+            {columnFooters.length > 0 ? (
+              <div className="flex justify-between w-full">
+                <div className=" flex justify-around w-full">
+                  {columnFooters[0] && (
+                    <div className="mb-8 lg:mb-0  text-center lg:text-start">
+                      <h3 className="text-lg font-bold">{columnFooters[0].title}</h3>
+                      <div
+                        className="ck ck-content ck-editor__editable ck-rounded-corners ck-editor__editable_inline ck-blurred"
+                        dangerouslySetInnerHTML={{ __html: columnFooters[0].description }}
+                      />
+                    </div>
+                  )}
 
-            <div className="flex justify-between w-full">
-              <div className=" flex justify-around w-full">
-                <div className="mb-8 lg:mb-0  text-center lg:text-start">
-                  <h3 className="text-lg font-bold mb-4">خرید از وندامد</h3>
-                  <ul>
-                    <li>
-                      <a href="#" className="text-sm p-2">
-                        رویه ارسال سفارش
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" className="text-sm p-2">
-                        رویه استرداد کالا
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" className="text-sm p-2">
-                        نحوه پرداخت مبلغ سفارش
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" className="text-sm p-2">
-                        نحوه خرید از وندامد
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-                <div className="mb-8 lg:mb-0  text-center lg:text-start">
-                  <h3 className="text-lg font-bold mb-4">فروش در وندامد</h3>
-                  <ul>
-                    <li>
-                      <a href="#" className="text-sm p-2">
-                        قوانین فروش در وندامد
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-                <div className=" text-center lg:text-start">
-                  <h3 className="text-lg font-bold mb-4 ">با وندامد</h3>
-                  <ul>
-                    <li>
-                      <a href="#" className="text-sm p-2">
-                        تماس با ما
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" className="text-sm p-2">
-                        سوالات متداول!
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" className="text-sm p-2">
-                        گزارش ایراد در سایت
-                      </a>
-                    </li>
-                  </ul>
+                  {columnFooters[1] && (
+                    <div className="mb-8 lg:mb-0  text-center lg:text-start">
+                      <h3 className="text-lg font-bold">{columnFooters[1].title}</h3>
+                      <div
+                        className="ck ck-content ck-editor__editable ck-rounded-corners ck-editor__editable_inline ck-blurred"
+                        dangerouslySetInnerHTML={{ __html: columnFooters[1].description }}
+                      />
+                    </div>
+                  )}
+
+                  {columnFooters[2] && (
+                    <div className="mb-8 lg:mb-0  text-center lg:text-start">
+                      <h3 className="text-lg font-bold">{columnFooters[2].title}</h3>
+                      <div
+                        className="ck ck-content ck-editor__editable ck-rounded-corners ck-editor__editable_inline ck-blurred"
+                        dangerouslySetInnerHTML={{ __html: columnFooters[2].description }}
+                      />
+                    </div>
+                  )}
+
+                  {columnFooters[3] && (
+                    <div className="mb-8 lg:mb-0  text-center lg:text-start">
+                      <h3 className="text-lg font-bold">{columnFooters[3].title}</h3>
+                      <div
+                        className="ck ck-content ck-editor__editable ck-rounded-corners ck-editor__editable_inline ck-blurred"
+                        dangerouslySetInnerHTML={{ __html: columnFooters[3].description }}
+                      />
+                    </div>
+                  )}
+                  
                 </div>
               </div>
-            </div>
+            ) : null}
           </div>
         </div>
         <div className="flex justify-center border-t pt-6">

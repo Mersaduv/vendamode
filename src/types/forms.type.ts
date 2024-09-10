@@ -190,7 +190,7 @@ export interface IArticleForm {
   id?: string | undefined
   title: string
   isActive: boolean
-  thumbnail: File
+  thumbnail: File | null
   place: number
   description: string
   categoryId: string

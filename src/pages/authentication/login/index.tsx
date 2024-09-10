@@ -18,7 +18,7 @@ import { useAppSelector } from '@/hooks'
 function LoginPage() {
   // ? Assets
   const { replace, query } = useRouter()
-  const { generalSetting } = useAppSelector((state) => state.design)
+  const { generalSetting, logoImages } = useAppSelector((state) => state.design)
   // ? Login User
   const [login, { data, isSuccess, isError, isLoading, error }] = useLoginMutation()
 
@@ -50,8 +50,8 @@ function LoginPage() {
           keywords={generalSetting?.googleTags || ' اینترنتی, فروشگاه'}
         />
         <section className="container max-w-xl space-y-6 px-12 py-6 lg:rounded-lg lg:border-gray-100">
-          <Link className="flex justify-center" passHref href="/">
-            <img width={280} src={'/logo/Logo.png'} alt="Venda Mode" />
+          <Link className="flex justify-center pb-4" passHref href="/">
+            <img width={280} src={(logoImages?.orgImage && logoImages?.orgImage.imageUrl) || ''} alt="Venda Mode" />
           </Link>
 
           <LoginForm isLoading={isLoading} onSubmit={submitHander} />

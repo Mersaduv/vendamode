@@ -2009,13 +2009,12 @@ const Table: React.FC<PropTable> = (props) => {
                       onChange={(e) => handleCheckboxChange('price', e.target.checked)}
                     /> */}
                   </div>{' '}
-                  <div title="تکرار مبلغ" className=" py-2 px-1 cursor-pointer">
+                  <div title="تکرار مبلغ" className=" py-2 px-1 cursor-pointer ">
                     <FaArrowDownLong
-                      onClick={() => {
-                        handleCheckboxChange('price', isSelectedColumn)
-                        setIsSelectedComlumn((prev) => !prev)
-                      }}
-                      className="text-gray-400"
+                      onClick={() =>
+                        handleCheckboxChange('price', true)
+                }
+                      className="text-gray-400 hover:border border-gray-400"
                     />
                   </div>
                 </div>
@@ -2143,10 +2142,7 @@ const Table: React.FC<PropTable> = (props) => {
                       placeholder=""
                       value={digitsEnToFa(addCommas(stockItems[idx]?.price || ''))}
                       onChange={(e) => handleInputChange(idx, 'price', digitsFaToEn(e.target.value))}
-                      className={`w-36 h-9 rounded-lg text-center ${
-                        !isPriceEditable ? 'bg-gray-100' : ''
-                      } border border-gray-300`}
-                      disabled={!isPriceEditable}
+                      className={`w-36 h-9 rounded-lg text-center  border border-gray-300`}
                     />
                   )}
                 </td>

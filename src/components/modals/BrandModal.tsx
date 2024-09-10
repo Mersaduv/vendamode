@@ -1,6 +1,6 @@
 import { Modal, Button, CustomCheckbox } from '@/components/ui'
 import { useCreateBrandMutation, useUpdateBrandMutation } from '@/services'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { HandleResponse } from '../shared'
 import { Resolver, SubmitHandler, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -36,7 +36,7 @@ const BrandModal: React.FC<Props> = (props) => {
     inSlider: false,
     isActive: false,
   }
-
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [
     createBrand,
     {
@@ -69,7 +69,13 @@ const BrandModal: React.FC<Props> = (props) => {
     resolver: yupResolver(brandSchema) as unknown as Resolver<IBrandForm>,
     defaultValues,
   })
-
+  useEffect(() => {
+    if (isShow && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current?.focus(); 
+      }, 100); 
+    }
+  }, [isShow]);
   useEffect(() => {
     const loadData = async () => {
       if (brand) {
@@ -256,6 +262,10 @@ const BrandModal: React.FC<Props> = (props) => {
                         id={`nameInput-${mode}`}
                         placeholder="نام"
                         {...register('name')}
+                        ref={(e) => {
+                          register('name').ref(e); // ادغام ref از register
+                          inputRef.current = e; // تنظیم ref دستی
+                        }}
                       />
                       <label
                         htmlFor={`nameInput-${mode}`}

@@ -536,10 +536,15 @@ const Products: NextPage = () => {
                     <option className="appearance-none text-sm" value="">
                       کارهای گروهی
                     </option>
-                    <option value="1">فعال کردن</option>
-                    <option value="2">غیر فعال کردن</option>
-                    <option value="3">انتقال به زباله دان</option>
-                    <option value="4">بازگردانی محصول</option>
+                    {tabKey !== 'activeProducts' && tabKey !== 'deletedProducts' && (
+                      <option value="1">فعال کردن</option>
+                    )}
+                    {tabKey !== 'inactiveProducts' && tabKey !== 'deletedProducts' && (
+                      <option value="2">غیر فعال کردن</option>
+                    )}
+                    {tabKey !== 'deletedProducts' && <option value="3">انتقال به زباله دان</option>}
+                    {tabKey === 'deletedProducts' && <option value="4">بازگردانی محصول</option>}
+                    {tabKey === 'deletedProducts' && <option value="5">حذف</option>}
                   </select>
                   <div
                     className="bg-gray-100 cursor-pointer hover:bg-gray-200 mr-[1px] rounded-l-md text-sm flex justify-center items-center w-14"
@@ -740,16 +745,16 @@ const Products: NextPage = () => {
                                   </div>
                                 </th>
                                 <th className="text-sm py-3 px-2 font-normal w-[70px] text-start"></th>
-                                <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[150px] text-start">
+                                <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[30%] text-start">
                                   نام محصول
                                 </th>
-                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">کد</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[10%]">کد</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[150px]">دسته بندی</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">نوع</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">تعداد</th>
-                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">فروشنده</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[10%]">فروشنده</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">وضعیت</th>
-                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">عملیات</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[2%]">عملیات</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -774,7 +779,7 @@ const Products: NextPage = () => {
                                         alt="p-img"
                                       />
                                     </td>
-                                    <td className="text-sm text-gray-600 ">
+                                    <td className="text-sm text-gray-600  line-clamp-2 overflow-hidden text-ellipsis pt-2">
                                       <Link className="text-sky-500" href={`/products/${product.slug}`}>
                                         {product.title}
                                       </Link>
@@ -796,7 +801,9 @@ const Products: NextPage = () => {
                                       {handleIsChangeable(product) ? 'متغیر' : 'ساده'}
                                     </td>
                                     <td className="text-center text-sm text-gray-600">
-                                      {handleIsChangeable(product) && product.inStock > 0 ? '✓' : digitsEnToFa(product.inStock)}
+                                      {handleIsChangeable(product) && product.inStock > 0
+                                        ? '✓'
+                                        : digitsEnToFa(product.inStock)}
                                     </td>
                                     <td className="text-center text-sm text-gray-600">{generalSetting?.title}</td>
                                     <td className="text-center">
@@ -906,16 +913,16 @@ const Products: NextPage = () => {
                                   </div>
                                 </th>
                                 <th className="text-sm py-3 px-2 font-normal w-[70px] text-start"></th>
-                                <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[150px] text-start">
+                                <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[30%] text-start">
                                   نام محصول
                                 </th>
-                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">کد</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[10%]">کد</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[150px]">دسته بندی</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">نوع</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">تعداد</th>
-                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">فروشنده</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[10%]">فروشنده</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">وضعیت</th>
-                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">عملیات</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[2%]">عملیات</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -940,7 +947,7 @@ const Products: NextPage = () => {
                                         alt="p-img"
                                       />
                                     </td>
-                                    <td className="text-sm text-gray-600 ">
+                                    <td className="text-sm text-gray-600  line-clamp-2 overflow-hidden text-ellipsis pt-2">
                                       <Link className="text-sky-500" href={`/products/${product.slug}`}>
                                         {product.title}
                                       </Link>
@@ -1072,16 +1079,16 @@ const Products: NextPage = () => {
                                   </div>
                                 </th>
                                 <th className="text-sm py-3 px-2 font-normal w-[70px] text-start"></th>
-                                <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[150px] text-start">
+                                <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[30%] text-start">
                                   نام محصول
                                 </th>
-                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">کد</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[10%]">کد</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[150px]">دسته بندی</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">نوع</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">تعداد</th>
-                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">فروشنده</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[10%]">فروشنده</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">وضعیت</th>
-                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">عملیات</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[2%]">عملیات</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -1106,7 +1113,7 @@ const Products: NextPage = () => {
                                         alt="p-img"
                                       />
                                     </td>
-                                    <td className="text-sm text-gray-600 ">
+                                    <td className="text-sm text-gray-600  line-clamp-2 overflow-hidden text-ellipsis pt-2">
                                       <Link className="text-sky-500" href={`/products/${product.slug}`}>
                                         {product.title}
                                       </Link>
@@ -1238,16 +1245,16 @@ const Products: NextPage = () => {
                                   </div>
                                 </th>
                                 <th className="text-sm py-3 px-2 font-normal w-[70px] text-start"></th>
-                                <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[150px] text-start">
+                                <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[30%] text-start">
                                   نام محصول
                                 </th>
-                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">کد</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[10%]">کد</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[150px]">دسته بندی</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">نوع</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">تعداد</th>
-                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">فروشنده</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[10%]">فروشنده</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">وضعیت</th>
-                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">عملیات</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[2%]">عملیات</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -1272,7 +1279,7 @@ const Products: NextPage = () => {
                                         alt="p-img"
                                       />
                                     </td>
-                                    <td className="text-sm text-gray-600 ">
+                                    <td className="text-sm text-gray-600  line-clamp-2 overflow-hidden text-ellipsis pt-2">
                                       <Link className="text-sky-500" href={`/products/${product.slug}`}>
                                         {product.title}
                                       </Link>

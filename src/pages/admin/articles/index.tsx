@@ -8,6 +8,7 @@ import {
   useDeleteArticleMutation,
   useDeleteTrashArticleMutation,
   useGetArticlesQuery,
+  useGetColumnFootersQuery,
   useRestoreArticleMutation,
 } from '@/services'
 import { Fragment, useEffect, useState } from 'react'
@@ -22,6 +23,7 @@ import { IArticle } from '@/types'
 import { TableSkeleton } from '@/components/skeleton'
 import { Pagination } from '@/components/navigation'
 import { LuSearch } from 'react-icons/lu'
+import { ProductBreadcrumb } from '@/components/product'
 
 const Articles: NextPage = () => {
   // ? Assets
@@ -49,6 +51,11 @@ const Articles: NextPage = () => {
   const [isShowConfirmUpdateModal, confirmUpdateModalHandlers] = useDisclosure()
 
   // ? Querirs
+  const {
+    data: columnFootersData,
+    isLoading: isLoadingColumnFooter,
+    isError: isErrorColumnFooter,
+  } = useGetColumnFootersQuery()
   //* Get Articles Data
   const [articlesPagination, setArticlesPagination] = useState<GetArticlesResult>()
   const [articlesActivePagination, setArticlesActivePagination] = useState<GetArticlesResult>()
@@ -108,22 +115,18 @@ const Articles: NextPage = () => {
   } = useFetchArticles('isDeleted')
 
   useEffect(() => {
-
     if (allArticles) setArticlesPagination(allArticles)
   }, [allArticles])
 
   useEffect(() => {
-
     if (activeArticles) setArticlesActivePagination(activeArticles)
   }, [activeArticles])
 
   useEffect(() => {
-
     if (inactiveArticles) setArticlesInActivePagination(inactiveArticles)
   }, [inactiveArticles])
 
   useEffect(() => {
-
     if (deletedArticles) setArticlesIsDeletedPagination(deletedArticles)
   }, [deletedArticles])
 
@@ -359,14 +362,19 @@ const Articles: NextPage = () => {
                       id=""
                       onChange={handlePlaceChange}
                     >
-                      <option className="appearance-none text-sm" value="0">
+                      <option className="appearance-none text-sm" value="">
                         همه مقالات
                       </option>
 
                       <option value={'1'}>خواندنی ها</option>
-                      <option value={'2'}>فروش در {generalSetting?.title}</option>
-                      <option value={'3'}>با {generalSetting?.title}</option>
-                      <option value={'4'}>خرید از {generalSetting?.title}</option>
+                      {columnFootersData?.data &&
+                        columnFootersData.data.map((columnFooter, index) => {
+                          return (
+                            <option key={index} value={`${columnFooter.index}`} className={''}>
+                              {columnFooter.name}
+                            </option>
+                          )
+                        })}
                     </select>
                     <div
                       className="bg-gray-100 hover:bg-gray-200 mr-[1px] rounded-l-md text-sm flex justify-center cursor-pointer items-center w-14"
@@ -484,12 +492,16 @@ const Articles: NextPage = () => {
                                 <th className="text-sm py-3 px-2 font-normal w-[130px] text-center text-gray-600 ">
                                   عکس
                                 </th>
-                                <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[150px] text-start">
+                                <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[30%] text-start">
                                   عنوان
                                 </th>
-                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">کد مقاله</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal whitespace-nowrap">
+                                  کد مقاله
+                                </th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">جایگاه</th>
-                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">دسته بندی </th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal whitespace-nowrap">
+                                  دسته بندی{' '}
+                                </th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">دیدگاه</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">نویسنده</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">وضعیت</th>
@@ -499,7 +511,6 @@ const Articles: NextPage = () => {
                             <tbody>
                               {articlesPagination?.data?.data &&
                                 articlesPagination?.data?.data.map((article, index) => {
-
                                   console.log(article, ' article.author')
 
                                   return (
@@ -515,7 +526,10 @@ const Articles: NextPage = () => {
                                         />
                                       </td>
                                       <td className="text-sm text-gray-600 ">
-                                        <Link className="text-sky-500" href={`/articles/${article.slug}`}>
+                                        <Link
+                                          className="text-sky-500 line-clamp-2 overflow-hidden text-ellipsis"
+                                          href={`/articles/${article.slug}`}
+                                        >
                                           {article.title}
                                         </Link>
                                       </td>
@@ -523,24 +537,47 @@ const Articles: NextPage = () => {
                                         {digitsEnToFa(article.code)}
                                       </td>
                                       <td className="text-center text-sm text-gray-600">
-                                        {digitsEnToFa(CheckPlaceArticle(article.place))}
+                                        <div className="line-clamp-1 overflow-hidden text-ellipsis">
+                                          {digitsEnToFa(CheckPlaceArticle(article.place))}
+                                        </div>
                                       </td>
-                                      <td className="text-center text-sm text-gray-600">
+                                      {/* <td className="text-center text-sm text-gray-600">
                                         {article.category === '' ? (
                                           <span className="text-lg">-</span>
                                         ) : (
                                           article.category
                                         )}
+                                      </td> */}
+                                      <td className="tooltip-container text-sm text-gray-600 text-center cursor-pointer">
+                                        {article.parentCategories !== null
+                                          ? article.parentCategories?.category.name
+                                          : '-'}
+                                        {article.parentCategories !== null && (
+                                          <span className="tooltip-text">
+                                            <ProductBreadcrumb categoryLevels={article.parentCategories} isAdmin />
+                                          </span>
+                                        )}
                                       </td>
                                       <td className="text-center text-sm text-gray-600">
                                         {digitsEnToFa(article.numReviews)}
                                       </td>
-                                      <td className="text-center text-sm text-gray-600">
-                                        {article.author !== ' ' ||
-                                        article.author !== undefined ||
-                                        article.author !== null
-                                          ? article.author
-                                          : '-'}
+                                      <td
+                                        title={
+                                          article.author !== ' ' ||
+                                          article.author !== undefined ||
+                                          article.author !== null
+                                            ? article.author
+                                            : '-'
+                                        }
+                                        className="text-center text-sm text-gray-600 "
+                                      >
+                                        <div className=" line-clamp-1 overflow-hidden text-ellipsis">
+                                          {article.author !== ' ' ||
+                                          article.author !== undefined ||
+                                          article.author !== null
+                                            ? article.author
+                                            : '-'}
+                                        </div>
                                       </td>
                                       <td className="text-center">
                                         {article.isActive ? (

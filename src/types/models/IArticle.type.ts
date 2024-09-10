@@ -1,3 +1,5 @@
+import { CategoryWithAllParents } from "./IProduct.type"
+
 export interface IArticle {
   id: string
   title: string
@@ -14,8 +16,9 @@ export interface IArticle {
   description: string
   categoryId: string
   category: string
+  parentCategories: CategoryWithAllParents | null
   author: string
-  numReviews : number
+  numReviews: number
   created: string
   lastUpdated: string
 }

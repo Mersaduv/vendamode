@@ -68,7 +68,7 @@ const ProductSort: React.FC<Props> = () => {
         {sorts.map((item, i) => (
           <button
             key={i}
-            className={`text-xs whitespace-nowrap p-1 sm:p-2 md:p-3 rounded border border-transparent hover:border-gray-400 md:text-base ${sortQuery === item.value ? 'text-white bg-[#3F3A42]' : 'text-gray-600'}`}
+            className={`text-xs whitespace-nowrap p-2 rounded border border-transparent hover:border-gray-400 md:text-base ${sortQuery === item.value ? 'text-white bg-[#3F3A42]' : 'text-gray-600'}`}
             type="button"
             name="sort"
             onClick={() => handleSortChange(item)}

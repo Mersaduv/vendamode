@@ -20,7 +20,7 @@ const ReviewProductCard: React.FC<Props> = (props) => {
         <div className="border-b w-fit border-gray-100 flex items-center">
           <span className="text-xs">{item.userName}</span>
           <span className="mx-2 inline-block h-[18px] w-[1px] rounded-full bg-gray-300" />
-          <span className="farsi-digits text-base">{digitsEnToFa(moment(item.updated).format('jYYYY/jM/jD'))}</span>
+          <span className="farsi-digits text-base">{digitsEnToFa(moment(item.lastUpdated).format('jYYYY/jM/jD'))}</span>
         </div>
         <div className="flex">
         {Array.from({ length: 5 }, (_, i) => (

@@ -7,12 +7,13 @@ export type ReviewsResult = {
   reviewsLength: number
   pagination: IPagination<IReview[]>
 }
-export type GetReviewsResult =ServiceResponse<ReviewsResult>
+export type GetReviewsResult = ServiceResponse<ReviewsResult>
+
+export type GetArticleReviewsQuery = { id: string; page: number }
 
 export type GetReviewsQuery = { page: number }
 export type CreateReviewQuery = IReviewForm
-
-
+export type CreateArticleReview = { comment: string; articleId: string }
 export type ProductReviewsResult = {
   reviewsLength: number
   pagination: IPagination<IReview[]>

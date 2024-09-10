@@ -7,7 +7,7 @@ import {
   useUpdateCategoryFeatureMutation,
   useUpdateCategoryMutation,
 } from '@/services'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { HandleResponse } from '../shared'
 import { CategoryFeatureForm } from '@/services/category/types'
 import { Resolver, SubmitHandler, useForm } from 'react-hook-form'
@@ -39,6 +39,7 @@ const SubCategoryModal: React.FC<Props> = (props) => {
   const [selectedFile, setSelectedFile] = useState<File[]>([])
   const [selectedCategory, setSelectedCategory] = useState<ICategory | null>(null)
   const [parentCategory, setParentCategory] = useState<ICategory | undefined>(undefined)
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [
     createCategory,
     {
@@ -69,7 +70,13 @@ const SubCategoryModal: React.FC<Props> = (props) => {
     resolver: yupResolver(categorySchema) as unknown as Resolver<ICategoryForm>,
     defaultValues,
   })
-
+  useEffect(() => {
+    if (isShow && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current?.focus(); 
+      }, 100); 
+    }
+  }, [isShow]);
   const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // if (e.target.files) {
     //   setSelectedFile([...Array.from(e.target.files)])
@@ -163,6 +170,7 @@ const SubCategoryModal: React.FC<Props> = (props) => {
     if (data.level) {
       formData.append('Level', data.level.toString())
     }
+console.log(parentCategory , "parentCategory");
 
     if (parentCategory === undefined) {
       formData.append('ParentCategoryId', categoryParent.id)
@@ -209,6 +217,7 @@ const SubCategoryModal: React.FC<Props> = (props) => {
             refetch()
             setStateCategoryData({ isActive: true, isActiveProduct: true } as ICategoryForm)
             setSelectedFile([])
+            setParentCategory(undefined)
           }}
         />
       )}
@@ -218,6 +227,7 @@ const SubCategoryModal: React.FC<Props> = (props) => {
           onClose()
           // setStateCategoryData({} as ICategoryForm)
           setSelectedFile([])
+          setParentCategory(undefined)
         }}
         effect="bottom-to-top"
       >
@@ -238,6 +248,10 @@ const SubCategoryModal: React.FC<Props> = (props) => {
                     id="floatingInput"
                     placeholder="نام دسته"
                     {...register('name')}
+                    ref={(e) => {
+                      register('name').ref(e); // ادغام ref از register
+                      inputRef.current = e; // تنظیم ref دستی
+                    }}
                   />
                   <label
                     htmlFor="floatingInput"

@@ -21,28 +21,33 @@ const CategoryList: React.FC<Props> = (props) => {
     data: storeCategoriesData,
     isLoading: isLoadingStoreCategories,
     isError: isErrorStoreCategories,
-    isFetching
+    isFetching,
   } = useGetStoreCategoryListQuery()
 
   if (isFetching) {
     return <div>Loading...</div>
   }
   // ? Re-Renders
-  if (childCategories.categories.length > 0) {
+  if (
+    childCategories.categories.length > 0 &&
+    storeCategoriesData &&
+    storeCategoriesData?.data &&
+    storeCategoriesData?.data?.length > 0
+  ) {
     return (
-      <section className="px-3 border-t-2 sm:pt-8 pt-28 mx-8">
-        <h4 className="mb-3 text-center text-2xl">
+      <section className="px-3  sm:mx-8 margin-brandSlider">
+        <h4 className="w-full text-center text-gray-400 font-normal text-lg pb-4">
           {childCategories.title}{' '}
-          <span className="text-2xl" style={{}}>
+          <span className="w-full text-center text-gray-400 font-normal text-lg pb-4" style={{}}>
             {name}
           </span>
         </h4>
-        <div className="mx-auto flex w-fit flex-wrap justify-center gap-4 space-x-4">
+        <div className="mx-auto flex w-fit flex-wrap justify-center gap-7 space-x-4">
           {storeCategoriesData?.data?.map((item, index) => (
             <div key={index} className="text-center">
-              <Link href={homePage ? `/main/${item.slug}` : `/products?category=${item.slug}`} className="text-center">
+              <Link href={`/products?categorySlug=${item.slug}&categoryId=${item.id}`} className="text-center">
                 <ResponsiveImage
-                  dimensions="w-28 h-28 lg:h-44 lg:w-44"
+                  dimensions="w-28 h-28 "
                   className="mx-auto mb-1  transition duration-300 ease-in-out transform hover:scale-110"
                   src={item.imagesSrc?.imageUrl!}
                   alt={item.name}
@@ -54,6 +59,7 @@ const CategoryList: React.FC<Props> = (props) => {
             </div>
           ))}
         </div>
+        <hr className="pb-20 border-t-2 mt-20" />
       </section>
     )
   }

@@ -21,8 +21,6 @@ const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDe
   const { control, setValue } = useFormContext()
   const dispatch = useAppDispatch()
 
-  const [nextIndex , setNextIndex] = useState(2)
-
   useEffect(() => {
     const columnFootersWithThumbnail = columnFooters.filter((slider) => slider.name !== '')
     setValue('columnFooters', columnFootersWithThumbnail)
@@ -35,17 +33,18 @@ const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDe
           status: 'error',
           title: 'حداکثر تعداد ستون های فوتر 4 عدد میباشد',
         })
-      )
-      return
+      );
+      return;
     }
-
-//  let columnIndex = nextIndex +1
-
+  
+    const nextIndex = columnFooters.length + 2;
+  
     setColumnFooter([
       ...columnFooters,
       { id: '', name: '', index: nextIndex },
-    ])
-  }
+    ]);
+  };
+  
 
   const handleDelete = (index: number, columnFooter: IColumnFooter) => {
     if (columnFooter.id) {
@@ -58,11 +57,13 @@ const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDe
     })
   }
   const handleInputChange = (index: number, value: string) => {
-    const newColumnFooters = [...columnFooters]
-    newColumnFooters[index].name = value
-
-    setColumnFooter(newColumnFooters)
-  }
+    const newColumnFooters = columnFooters.map((columnFooter, i) =>
+      i === index ? { ...columnFooter, name: value } : columnFooter
+    );
+  
+    setColumnFooter(newColumnFooters);
+  };
+  
   return (
     <div className="flex flex-1">
       <div className="bg-white flex flex-col justify-between w-full rounded-md shadow-item">
@@ -114,93 +115,6 @@ const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDe
                 })}
               </div>
             )}
-            {/* <Controller
-              name="support.copyright"
-              control={control}
-              render={({ field }) => (
-                <div className="relative px-[18px] w-full">
-                  <input
-                    type="text"
-                    placeholder="زمان پاسخگویی"
-                    {...field}
-                    className={`peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-clip-padding px-3 py-4 text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]`}
-                    id="floatingCopy"
-                  />
-                  <label
-                    htmlFor="floatingCopy"
-                    className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
-                  >
-                    زمان پاسخگویی{' '}
-                  </label>
-                </div>
-              )}
-            />
-
-            <Controller
-              name="support.copyright"
-              control={control}
-              render={({ field }) => (
-                <div className="relative px-[18px] w-full">
-                  <input
-                    type="text"
-                    placeholder="زمان پاسخگویی"
-                    {...field}
-                    className={`peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-clip-padding px-3 py-4 text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]`}
-                    id="floatingCopy"
-                  />
-                  <label
-                    htmlFor="floatingCopy"
-                    className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
-                  >
-                    زمان پاسخگویی{' '}
-                  </label>
-                </div>
-              )}
-            />
-
-            <Controller
-              name="support.copyright"
-              control={control}
-              render={({ field }) => (
-                <div className="relative px-[18px] w-full">
-                  <input
-                    type="text"
-                    placeholder="زمان پاسخگویی"
-                    {...field}
-                    className={`peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-clip-padding px-3 py-4 text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]`}
-                    id="floatingCopy"
-                  />
-                  <label
-                    htmlFor="floatingCopy"
-                    className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
-                  >
-                    زمان پاسخگویی{' '}
-                  </label>
-                </div>
-              )}
-            />
-
-            <Controller
-              name="support.copyright"
-              control={control}
-              render={({ field }) => (
-                <div className="relative px-[18px] w-full">
-                  <input
-                    type="text"
-                    placeholder="زمان پاسخگویی"
-                    {...field}
-                    className={`peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-clip-padding px-3 py-4 text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]`}
-                    id="floatingCopy"
-                  />
-                  <label
-                    htmlFor="floatingCopy"
-                    className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
-                  >
-                    زمان پاسخگویی{' '}
-                  </label>
-                </div>
-              )}
-            /> */}
           </div>
         </div>
         <div className="bg-gray-50 h-[56px] w-full rounded-b-lg px-8 flex flex-col pb-2">

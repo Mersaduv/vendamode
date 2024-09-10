@@ -103,6 +103,7 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
             id: category.id,
             name: category.name,
             isActive: category.isActive ?? false, // Ensure isActive has a boolean value
+            isActiveProduct: category.isActiveProduct,
             parentCategoryId: category.parentCategoryId,
             mainCategoryId: category.parentCategoryId,
             level: category.level,
@@ -188,7 +189,7 @@ const SubCategoryUpdateModal: React.FC<Props> = (props) => {
 
     formData.append('Name', data.name)
     formData.append('IsActive', data.isActive.toString())
-    formData.append('IsActiveProduct', data.isActiveProduct?.toString())
+    formData.append('IsActiveProduct', data.isActiveProduct.toString())
     if (data.thumbnail) {
       formData.append('Thumbnail', data.thumbnail)
     }
