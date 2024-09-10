@@ -50,7 +50,8 @@ export const singleSchema = Yup.object().shape({
 
 export const brandSchema = Yup.object().shape({
   id: Yup.string().optional(),
-  name: Yup.string().required('نام برند نباید خالی باشد'),
+  nameFa: Yup.string().required('نام فارسی برند نباید خالی باشد'),
+  nameEn: Yup.string().required('نام انگلیسی برند نباید خالی باشد'),
   Thumbnail: Yup.mixed().required('تصویر برند الزامی است'),
   description: Yup.string().optional(),
 })

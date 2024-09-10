@@ -46,13 +46,15 @@ const TabDashboardLayout: React.FC<TabDashboardLayoutProps> = ({ children }) => 
   );
 
   return (
-    <div className="min-h-screen max-w-screen-2xl flex flex-col mx-auto w-full pt-7">
+    <div className="min-h-screen max-w-screen-2xl flex flex-col mx-auto w-full pt-7 relative">
       {/* Tab Navigation */}
-      <div className="py-4 overflow-auto flex gap-4 p-2 shadow-item mx-3 bg-white rounded-lg border-gray-200">
-        {renderedTabs}
-      </div>
+      <nav className='fixed pt-[103px] top-0 z-50  max-w-screen-2xl w-full bg-[#f5f8fa] pb-3'>
+        <div className="py-4 overflow-auto  flex gap-4 p-2 shadow-item mx-3 bg-white rounded-lg border-gray-200">
+          {renderedTabs}
+        </div>
+      </nav>
       {/* Page Content */}
-      <div className="mt-4 mb-4 overflow-auto rounded-lg shadow-item mx-3 bg-white">
+      <div className="mt-[88px] mb-4 overflow-auto rounded-lg shadow-item mx-3 bg-white">
         {children}
       </div>
     </div>

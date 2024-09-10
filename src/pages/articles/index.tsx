@@ -95,7 +95,7 @@ const Articles: NextPage = () => {
             </div>
             {/* sticky content */}
             <div className="flex- flex-col ">
-              <aside className="left-0 top-0 w-[274px] h-[405px] border rounded-lg p-3 shadow-item  px-4 mb-8">
+              <aside className="left-0 top-0 w-[274px] h-[274px] border rounded-lg p-3 shadow-item  px-4 mb-8">
                 <h3 className="my-2 mb-5 text-gray-600 text-center">پیشنهاد لحظه ای</h3>
                 <Swiper
                   pagination={{ clickable: true }}

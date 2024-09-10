@@ -9,7 +9,7 @@ import {
   useUpdateCategoryMutation,
   useUpdateFeatureMutation,
 } from '@/services'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { HandleResponse } from '../shared'
 import { CategoryFeatureForm } from '@/services/category/types'
 import { Resolver, SubmitHandler, useForm } from 'react-hook-form'
@@ -27,7 +27,7 @@ interface Props {
 
 const FeatureModal: React.FC<Props> = (props) => {
   const { isShow, onClose, refetch, title, feature } = props
-
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [
     createFeature,
     {
@@ -69,7 +69,13 @@ const FeatureModal: React.FC<Props> = (props) => {
       })
     }
   }, [feature])
-
+  useEffect(() => {
+    if (isShow && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current?.focus(); 
+      }, 100); 
+    }
+  }, [isShow]);
   const onConfirm: SubmitHandler<{ id?: string; name: string }> = (data) => {
     if (data.id != undefined) {
       updateFeature({ id: data.id, name: data.name })
@@ -135,6 +141,10 @@ const FeatureModal: React.FC<Props> = (props) => {
                     id="floatingInput"
                     placeholder="نام"
                     {...register('name')}
+                    ref={(e) => {
+                      register('name').ref(e); // ادغام ref از register
+                      inputRef.current = e; // تنظیم ref دستی
+                    }}
                   />
                   <label
                     htmlFor="floatingInput"

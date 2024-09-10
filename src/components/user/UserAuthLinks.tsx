@@ -42,8 +42,8 @@ const UserAuthLinks = () => {
           {/* <Link href="/profile">
             <User className="icon h-7 w-7" />
           </Link> */}
-          <div>
-            <User className="icon h-7 w-7" />
+          <div className=''>
+            <User className="icon h-6 w-6 text-gray-500" />
           </div>
           <div
             className={`fixed top-0 z-10 h-screen w-full duration-200 lg:hidden ${

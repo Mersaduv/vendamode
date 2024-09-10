@@ -9,18 +9,17 @@ import { useAppSelector } from '@/hooks'
 import dynamic from 'next/dynamic'
 import 'owl.carousel/dist/assets/owl.carousel.css'
 import 'owl.carousel/dist/assets/owl.theme.default.css'
-import { TbRuler2 } from 'react-icons/tb'
 interface Props {
   currentCategory?: ICategory
-  products : IProduct[]
+  products: IProduct[]
   isFetching: boolean
 }
 const OwlCarousel = dynamic(() => import('react-owl-carousel'), {
   ssr: false,
 })
 
-const BestSeller: React.FC<Props> = (props) => {
-  const { currentCategory,isFetching,products } = props
+const SimilarProductsSlider: React.FC<Props> = (props) => {
+  const { currentCategory, products, isFetching } = props
   const { generalSetting } = useAppSelector((state) => state.design)
 
   const carouselOptions = {
@@ -56,6 +55,7 @@ const BestSeller: React.FC<Props> = (props) => {
   if (isFetching) {
     return <div>Loading...</div>
   }
+  console.log(products, 'product -- product')
 
   return (
     <>
@@ -66,7 +66,7 @@ const BestSeller: React.FC<Props> = (props) => {
           {...carouselOptions}
           dir="ltr"
         >
-      {products?.map((product) => {
+          {products?.map((product) => {
             const stockItemWithDiscount = product.stockItems.find((stockItem) => stockItem.discount! > 0)
             const stockItemWithOutDiscount = product.stockItems.find((stockItem) => stockItem.discount === 0)
 
@@ -124,7 +124,7 @@ const BestSeller: React.FC<Props> = (props) => {
           {...carouselOptions}
           dir="ltr"
         >
-         {products?.map((product) => {
+          {products?.map((product) => {
             const stockItemWithDiscount = product.stockItems.find((stockItem) => stockItem.discount! > 0)
             const stockItemWithOutDiscount = product.stockItems.find((stockItem) => stockItem.discount === 0)
 
@@ -176,15 +176,15 @@ const BestSeller: React.FC<Props> = (props) => {
 
           <div>
             <div className="mt-10 flex justify-center">
-              <img className="w-[120px] xs2:w-[180px] static-img" src="/images/Top Seller.webp" alt="offer" />
+              <img className="w-[120px] xs2:w-[180px] static-img" src="/images/Similar.webp" alt="offer" />
             </div>
             <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">
-              محصولات پرفروش رو اینجا ببین
+              محصولات مرتبط رو اینجا ببین
             </p>
             <div className="w-full sm:flex justify-center hidden">
-              <Link href={`/products?bestSelling=true`}>
+              {/* <Link href={`/products?sortBy=Created`}>
                 <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
-              </Link>
+              </Link> */}
             </div>
           </div>
         </OwlCarousel>
@@ -193,4 +193,4 @@ const BestSeller: React.FC<Props> = (props) => {
   )
 }
 
-export default BestSeller
+export default SimilarProductsSlider

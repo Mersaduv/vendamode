@@ -60,7 +60,7 @@ const FeatureValues: NextPage = () => {
     refetch,
     ...featureValuesQueryProps
   } = useGetFeatureValuesQuery({
-    pageSize: 20,
+    pageSize: 8,
     page: featureValuesPage,
     search: searchTerm,
     featureIds: featureIds,

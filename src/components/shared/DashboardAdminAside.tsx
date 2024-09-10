@@ -17,7 +17,7 @@ import {
   Users,
 } from '@/icons'
 import { LiaAdSolid } from 'react-icons/lia'
-import { MdOutlineAdsClick } from 'react-icons/md'
+import { MdOutlineAdsClick, MdOutlinePreview } from 'react-icons/md'
 import { GrGallery } from 'react-icons/gr'
 import { PiUserDuotone } from 'react-icons/pi'
 import { AiTwotoneMail } from 'react-icons/ai'
@@ -136,26 +136,25 @@ const profileData: ProfilePath[] = [
       },
     ],
   },
-  { id: 4, name: 'گالری', Icon: GrGallery, path: '/admin/categories' },
   {
-    id: 5,
+    id: 4,
     name: 'کاربران',
     Icon: PiUserDuotone,
     subItem: [
       {
-        id: 5,
+        id: 4,
         name: 'کاربر جدید',
         Icon: TbPointFilled,
         path: '/admin/users/create',
       },
       {
-        id: 5,
+        id: 4,
         name: 'همه کاربران',
         Icon: TbPointFilled,
         path: '/admin/users',
       },
       {
-        id: 5,
+        id: 4,
         name: 'سمت ها',
         Icon: TbPointFilled,
         path: '/admin/user/roles',
@@ -163,18 +162,18 @@ const profileData: ProfilePath[] = [
     ],
   },
   {
-    id: 6,
+    id: 5,
     name: 'پشتیبانی',
     Icon: HiMail,
     subItem: [
       {
-        id: 6,
+        id: 5,
         name: 'پیام ها',
         Icon: TbPointFilled,
         path: '/admin/support',
       },
       {
-        id: 6,
+        id: 5,
         name: 'دیدگاه',
         Icon: TbPointFilled,
         path: '/admin/support',
@@ -182,24 +181,24 @@ const profileData: ProfilePath[] = [
     ],
   },
   {
-    id: 7,
+    id: 6,
     name: 'تجزیه تحلیل',
     Icon: FaCalculator,
     subItem: [
       {
-        id: 7,
+        id: 6,
         name: 'درآمد',
         Icon: TbPointFilled,
         path: '/admin/analyze',
       },
       {
-        id: 7,
+        id: 6,
         name: 'مالیات',
         Icon: TbPointFilled,
         path: '/admin/analyze',
       },
       {
-        id: 7,
+        id: 6,
         name: 'نمودار فروش',
         Icon: TbPointFilled,
         path: '/admin/analyze',
@@ -207,43 +206,44 @@ const profileData: ProfilePath[] = [
     ],
   },
   {
-    id: 8,
+    id: 7,
     name: 'نمای سایت',
-    Icon: IoSettings,
-    subItem: [
-      {
-        id: 8,
-        name: 'دیزاین',
-        Icon: TbPointFilled,
-        path: '/admin/design/siteItems',
-      },
-      {
-        id: 8,
-        name: 'صفحه اصلی',
-        Icon: TbPointFilled,
-        path: '/admin/ads/main',
-      },
-    ],
+    Icon: MdOutlinePreview,
+    path: '/admin/ads/main',
+    // subItem: [
+    //   {
+    //     id: 7,
+    //     name: 'دیزاین',
+    //     Icon: TbPointFilled,
+    //     path: '/admin/design/siteItems',
+    //   },
+    //   {
+    //     id: 7,
+    //     name: 'صفحه اصلی',
+    //     Icon: TbPointFilled,
+    //     path: '/admin/ads/main',
+    //   },
+    // ],
   },
   {
-    id: 9,
+    id: 8,
     name: 'تنظیمات',
     Icon: IoSettings,
     subItem: [
       {
-        id: 9,
+        id: 8,
         name: 'پیکربندی محصول',
         Icon: TbPointFilled,
         path: '/admin/product-configuration/categories',
       },
       {
-        id: 9,
+        id: 8,
         name: 'مبالغ و هزینه ها',
         Icon: TbPointFilled,
         path: '/admin/setting',
       },
       {
-        id: 9,
+        id: 8,
         name: 'دپارتمان',
         Icon: TbPointFilled,
         path: '/admin/setting',

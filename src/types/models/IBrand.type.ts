@@ -1,6 +1,7 @@
 export interface IBrand{
   id: string
-  name: string
+  nameFa: string
+  nameEn: string
   imagesSrc: {
     imageUrl: string
     placeholder: string

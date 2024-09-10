@@ -62,7 +62,7 @@ const ArticlesAdsForm: React.FC<ArticleFormProps> = ({ articleBanners, setArticl
     <div className="flex flex-1">
       <div className="bg-white w-full rounded-md shadow-item">
         <div className="flex justify-between items-center border-b p-5 px-6">
-          <h3 className=" text-gray-600 whitespace-nowrap">بنر مقالات</h3>
+          <h3 className=" text-gray-600 whitespace-nowrap"> مقالات</h3>
           <ControlledCheckbox name="articleBannersIsActive" control={control} label="وضعیت نمایش" />
         </div>
         <div className="px-2 sm:px-4 md:px-8 grid sm:grid-cols-2 gap-4 py-6">

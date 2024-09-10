@@ -1,8 +1,10 @@
 import baseApi from '@/services/baseApi'
 
 import type {
+  CreateArticleReview,
   CreateReviewQuery,
   EditReviewQuery,
+  GetArticleReviewsQuery,
   GetProductReviewsQuery,
   GetProductReviewsResult,
   GetReviewsQuery,
@@ -11,7 +13,7 @@ import type {
   IdQuery,
   MsgResult,
 } from './types'
-import { ServiceResponse } from '@/types'
+import { IArticleReview, IPagination, QueryParams, ServiceResponse } from '@/types'
 import { generateQueryParams, getToken } from '@/utils'
 
 export const reviewApiSlice = baseApi.injectEndpoints({
@@ -36,7 +38,7 @@ export const reviewApiSlice = baseApi.injectEndpoints({
           : ['Review'],
     }),
 
-    getAllArticleReviews: builder.query<GetReviewsResult, GetReviewsQuery>({
+    getAllArticleReviews: builder.query<GetReviewsResult, QueryParams>({
       query: ({ ...params }) => {
         const queryParams = generateQueryParams(params)
         return {
@@ -59,15 +61,15 @@ export const reviewApiSlice = baseApi.injectEndpoints({
           : ['ArticleReview'],
     }),
 
-    getArticleReviews: builder.query<GetProductReviewsResult, GetProductReviewsQuery>({
+    getArticleReviews: builder.query<ServiceResponse<IPagination<IArticleReview[]>>, GetProductReviewsQuery>({
       query: ({ id, page }) => ({
         url: `/api/articleReviews/${id}?page=${page}&pageSize=5`,
         method: 'GET',
       }),
       providesTags: (result) =>
-        result?.data?.pagination.data
+        result?.data?.data
           ? [
-              ...result.data?.pagination.data.map(({ id }) => ({
+              ...result.data.data.map(({ id }) => ({
                 type: 'ArticleReview' as const,
                 id: id,
               })),
@@ -88,7 +90,7 @@ export const reviewApiSlice = baseApi.injectEndpoints({
       invalidatesTags: ['Review'],
     }),
 
-    createArticleReviews: builder.mutation<ServiceResponse<boolean>, FormData>({
+    createArticleReviews: builder.mutation<ServiceResponse<boolean>, CreateArticleReview>({
       query: (body) => ({
         url: `/api/articleReviews`,
         method: 'POST',
@@ -154,4 +156,7 @@ export const {
   useGetProductReviewsQuery,
   useEditReviewMutation,
   useCreateReviewMutation,
+  useCreateArticleReviewsMutation,
+  useGetAllArticleReviewsQuery,
+  useGetArticleReviewsQuery,
 } = reviewApiSlice

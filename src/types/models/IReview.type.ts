@@ -18,5 +18,5 @@ export interface IReview {
     title: string
   }[]
   created: string
-  updated: string
+  lastUpdated: string
 }

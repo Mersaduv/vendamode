@@ -168,6 +168,14 @@ export const designApiSlice = baseApi.injectEndpoints({
       invalidatesTags: ['ColumnFooter'],
     }),
 
+    deleteColumnFooter: builder.mutation<ServiceResponse<boolean>, string>({
+      query: (id) => ({
+        url: `/api/design/columnFooters/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['ColumnFooter'],
+    }),
+
     upsertDesignItems: builder.mutation<ServiceResponse<boolean>, FormData>({
       query: (body) => {
         return {
@@ -398,7 +406,7 @@ export const designApiSlice = baseApi.injectEndpoints({
     }),
 
     deleteArticle: builder.mutation<ServiceResponse<boolean>, IdQuery>({
-      query: (id) => ({
+      query: ({ id }) => ({
         url: `/api/article/${id}`,
         method: 'DELETE',
       }),
@@ -489,4 +497,5 @@ export const {
   useGetColumnFootersQuery,
   useUpsertColumnFooterMutation,
   useGetStoreCategoryListQuery,
+  useDeleteColumnFooterMutation,
 } = designApiSlice

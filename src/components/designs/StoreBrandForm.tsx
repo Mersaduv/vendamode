@@ -26,7 +26,7 @@ interface Props {
   setDeletedStoreCategories: React.Dispatch<React.SetStateAction<IStoreCategory[]>>
 }
 
-const StoreCategoryForm: React.FC<Props> = ({ storeCategories, setStoreCategories, setDeletedStoreCategories }) => {
+const StoreBrandForm: React.FC<Props> = ({ storeCategories, setStoreCategories, setDeletedStoreCategories }) => {
   const { control, setValue, getValues, watch } = useFormContext()
   const { generalSetting } = useAppSelector((state) => state.design)
   const [allCategories, setAllCategories] = useState<ICategory[]>([])
@@ -82,20 +82,20 @@ const StoreCategoryForm: React.FC<Props> = ({ storeCategories, setStoreCategorie
   }
 
   const handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>, index: number) => {
-    const selectedCategoryId = event.target.value;
+    const selectedCategoryId = event.target.value
 
-    const newStoreCategories = storeCategories.map((category, i) => 
-        i === index ? { ...category, categoryId: selectedCategoryId } : category
-    );
+    const newStoreCategories = storeCategories.map((category, i) =>
+      i === index ? { ...category, categoryId: selectedCategoryId } : category
+    )
 
-    setStoreCategories(newStoreCategories);
-};
+    setStoreCategories(newStoreCategories)
+  }
 
   return (
     <div className="flex flex-1">
       <div className="bg-white w-full rounded-md shadow-item">
         <div className="flex justify-between items-center border-b p-5 px-6">
-          <h3 className=" text-gray-600 whitespace-nowrap">دسته بندی ها</h3>
+          <h3 className=" text-gray-600 whitespace-nowrap">برند ها</h3>
           <div className="flex justify-end w-[260px] gap-4 items-center">
             <Button className=" px-5 py-2.5 bg-sky-500 hover:bg-sky-400" onClick={handleAddStoreCategory}>
               {'افزودن'}
@@ -106,7 +106,9 @@ const StoreCategoryForm: React.FC<Props> = ({ storeCategories, setStoreCategorie
           <div className="flex justify-end mb-4"></div>
           <div className="grid w-full justify-center  grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 ">
             {storeCategories.length === 0 ? (
-              <div className="flex justify-center col-span-5">دسته بندی {generalSetting?.title} مورد نظر را اضافه کنید</div>
+              <div className="flex justify-center col-span-5">
+                دسته بندی {generalSetting?.title} مورد نظر را اضافه کنید
+              </div>
             ) : (
               storeCategories.map((storeCategory, index) => (
                 <div key={index} className="mb-4 w-full flex-1 rounded-lg  relative">
@@ -158,4 +160,4 @@ const StoreCategoryForm: React.FC<Props> = ({ storeCategories, setStoreCategorie
     </div>
   )
 }
-export default StoreCategoryForm
+export default StoreBrandForm

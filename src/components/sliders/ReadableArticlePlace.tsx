@@ -10,26 +10,19 @@ import dynamic from 'next/dynamic'
 import 'owl.carousel/dist/assets/owl.carousel.css'
 import 'owl.carousel/dist/assets/owl.theme.default.css'
 import { TbRuler2 } from 'react-icons/tb'
+import { GetArticlesResult } from '@/services/design/types'
 interface Props {
   currentCategory?: ICategory
+  articleData: GetArticlesResult
+  isFetching: boolean
 }
 const OwlCarousel = dynamic(() => import('react-owl-carousel'), {
   ssr: false,
 })
 
 const ReadableArticlePlace: React.FC<Props> = (props) => {
-  const { currentCategory } = props
+  const { currentCategory,articleData,isFetching } = props
   const { generalSetting } = useAppSelector((state) => state.design)
-  const {
-    data: articleData,
-    isLoading: isLoadingArticle,
-    isError: isErrorArticle,
-    isFetching
-  } = useGetArticlesQuery({
-    page: 1,
-    pageSize: 99999,
-    place: '1',
-  })
 
   const carouselOptions = {
     margin: 10,

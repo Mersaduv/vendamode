@@ -1,6 +1,6 @@
 import { Modal, Button } from '@/components/ui'
 import { useCreateFeatureValueMutation, useUpdateFeatureValueMutation } from '@/services'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { HandleResponse } from '../shared'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -19,6 +19,7 @@ interface Props {
 const FeatureValueModal: React.FC<Props> = (props) => {
   const { isShow, onClose, refetch, title, featureValue, productFeature } = props
   const [isColor, setIsColor] = useState(false)
+  const inputRef = useRef<HTMLInputElement | null>(null)
   const [
     createFeatureValue,
     {
@@ -50,7 +51,13 @@ const FeatureValueModal: React.FC<Props> = (props) => {
   } = useForm<FeatureValueDTO>({
     resolver: yupResolver(singleSchema),
   })
-
+  useEffect(() => {
+    if (isShow && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current?.focus()
+      }, 100)
+    }
+  }, [isShow])
   useEffect(() => {
     if (productFeature?.name === 'رنگ') {
       setIsColor(true)
@@ -128,7 +135,7 @@ const FeatureValueModal: React.FC<Props> = (props) => {
           <Modal.Header notBar onClose={onClose}>
             <div className="text-start text-base flex gap-2">
               {' '}
-              {title === 'ویرایش' ? (
+            {title === 'ویرایش' ? (
                 'ویرایش'
               ) : (
                 <div className="flex">
@@ -148,6 +155,10 @@ const FeatureValueModal: React.FC<Props> = (props) => {
                     id="floatingInput"
                     placeholder="نام"
                     {...register('name')}
+                    ref={(e) => {
+                      register('name').ref(e); // ادغام ref از register
+                      inputRef.current = e; // تنظیم ref دستی
+                    }}
                   />
                   <label
                     htmlFor="floatingInput"

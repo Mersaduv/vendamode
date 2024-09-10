@@ -1,7 +1,7 @@
 export { default as DiscountSlider } from './DiscountSlider'
 export { default as NewSlider } from './NewSlider'
 export { default as MainSlider } from './MainSlider'
-export { default as SmilarProductsSlider } from './SmilarProductsSlider'
+export { default as SmilarProductsSlider } from './SimilarProductsSlider'
 export { default as RecentVisitedSlider } from './RecentVisitedSlider'
 export { default as ReadableArticlePlace } from './ReadableArticlePlace'
 export { default as BestSeller } from './BestSeller'

@@ -407,7 +407,6 @@ const ProductForm: React.FC<Props> = (props) => {
   const titleWatch = watch('Title')
   const categoryIdWatch = watch('CategoryId')
   const mainFileWatch = watch('MainThumbnail')
-  console.log(titleWatch, 'titleWatch')
 
   const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -723,7 +722,7 @@ const ProductForm: React.FC<Props> = (props) => {
         {/*register image and category  */}
         <div className="flex flex-col md:flex-row gap-4  h-auto ">
           <div className=" bg-white   rounded-md shadow-item md:w-[30%]">
-            <div className="flex flex-1 h-fit overflow-auto ">
+            <div className="flex flex-1 h-full overflow-auto ">
               <div className="bg-white w-full rounded-md overflow-auto h-full ">
                 <h3 className="border-b p-6  text-gray-600">دسته بندی محصول</h3>
                 <div className="flex px-6 py-10 pt-6">
@@ -1023,7 +1022,7 @@ const ProductForm: React.FC<Props> = (props) => {
                       </div>
                       {/* image  */}
                       <div className=" mdx:w-fit flex justify-center w-full mdx:mb-0 pt-3 mb-4">
-                        <div className="rounded-lg  shadow-product w-[240px] h-[240px]">
+                        <div className="rounded-lg  shadow-product w-[400px] h-[400px]">
                           <img
                             className="w-full h-full rounded-lg"
                             src={productSizeScale.imagesSrc?.imageUrl}
@@ -1283,7 +1282,7 @@ const Table: React.FC<PropTable> = (props) => {
         stockId: row.id,
         featureValueId: row.featureValueIds || [],
         sizeId: row.sizeId || undefined,
-        isHidden: true,
+        isHidden: false,
         ...dynamicProperties,
       }
     })
@@ -1404,13 +1403,12 @@ const Table: React.FC<PropTable> = (props) => {
                       onChange={(e) => handleCheckboxChange('price', e.target.checked)}
                     /> */}
                   </div>{' '}
-                  <div title="تکرار مبلغ" className=" py-2 px-1 cursor-pointer">
+                  <div title="تکرار مبلغ" className=" py-2 px-1 cursor-pointer ">
                     <FaArrowDownLong
-                      onClick={() => {
-                        handleCheckboxChange('price', isSelectedColumn)
-                        setIsSelectedComlumn((prev) => !prev)
-                      }}
-                      className="text-gray-400"
+                      onClick={() =>
+                        handleCheckboxChange('price', true)
+                }
+                      className="text-gray-400 hover:border border-gray-400"
                     />
                   </div>
                 </div>
@@ -1439,7 +1437,7 @@ const Table: React.FC<PropTable> = (props) => {
             return (
               <tr
                 key={row.id}
-                className={`${!stockItems[idx]?.isHidden && 'bg-red-200'} ${shouldHideHeader ? '' : 'border-b'}  ${
+                className={`${!stockItems[idx]?.isHidden && ''} ${shouldHideHeader ? '' : 'border-b'}  ${
                   idx % 2 !== 0 ? 'bg-gray-50' : ''
                 }`}
               >

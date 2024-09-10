@@ -294,7 +294,7 @@ const ArticleForm: React.FC<Props> = (props) => {
             )
           } else {
             validFiles.push(file)
-            setValue('thumbnail', file)
+            setValue('thumbnail', file, { shouldValidate: true })
             setMainSelectedFiles([...validFiles])
           }
         }
@@ -343,6 +343,9 @@ const ArticleForm: React.FC<Props> = (props) => {
     confirmTrashDeleteModalHandlers.close()
     setDeleteTrashInfo({ id: '' })
   }
+
+  const titleWatch = watch('title')
+  const thumbnailWatch = watch('thumbnail')
   return (
     <>
       {/* Handle Delete Product Response */}
@@ -371,7 +374,7 @@ const ArticleForm: React.FC<Props> = (props) => {
             <div className="flex flex-1">
               <div className="bg-white w-full rounded-md shadow-item">
                 <h3 className="border-b p-6 text-gray-600 flex gap-2">
-                  {mode === 'edit' ? 'ویرایش مقاله' : 'مقاله جدید '}:{' '}
+                  {mode === 'edit' ? 'ویرایش مقاله' : 'مقاله جدید '}{' '}
                   <div className="text-sky-500">{selectedArticle?.title}</div>
                 </h3>
                 <div className="flex flex-col">
@@ -382,7 +385,7 @@ const ArticleForm: React.FC<Props> = (props) => {
                       className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]"
                     >
                       <img className="w-5 h-5" src="/assets/svgs/duotone/text.svg" alt="" />
-                      <span className="whitespace-nowrap text-center w-[113px]">عنوان</span>
+                      <span className="whitespace-nowrap text-center w-[113px]">عنوان مقاله</span>
                     </label>
                     <input
                       className="w-full border rounded-r-none border-gray-200 rounded-md "
@@ -404,7 +407,7 @@ const ArticleForm: React.FC<Props> = (props) => {
                   )}
 
                   {/* place of display  */}
-                  <div className="flex px-10 py-6 flex-col xs:flex-row">
+                  {/* <div className="flex px-10 py-6 flex-col xs:flex-row">
                     <label
                       htmlFor="isActive"
                       className="flex items-center justify-center xs:py-0 py-2 px-3 rounded-l-none rounded-md bg-[#f5f8fa]"
@@ -423,8 +426,8 @@ const ArticleForm: React.FC<Props> = (props) => {
                       </option>
                       <option value="1" className={''}>
                         خواندنی ها
-                      </option>
-                      {/* <option value="2" className={''}>
+                      </option> */}
+                  {/* <option value="2" className={''}>
                         فروش در
                       </option>
                       <option value="3" className={''}>
@@ -433,7 +436,7 @@ const ArticleForm: React.FC<Props> = (props) => {
                       <option value="4" className={''}>
                         خرید از
                       </option> */}
-                      {columnFootersData?.data &&
+                  {/* {columnFootersData?.data &&
                         columnFootersData.data.map((columnFooter, index) => {
                           return (
                             <option key={index} value={`${columnFooter.index}`} className={''}>
@@ -442,39 +445,37 @@ const ArticleForm: React.FC<Props> = (props) => {
                           )
                         })}
                     </select>
-                  </div>
+                  </div> */}
                   {/*select category  */}
-                  {place === '1' ? (
-                    <div className="flex px-10 py-6 pt-0 flex-col xs:flex-row">
-                      <label
-                        htmlFor="place"
-                        className="flex items-center justify-center xs:py-0 py-2 px-3 rounded-l-none rounded-md bg-[#f5f8fa]"
-                      >
-                        <img className="w-5 h-5" src="/assets/svgs/duotone/bars.svg" alt="" />
-                        <span className="whitespace-nowrap text-center w-[113px]">انتخاب دسته</span>
-                      </label>
-                      <select
-                        className="w-full text-center rounded-md rounded-r-none border border-gray-300"
-                        name="انتخاب"
-                        id="place"
-                        value={selectedCategory || ''}
-                        onChange={handleCategoryChange}
-                      >
-                        <option className="appearance-none text-sm" value="">
-                          انتخاب کنید
+                  <div className="flex px-10 py-6 pt-6 flex-col xs:flex-row">
+                    <label
+                      htmlFor="place"
+                      className="flex items-center justify-center xs:py-0 py-2 px-3 rounded-l-none rounded-md bg-[#f5f8fa]"
+                    >
+                      <img className="w-5 h-5" src="/assets/svgs/duotone/bars.svg" alt="" />
+                      <span className="whitespace-nowrap text-center w-[113px]">انتخاب دسته</span>
+                    </label>
+                    <select
+                      className="w-full text-center rounded-md rounded-r-none border border-gray-300"
+                      name="انتخاب"
+                      id="place"
+                      value={selectedCategory || ''}
+                      onChange={handleCategoryChange}
+                    >
+                      <option className="appearance-none text-sm" value="">
+                        انتخاب کنید
+                      </option>
+                      {allCategories?.map((category) => (
+                        <option
+                          className={category.level === 0 ? 'text-blue-600' : ''}
+                          key={category.id}
+                          value={category.id}
+                        >
+                          {category.name}
                         </option>
-                        {allCategories?.map((category) => (
-                          <option
-                            className={category.level === 0 ? 'text-blue-600' : ''}
-                            key={category.id}
-                            value={category.id}
-                          >
-                            {category.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  ) : null}
+                      ))}
+                    </select>
+                  </div>
                   {/* Thumbnail article  */}
                   <div className="flex justify-center">
                     <div className="">
@@ -518,7 +519,7 @@ const ArticleForm: React.FC<Props> = (props) => {
             {/* is active  */}
             <div className="flex flex-1">
               <div className="bg-white w-full rounded-md shadow-item">
-                <div className="flex items-center justify-between border-b p-6 py-5">
+                <div className="flex items-center justify-between border-b p-6 py-6">
                   <h3 className=" text-gray-600">وضعیت مقاله</h3>
                   {mode === 'edit' && (
                     <div className="flex gap-2">
@@ -639,20 +640,46 @@ const ArticleForm: React.FC<Props> = (props) => {
           </div>
 
           {/* validation errors */}
-          <div className="flex flex-col">
-            {formErrors.title && <p className="text-red-500 px-10">{formErrors.title.message}</p>}
+          {/* <div className="flex flex-col"> */}
+          {/* {formErrors.title && <p className="text-red-500 px-10">{formErrors.title.message}</p>} */}
 
-            {/* {formErrors.categoryId && <p className="text-red-500 px-10">{formErrors.categoryId?.message}</p>} */}
+          {/* {formErrors.categoryId && <p className="text-red-500 px-10">{formErrors.categoryId?.message}</p>} */}
 
-            {formErrors.thumbnail && <p className="text-red-500 px-10">{formErrors.thumbnail?.message}</p>}
+          {/* {formErrors.thumbnail && <p className="text-red-500 px-10">{formErrors.thumbnail?.message}</p>} */}
+          {/* </div> */}
+          {/* validation errors */}
+          <div className="flex justify-end w-full">
+            <div className="flex flex-col">
+              <p className={`text-red-500 h-5 px-10  visible`}>
+                {formErrors.title
+                  ? formErrors.title.message
+                  : titleWatch !== ''
+                  ? ''
+                  : 'وارد کردن نام مقاله الزامی است'}
+              </p>
+
+              <p className={`text-red-500 h-5 px-10 visible `}>
+                {formErrors.thumbnail ? formErrors.thumbnail.message : thumbnailWatch ? '' : 'تصویر نمایه الزامی است'}
+              </p>
+            </div>
+            <div className=" w-fit">
+              {' '}
+              <Button
+                isLoading={isLoadingCreate || isLoadingUpdate}
+                type="submit"
+                className={` px-11 py-3 ${!isValid ? 'bg-gray-300' : 'hover:bg-[#e90088c4] '}  `}
+              >
+                {mode === 'edit' ? 'بروزرسانی' : 'انتشار'}
+              </Button>
+            </div>
           </div>
 
-          <div className="flex justify-end w-full">
+          {/* <div className="flex justify-end w-full">
             {' '}
             <Button type="submit" className={`w-0 px-11 py-3 hover:bg-[#e90088b0] mb-10 float-start`}>
               {mode === 'edit' ? 'بروزرسانی' : 'انتشار'}
             </Button>
-          </div>
+          </div> */}
         </form>
       </section>
     </>

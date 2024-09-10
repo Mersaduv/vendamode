@@ -19,20 +19,24 @@ const ProductPriceDisplay: React.FC<Props> = (props) => {
   // ? Render(s)
   return (
     <div className={`${singleProduct && 'flex flex-col'}`}>
-      {discount > 0 && (
+      {discount > 0 ? (
         <div className="text-center mb-1">
-          <span className="farsi-digits ml-2 text-lg text-red-500 font-bold line-through-a">
-            {digitsEnToFa(formatNumber(price))}{' '}
+          <span dir="rtl" className="farsi-digits text-sm text-red-500 font-normal line-through-a">
+            {digitsEnToFa(formatNumber(price))} 
           </span>
+        </div>
+      ) : (
+        <div className='py-[14px]'>
+
         </div>
       )}
       <div className="flex items-center">
         <span
           className={`flex gap-2 justify-center ${
-            singleProduct ? 'text-lg text-green-500' : 'farsi-digits text-lg text-gray-700'
+            singleProduct ? 'text-lg text-green-500' : 'farsi-digits text-base text-gray-700'
           }`}
         >
-          <div className="font-semibold">{digitsEnToFa(formatNumber(discountedPrice))}</div> تومان{' '}
+           <div className="font-semibold text-base">{digitsEnToFa(formatNumber(discountedPrice))}</div>{' '} تومان
         </span>
       </div>
     </div>

@@ -72,22 +72,6 @@ const ProductFilterControls: React.FC<Props> = (props) => {
   const canReset =
     inStockQuery || discountQuery || mainMinPrice !== debouncedMinPrice || mainMaxPrice !== debouncedMaxPrice
 
-  // ? Re-Renders
-  //*   Change Route After Debounce
-  // useEffect(() => {
-  //   if (debouncedMinPrice && mainMinPrice !== debouncedMinPrice)
-  //     handleChangeRoute({
-  //       price: `${debouncedMinPrice}-${debouncedMaxPrice}`,
-  //     })
-  // }, [debouncedMinPrice])
-
-  // useEffect(() => {
-  //   if (debouncedMaxPrice && mainMaxPrice !== debouncedMaxPrice)
-  //     handleChangeRoute({
-  //       price: `${debouncedMinPrice}-${debouncedMaxPrice}`,
-  //     })
-  // }, [debouncedMaxPrice])
-
   //*   Close Modal on Change Filter
   useEffect(() => {
     onClose?.()
@@ -151,11 +135,12 @@ const ProductFilterControls: React.FC<Props> = (props) => {
     if (selectedBrands.length > 0) {
       handleChangeRoute({
         brands: selectedBrands.length ? selectedBrands.join(',') : '',
-      })
+      });
     } else {
-      push('/products')
+      // push('/products'); // Resets the URL
     }
-  }, [selectedBrands])
+  }, [selectedBrands]);
+  
 
   // ? Render(s)
   return (

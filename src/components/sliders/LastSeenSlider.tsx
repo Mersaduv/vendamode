@@ -1,26 +1,28 @@
 import Link from 'next/link'
 import { useGetProductsQuery } from '@/services'
 
-import { ProductPriceDisplay } from '@/components/product'
+import { ProductDiscountTag, ProductPriceDisplay } from '@/components/product'
 import { Button, ResponsiveImage } from '@/components/ui'
 
-import type { ICategory } from '@/types'
+import type { ICategory, IProduct } from '@/types'
 import { useAppSelector } from '@/hooks'
 import dynamic from 'next/dynamic'
 import 'owl.carousel/dist/assets/owl.carousel.css'
 import 'owl.carousel/dist/assets/owl.theme.default.css'
 import { TbRuler2 } from 'react-icons/tb'
+import { Product } from '@/store'
 interface Props {
   currentCategory?: ICategory
+  products : Product[]
 }
 const OwlCarousel = dynamic(() => import('react-owl-carousel'), {
   ssr: false,
 })
 
 const LastSeenSlider: React.FC<Props> = (props) => {
-  const { currentCategory } = props
+  const { currentCategory,products } = props
   const { generalSetting } = useAppSelector((state) => state.design)
-  const { lastSeen: products } = useAppSelector((state) => state.lastSeen)
+
   const carouselOptions = {
     margin: 10,
     nav: true,
@@ -64,7 +66,7 @@ const LastSeenSlider: React.FC<Props> = (props) => {
             return (
               <div
                 key={product.productID}
-                className="w-[150px] sm:w-[200px] z-50 shadow-article rounded-lg mb-3 bg-white"
+                className="w-[150px] sm:w-[200px] z-50 shadow-item2 rounded-lg mb-3 bg-white"
               >
                 <Link href={`/products/${product.slug}`}>
                   <ResponsiveImage
@@ -75,16 +77,27 @@ const LastSeenSlider: React.FC<Props> = (props) => {
                     alt={product.title}
                     imageStyles="object-center rounded-t-lg"
                   />
-                  <div className="flex flex-col gap-y-4 py-4">
-                    <h2 className="text-center line-clamp-2 overflow-hidden text-ellipsis">{product.title}</h2>
-                    <div className="mt-1.5 flex justify-center gap-x-2 px-2">
-                      <ProductPriceDisplay
-                        inStock={product.inStock}
-                        discount={0}
-                        price={product?.price ?? product?.price ?? 0}
-                      />
+                 <div className="flex flex-col justify-between gap-y-1 py-3 h-[130px] ">
+                      <h2 dir="rtl" className="text-right line-clamp-2 overflow-hidden text-ellipsis px-2 text-sm">
+                        {product.title}
+                      </h2>
+                      <div className="mt-1.5 flex justify-center gap-x-2 px-2 relative">
+                        <div className="">
+                          {product.discount > 0 && (
+                            <ProductDiscountTag
+                              price={product?.price }
+                              discount={product.discount}
+                              isSlider
+                            />
+                          )}
+                        </div>
+                        <ProductPriceDisplay
+                          inStock={product.inStock}
+                          discount={product.discount}
+                          price={product?.price }
+                        />
+                      </div>
                     </div>
-                  </div>
                 </Link>
               </div>
             )
@@ -102,7 +115,7 @@ const LastSeenSlider: React.FC<Props> = (props) => {
             return (
               <div
                 key={product.productID}
-                className="w-[150px] sm:w-[200px] z-50 shadow-article rounded-lg mb-3 bg-white"
+                className="w-[150px] sm:w-[200px] z-50 shadow-item2 rounded-lg mb-3 bg-white"
               >
                 <Link href={`/products/${product.slug}`}>
                   <ResponsiveImage
@@ -113,7 +126,7 @@ const LastSeenSlider: React.FC<Props> = (props) => {
                     alt={product.title}
                     imageStyles="object-center rounded-t-lg"
                   />
-                  <div className="flex flex-col gap-y-4 py-4">
+                  {/* <div className="flex flex-col gap-y-4 py-4 h-[150px]">
                     <h2 className="text-center line-clamp-2 overflow-hidden text-ellipsis">{product.title}</h2>
                     <div className="mt-1.5 flex justify-center gap-x-2 px-2">
                       <ProductPriceDisplay
@@ -122,7 +135,28 @@ const LastSeenSlider: React.FC<Props> = (props) => {
                         price={product?.price ?? product?.price ?? 0}
                       />
                     </div>
-                  </div>
+                  </div> */}
+                  <div className="flex flex-col justify-between gap-y-1 py-3 h-[130px] ">
+                      <h2 dir="rtl" className="text-right line-clamp-2 overflow-hidden text-ellipsis px-2 text-sm">
+                        {product.title}
+                      </h2>
+                      <div className="mt-1.5 flex justify-center gap-x-2 px-2 relative">
+                        <div className="">
+                          {product.discount > 0 && (
+                            <ProductDiscountTag
+                              price={product?.price }
+                              discount={product.discount}
+                              isSlider
+                            />
+                          )}
+                        </div>
+                        <ProductPriceDisplay
+                          inStock={product.inStock}
+                          discount={product.discount}
+                          price={product?.price }
+                        />
+                      </div>
+                    </div>
                 </Link>
               </div>
             )
@@ -133,7 +167,7 @@ const LastSeenSlider: React.FC<Props> = (props) => {
               بازدید های اخیر شما{' '}
             </div>
             <div className="mt-10 flex justify-center">
-              <img className="w-[120px] xs2:w-[180px] static-img" src="/images/NEW.webp" alt="offer" />
+              <img className="w-[120px] xs2:w-[180px] static-img" src="/images/Recent Visited.webp" alt="offer" />
             </div>
             <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">
               بازدید های اخیر رو اینجا ببین{' '}

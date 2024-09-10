@@ -1,7 +1,7 @@
 import { Modal, Button, CustomCheckbox } from '@/components/ui'
 import { ICategory, ICategoryForm } from '@/types'
 import { useCreateCategoryMutation } from '@/services'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { HandleResponse } from '../shared'
 import { Resolver, SubmitHandler, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -19,6 +19,7 @@ interface Props {
 }
 
 const CategoryModal: React.FC<Props> = (props) => {
+  const { isShow, onClose, refetch, title, mode } = props
   const [stateCategoryData, setStateCategoryData] = useState<ICategoryForm>({
     level: 0,
     name: '',
@@ -26,7 +27,8 @@ const CategoryModal: React.FC<Props> = (props) => {
   } as ICategoryForm)
   const [selectedFile, setSelectedFile] = useState<File[]>([])
 
-  const { isShow, onClose, refetch, title, mode } = props
+ const inputRef = useRef<HTMLInputElement | null>(null);
+
 
   const [
     createCategory,
@@ -57,7 +59,15 @@ const CategoryModal: React.FC<Props> = (props) => {
     resolver: yupResolver(categorySchema) as unknown as Resolver<ICategoryForm>,
     defaultValues,
   })
-
+  useEffect(() => {
+    if (isShow && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current?.focus(); // تاخیر کوچک برای اطمینان از رندر شدن کامل مدال
+      }, 100); // تاخیر 100 میلی‌ثانیه‌ای برای رندر کامل مدال
+    }
+  }, [isShow]);
+  
+  
   const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // if (e.target.files) {
     //   setSelectedFile([...Array.from(e.target.files)])
@@ -161,7 +171,7 @@ const CategoryModal: React.FC<Props> = (props) => {
             reset()
             onClose()
             refetch()
-            setStateCategoryData({isActive : true} as ICategoryForm)
+            setStateCategoryData({ isActive: true } as ICategoryForm)
             setSelectedFile([])
           }}
         />
@@ -169,8 +179,10 @@ const CategoryModal: React.FC<Props> = (props) => {
       <Modal
         isShow={isShow}
         onClose={() => {
+          reset()
           onClose()
-          // setStateCategoryData({} as ICategoryForm)
+          refetch()
+          setStateCategoryData({ isActive: true } as ICategoryForm)
           setSelectedFile([])
         }}
         effect="bottom-to-top"
@@ -188,10 +200,15 @@ const CategoryModal: React.FC<Props> = (props) => {
                 <div className="relative mb-3 w-full">
                   <input
                     type="text"
+                    // autoComplete="name"
                     className="peer m-0 pr-3 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
                     id="floatingInput"
                     placeholder="نام"
                     {...register('name')}
+                    ref={(e) => {
+                      register('name').ref(e); // ادغام ref از register
+                      inputRef.current = e; // تنظیم ref دستی
+                    }}
                   />
                   <label
                     htmlFor="floatingInput"

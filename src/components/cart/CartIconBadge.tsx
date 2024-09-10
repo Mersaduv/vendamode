@@ -19,7 +19,7 @@ export default function CartIconBadge() {
         </span>
       )}
 
-      <Cart className="icon h-7 w-7 text-gray-500" />
+      <Cart className="icon h-6 w-6 text-gray-500" />
     </div>
   )
 }

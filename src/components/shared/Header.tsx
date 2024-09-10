@@ -6,12 +6,13 @@ import { SearchModal } from '@/components/modals'
 import { UserAuthLinks } from '@/components/user'
 import { CartDisplay } from '@/components/cart'
 import { Sidebar, Navbar } from '@/components/shared'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TextMarquee from '../ui/TextMarquee'
 import { useAppSelector } from '@/hooks'
 import { useGetDesignItemsQuery, useGetStoreCategoriesQuery } from '@/services'
 const Header = () => {
   const [isShowSearch, setIsShowSearch] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false) // state برای وضعیت اسکرول
   const { logoImages } = useAppSelector((state) => state.design)
 
   const {
@@ -20,13 +21,26 @@ const Header = () => {
     isError: isErrorDesignItems,
   } = useGetDesignItemsQuery()
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      setIsScrolled(scrollTop > 0) // اگر اسکرول بیشتر از صفر باشد، حالت اسکرول فعال می‌شود
+    }
+
+    window.addEventListener('scroll', handleScroll)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
   return (
     <>
-      <header className="bg-white shadow xl:inset-x-0 top-0 fixed w-full z-[101] transition duration-700 ease-in-out">
-        <TextMarquee />
+      <TextMarquee />
+      <header className="bg-white shadow xl:inset-x-0 top-0 sticky w-full z-[101] transition duration-700 ease-in-out">
         {/* Tablet and Desktop */}
-        <div className="pr-4 sm:px-4 flex flex-col items-center">
-          <div className="container mx-10 hidden sm:block z-[99] items-center max-w-[1700px] lg:flex lg:py-2 w-full">
+        <div className="px-4 flex flex-col items-center z-50 bg-white">
+          <div className="container mx-10 hidden sm:block z-[99] items-center max-w-[1700px] lg:flex lg:py-2 w-full bg-white">
             <div className="inline-flex w-full items-center justify-between border-b lg:ml-8 lg:max-w-min lg:border-b-0">
               <Sidebar />
               <Link className="w-32 md:w-52" passHref href="/">
@@ -42,16 +56,20 @@ const Header = () => {
               <div className="flex grow gap-x-7 lg:justify-center">
                 <SearchModal />
               </div>
-              <div className=" inline-flex items-center gap-x-4">
+              <div className="inline-flex items-center gap-x-4">
                 <CartDisplay />
                 <span className="hidden h-8 w-0.5 bg-gray-300 lg:block" />
                 <UserAuthLinks />
               </div>
             </div>
           </div>
-          <div className="relative gap-8 flex max-w-[1700px] justify-start w-full ">
+          <nav
+            className={`relative gap-8 flex max-w-[1700px] justify-start w-full transition-all duration-500 ease-in-out ${
+              isScrolled ? 'translate-y-[-100%] h-0 opacity-0' : 'sm:translate-y-0  sm:h-14'
+            }`}
+          >
             <Navbar />
-            <div className=" gap-8 hidden lg:flex">
+            <div className="gap-8 hidden lg:flex">
               {designItemsData &&
                 designItemsData.data
                   ?.filter((item) => item.type === 'lists')
@@ -68,18 +86,17 @@ const Header = () => {
                             alt={designItem.title}
                           />
                         </div>
-                        <div className='text-sm'>{designItem.title}</div>
+                        <div className="text-sm">{designItem.title}</div>
                       </div>
                     )
                   })}
             </div>
-            {/* <AddressBar /> */}
-          </div>
+          </nav>
 
           {/* mobile  */}
-          <div className="container block sm:hidden z-[99] items-center max-w-[1700px] py-2 transition duration-700 ease-in-out">
+          <div className="container block sm:hidden z-[99] items-center max-w-[1700px] py-2 pb-1 transition duration-700 ease-in-out">
             <div className="inline-flex w-full items-center justify-between">
-              <div className="flex">
+              <div className="flex gap-x-3">
                 <Sidebar />
                 <Search
                   onClick={() => setIsShowSearch((prev) => !prev)}

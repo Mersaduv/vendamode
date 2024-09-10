@@ -13,6 +13,7 @@ import { digitsEnToFa } from '@persian-tools/persian-tools'
 import React, { forwardRef } from 'react'
 import { Control, FieldError, useController } from 'react-hook-form'
 import { useGetRedirectsQuery } from '@/services'
+import { useAppSelector } from '@/hooks'
 
 interface Props {
   onSubmit: (data: ILoginForm) => void
@@ -29,7 +30,7 @@ interface FieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 const LoginForm: React.FC<Props> = (props) => {
   const { onSubmit, isLoading } = props
-
+  const { generalSetting } = useAppSelector((state) => state.design)
   const [stage, setStage] = useState<'mobileNumber' | 'password'>('mobileNumber')
   const { data: redirectData, isLoading: isLoadingRedirect, isError: isErrorRedirect } = useGetRedirectsQuery()
 
@@ -72,27 +73,27 @@ const LoginForm: React.FC<Props> = (props) => {
     <form className="space-y-0.5" onSubmit={handleSubmit(onSubmit)}>
       {stage === 'mobileNumber' && (
         <>
-          <h2 className="text-gray-300 text-base text-center mb-8">شماره همراه خود را وارد کنید</h2>
+          <h2 className="text-gray-300 text-base text-center mb-12">شماره همراه خود را وارد کنید</h2>
           <TextField
             id="mobileNumber"
             control={control}
             errors={formErrors.mobileNumber}
             placeholder={digitsEnToFa('09...')}
             name="mobileNumber"
-            classStyle="rounded-3xl shadow-lg"
+            classStyle="rounded-3xl shadow-lg text-center"
             ref={mobileNumberRef}
             // type='number'
           />
-          <LoginButton isLoading={isLoading} onClick={handleMobileNumberSubmit}>
+          <LoginButton className="mx-auto w-full rounded-3xl py-2 bg-[#f792ce] border-2 border-[#e90089] hover:bg-[#e90089]" isLoading={isLoading} onClick={handleMobileNumberSubmit}>
             ادامه
           </LoginButton>
-          <div className="pt-4 flex items-center w-full">
-            <div className=" text-gray-800 text-sm flex">
+          <div className="pt-4 flex items-center w-full ">
+            <div className=" text-gray-800 text-sm flex mt-8">
               شرایط استفاده از{' '}
               <Link href={`/articles/${redirectData?.data?.slug}`} className="text-blue-400 text-sm mx-1">
                 قوانین و حریم خصوصی{' '}
               </Link>{' '}
-              وندامد را میپذیرم
+              {generalSetting?.title} را میپذیرم
             </div>
           </div>
         </>
@@ -100,7 +101,7 @@ const LoginForm: React.FC<Props> = (props) => {
 
       {stage === 'password' && (
         <>
-          <h2 className="text-gray-300 text-base text-center mb-8">رمز خود را وارد کنید</h2>
+          <h2 className="text-gray-300 text-base text-center ">رمز خود را وارد کنید</h2>
           <button type="button" onClick={handleBackToMobileNumber}>
             <BiRightArrowAlt className="text-[#e90089]" size={34} />
           </button>
@@ -110,14 +111,14 @@ const LoginForm: React.FC<Props> = (props) => {
             type="password"
             placeholder="رمز عبور"
             name="password"
-            classStyle="rounded-3xl"
+            classStyle="rounded-3xl text-center shadow-lg "
             ref={passwordRef}
           />
-          <LoginButton isLoading={isLoading}>ورود</LoginButton>
+          <LoginButton className="mx-auto w-full rounded-3xl py-2 bg-[#f792ce] border-2 border-[#e90089] hover:bg-[#e90089]" isLoading={isLoading}>ورود</LoginButton>
 
-          <div className="pt-4 flex items-center">
-            <p className="ml-1 inline text-gray-800 text-sm">رمز عبور رو فراموش کردی؟</p>
-            <div className="text-blue-400 text-sm">فراموشی رمز عبور</div>
+          <div className="pt-4 flex items-center ">
+            <p className="ml-1 inline text-gray-800 text-sm mt-8">رمز عبور رو فراموش کردی؟</p>
+            <div className="text-blue-400 text-sm mt-8">فراموشی رمز عبور</div>
           </div>
         </>
       )}
