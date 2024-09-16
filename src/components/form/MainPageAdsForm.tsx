@@ -268,27 +268,11 @@ const MainPageAdsForm: React.FC = () => {
 
   // load data
   useEffect(() => {
-    const loadAllData = async () => {
-      if (
-        headerTextData &&
-        headerTextData.data &&
-        sliderData &&
-        sliderData.data &&
-        bannerData &&
-        bannerData.data &&
-        footerBannerData &&
-        footerBannerData.data &&
-        articleBannerData &&
-        articleBannerData.data &&
-        storeCategoriesData &&
-        storeCategoriesData.data &&
-        storeBrandsData &&
-        storeBrandsData.data
-      ) {
-        // Load slider images
-        const slidersWithFiles = await Promise.all(
+    const loadSliderImages = async () => {
+      if (sliderData?.data) {
+        return await Promise.all(
           sliderData.data.map(async (slider) => {
-            const imageFile = await fetchImageAsFile(slider.image.imageUrl)
+            const imageFile = await fetchImageAsFile(slider.image.imageUrl);
             return {
               id: slider.id,
               thumbnail: imageFile,
@@ -296,14 +280,18 @@ const MainPageAdsForm: React.FC = () => {
               link: slider.link,
               type: slider.type,
               isActive: slider.isActive,
-            }
+            };
           })
-        )
-
-        // Load banner images
-        const bannersWithFiles = await Promise.all(
+        );
+      }
+      return [];
+    };
+  
+    const loadBannerImages = async () => {
+      if (bannerData?.data) {
+        return await Promise.all(
           bannerData.data.map(async (banner) => {
-            const imageFile = await fetchImageAsFile(banner.image.imageUrl)
+            const imageFile = await fetchImageAsFile(banner.image.imageUrl);
             return {
               id: banner.id,
               index: banner.index,
@@ -312,26 +300,32 @@ const MainPageAdsForm: React.FC = () => {
               link: banner.link,
               type: banner.type,
               isActive: banner.isActive,
-            }
+            };
           })
-        )
-
-        // Load Article Banner
-        const articleBanners = await Promise.all(
-          articleBannerData.data.map(async (articleBanner) => {
-            return {
-              id: articleBanner.id,
-              index: articleBanner.index,
-              isActive: articleBanner.isActive,
-              articleId: articleBanner.articleId,
-            }
-          })
-        )
-
-        // Load footer banner images
-        const footerBannersWithFiles = await Promise.all(
+        );
+      }
+      return [];
+    };
+  
+    const loadArticleBanners = async () => {
+      if (articleBannerData?.data) {
+        return await Promise.all(
+          articleBannerData.data.map(async (articleBanner) => ({
+            id: articleBanner.id,
+            index: articleBanner.index,
+            isActive: articleBanner.isActive,
+            articleId: articleBanner.articleId,
+          }))
+        );
+      }
+      return [];
+    };
+  
+    const loadFooterBannerImages = async () => {
+      if (footerBannerData?.data) {
+        return await Promise.all(
           footerBannerData.data.map(async (banner) => {
-            const imageFile = await fetchImageAsFile(banner.image.imageUrl)
+            const imageFile = await fetchImageAsFile(banner.image.imageUrl);
             return {
               id: banner.id,
               thumbnail: imageFile,
@@ -339,60 +333,69 @@ const MainPageAdsForm: React.FC = () => {
               link: banner.link,
               type: banner.type,
               isActive: banner.isActive,
-            }
+            };
           })
-        )
-        if (storeCategoriesData?.data) {
-          setStoreCategories(storeCategoriesData.data)
-        }
-        if (storeBrandsData?.data) {
-          setStoreBrands(storeBrandsData.data)
-        }
-
-        methods.reset({
-          textMarquee: {
-            id: headerTextData.data.id || '',
-            name: headerTextData.data.name || '',
-            isActive: headerTextData.data.isActive || false,
-          },
-          storeCategories: storeCategoriesData?.data || [],
-          storeBrands: storeBrandsData?.data || [],
-          storeCategoryIsActive: storeCategoriesData.data.length > 0 && storeCategoriesData.data[0].isActive,
-          storeBrandIsActive: storeBrandsData.data.length > 0 && storeBrandsData.data[0].isActive,
-          sliders: slidersWithFiles,
-          slidersIsActive: sliderData.data.length > 0 && sliderData.data[0].isActive,
-          banners: bannersWithFiles,
-          bannersIsActive: bannerData.data.length > 0 && bannerData.data[0].isActive,
-          footerBanners: footerBannersWithFiles,
-          footerBannersIsActive: footerBannerData.data.length > 0 && footerBannerData.data[0].isActive,
-          articleBanners: articleBanners,
-          articleBannersIsActive: articleBannerData.data.length > 0 && articleBannerData.data[0].isActive,
-        })
-        console.log(articleBannerData, 'articleBannerData - load')
-
-        setSliders(slidersWithFiles)
-        // setBanners(bannersWithFiles)
-        setArticleBanners((prev) => {
-          return prev.map((defaultArticleBanner) => {
-            const newArticleBanner = articleBanners.find(
-              (articleBanner) => articleBanner.index === defaultArticleBanner.index
-            )
-            return newArticleBanner ? newArticleBanner : defaultArticleBanner
-          })
-        })
-
-        setBanners((prevBanners) =>
-          prevBanners.map((defaultBanner) => {
-            const newBanner = bannersWithFiles.find((banner) => banner.index === defaultBanner.index)
-            return newBanner ? newBanner : defaultBanner
-          })
-        )
-        setFooterBanner(footerBannersWithFiles)
+        );
       }
-    }
-
-    loadAllData()
-  }, [headerTextData, sliderData, bannerData, footerBannerData, storeBrandsData, storeCategoriesData, methods])
+      return [];
+    };
+  
+    const loadAllData = async () => {
+      const [slidersWithFiles, bannersWithFiles, articleBanners, footerBannersWithFiles] = await Promise.all([
+        loadSliderImages(),
+        loadBannerImages(),
+        loadArticleBanners(),
+        loadFooterBannerImages(),
+      ]);
+  
+      if (storeCategoriesData?.data) {
+        setStoreCategories(storeCategoriesData.data);
+      }
+      if (storeBrandsData?.data) {
+        setStoreBrands(storeBrandsData.data);
+      }
+  
+      methods.reset({
+        textMarquee: {
+          id: headerTextData?.data?.id || '',
+          name: headerTextData?.data?.name || '',
+          isActive: headerTextData?.data?.isActive || false,
+        },
+        storeCategories: storeCategoriesData?.data || [],
+        storeBrands: storeBrandsData?.data || [],
+        storeCategoryIsActive: storeCategoriesData?.data?.length > 0 && storeCategoriesData.data[0].isActive,
+        storeBrandIsActive: storeBrandsData?.data?.length > 0 && storeBrandsData.data[0].isActive,
+        sliders: slidersWithFiles,
+        slidersIsActive: sliderData?.data?.length > 0 && sliderData.data[0].isActive,
+        banners: bannersWithFiles,
+        bannersIsActive: bannerData?.data?.length > 0 && bannerData.data[0].isActive,
+        footerBanners: footerBannersWithFiles,
+        footerBannersIsActive: footerBannerData?.data?.length > 0 && footerBannerData.data[0].isActive,
+        articleBanners: articleBanners,
+        articleBannersIsActive: articleBannerData?.data?.length > 0 && articleBannerData.data[0].isActive,
+      });
+  
+      setSliders(slidersWithFiles);
+      setArticleBanners((prev) => {
+        return prev.map((defaultArticleBanner) => {
+          const newArticleBanner = articleBanners.find(
+            (articleBanner) => articleBanner.index === defaultArticleBanner.index
+          );
+          return newArticleBanner ? newArticleBanner : defaultArticleBanner;
+        });
+      });
+      setBanners((prevBanners) =>
+        prevBanners.map((defaultBanner) => {
+          const newBanner = bannersWithFiles.find((banner) => banner.index === defaultBanner.index);
+          return newBanner ? newBanner : defaultBanner;
+        })
+      );
+      setFooterBanner(footerBannersWithFiles);
+    };
+  
+    loadAllData();
+  }, [headerTextData, sliderData, bannerData, footerBannerData, storeBrandsData, storeCategoriesData, methods]);
+  
 
   const onSubmit = async (data: FormData) => {
     console.log(data, 'data all')
