@@ -227,7 +227,6 @@ const ArticleForm: React.FC<Props> = (props) => {
       formData.append('CategoryId', data.categoryId ?? '')
     }
 
-    formData.append('Place', data.place.toString())
     formData.append('Description', textEditor)
     if (mode === 'edit' && selectedArticle !== undefined) {
       formData.append('Id', selectedArticle.id)

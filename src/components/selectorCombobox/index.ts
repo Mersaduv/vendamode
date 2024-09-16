@@ -7,3 +7,4 @@ export { default as SelectParentCategoryCombobox } from './SelectParentCategoryC
 export { default as SizesCombobox } from './SizesCombobox'
 export { default as StatusCombobox } from './StatusCombobox'
 export { default as ArticleCombobox } from './ArticleCombobox'
+export { default as ProductTypeCombobox } from './ProductTypeCombobox'

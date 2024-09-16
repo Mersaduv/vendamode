@@ -1,5 +1,5 @@
 export interface IFooterArticleColumn {
-  id: string
+  id?: string | undefined
   articleId: string
   index: number
   created?: string

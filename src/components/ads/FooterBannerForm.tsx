@@ -156,7 +156,7 @@ const FooterBannerForm: React.FC<FooterBannerFormProps> = ({ banners, setBanners
                         <img
                           src={URL.createObjectURL(banner.thumbnail)}
                           alt="banner Item"
-                          className="w-[285px] h-[125px] object-cover rounded-md"
+                          className=" h-[125px] object-cover rounded-md"
                         />
                       ) : (
                         <img
@@ -174,7 +174,7 @@ const FooterBannerForm: React.FC<FooterBannerFormProps> = ({ banners, setBanners
                       accept="image/jpeg"
                     />
                   </div>
-                  <div className="flex flex-col items-center sm:items-start lg:items-center gap-2 w-full">
+                  <div className="flex flex-col items-center sm:items-start lg:items-center gap-2 w-1/2">
                     {/* url link */}
                     <div className="flex gap-3 items-center ">
                       <div className="flex items-center">
@@ -233,7 +233,7 @@ const FooterBannerForm: React.FC<FooterBannerFormProps> = ({ banners, setBanners
                           disabled={banner.type !== 'category'}
                         >
                           <option className="appearance-none text-sm" value="">
-                            دسته بندی
+                          انتخاب دسته بندی
                           </option>
                           {allCategories?.map((category) => (
                             <option

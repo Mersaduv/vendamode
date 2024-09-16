@@ -71,6 +71,26 @@ function makeIdsUnique(arr: ProfilePath[]) {
 
 const profileData: ProfilePath[] = [
   { id: 1, name: 'پیشخوان', Icon: BiSolidGridAlt, path: '/admin' },
+  {
+    id: 7,
+    name: 'نمای سایت',
+    Icon: MdOutlinePreview,
+    path: '/admin/ads/main',
+    // subItem: [
+    //   {
+    //     id: 7,
+    //     name: 'دیزاین',
+    //     Icon: TbPointFilled,
+    //     path: '/admin/design/siteItems',
+    //   },
+    //   {
+    //     id: 7,
+    //     name: 'صفحه اصلی',
+    //     Icon: TbPointFilled,
+    //     path: '/admin/ads/main',
+    //   },
+    // ],
+  },
   { id: 1, name: 'سفارشات', Icon: IoCart, path: '/admin/orders' },
   {
     id: 1,
@@ -204,26 +224,6 @@ const profileData: ProfilePath[] = [
         path: '/admin/analyze',
       },
     ],
-  },
-  {
-    id: 7,
-    name: 'نمای سایت',
-    Icon: MdOutlinePreview,
-    path: '/admin/ads/main',
-    // subItem: [
-    //   {
-    //     id: 7,
-    //     name: 'دیزاین',
-    //     Icon: TbPointFilled,
-    //     path: '/admin/design/siteItems',
-    //   },
-    //   {
-    //     id: 7,
-    //     name: 'صفحه اصلی',
-    //     Icon: TbPointFilled,
-    //     path: '/admin/ads/main',
-    //   },
-    // ],
   },
   {
     id: 8,

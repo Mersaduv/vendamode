@@ -180,7 +180,7 @@ const SliderForm: React.FC<SliderFormProps> = ({ sliders, setSliders, setDeleted
           <h3 className=" text-gray-600 whitespace-nowrap">اسلایدر</h3>
           <div className="flex justify-end w-[260px] gap-4 items-center">
             <Button className=" px-5 py-2.5 bg-sky-500 hover:bg-sky-400" onClick={handleAddSlider}>
-              {'افزودن اسلایدر'}
+              {'افزودن '}
             </Button>
             <ControlledCheckbox name="slidersIsActive" control={control} label="وضعیت نمایش" inLabel />
           </div>
@@ -287,7 +287,7 @@ const SliderForm: React.FC<SliderFormProps> = ({ sliders, setSliders, setDeleted
                             disabled={slider.type !== 'category'}
                           >
                             <option className="appearance-none text-sm" value="">
-                              دسته بندی
+                            انتخاب دسته بندی
                             </option>
                             {allCategories?.map((category) => (
                               <option

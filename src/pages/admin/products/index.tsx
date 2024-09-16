@@ -61,7 +61,7 @@ const Products: NextPage = () => {
   const isUpdated = useAppSelector((state) => state.stateUpdate.isUpdated)
   const { name } = useAppSelector((state) => state.stateString)
   const { generalSetting } = useAppSelector((state) => state.design)
-  // ? state
+  // ? states
   const [tabKey, setTabKey] = useState('allProducts')
   const [selectedCategories, setSelectedCategories] = useState<SelectedCategories>(initialSelectedCategories)
   const [allCategories, setAllCategories] = useState<ICategory[]>([])
@@ -85,6 +85,7 @@ const Products: NextPage = () => {
   const [selectInStockState, setSelectInStockState] = useState<string | undefined>(undefined)
   const [searchTerm, setSearchTerm] = useState('')
   const [singleCategory, setSingleCategory] = useState(false)
+  const [publishTime, setPublishTime] = useState(false)
   const [filterClickCategory, setFilterClickCategory] = useState(false)
 
   // ? Get Categories Query
@@ -99,8 +100,8 @@ const Products: NextPage = () => {
   const [productsActivePagination, setProductsActivePagination] = useState<GetProductsResult>()
   const [productsInActivePagination, setProductsInActivePagination] = useState<GetProductsResult>()
   const [productsIsDeletedPagination, setProductsIsDeletedPagination] = useState<GetProductsResult>()
+  const [productsIsPendingPagination, setProductsIsPendingPagination] = useState<GetProductsResult>()
 
-  // دریافت محصولات با وضعیت خاص
   const useFetchProducts = (status: string) => {
     const commonQueryParams = {
       sortBy: 'LastUpdated',
@@ -121,6 +122,7 @@ const Products: NextPage = () => {
       inActive: status === 'inActive',
       isDeleted: status === 'isDeleted',
       adminList: status === 'adminList',
+      isPublishTime: status === 'isPublishTime',
     }
     const { data, isError, isFetching, isSuccess, refetch } = useGetProductsQuery({ ...commonQueryParams })
 
@@ -163,29 +165,32 @@ const Products: NextPage = () => {
     refetch: refetchDeletedProducts,
   } = useFetchProducts('isDeleted')
 
-  useEffect(() => {
-    console.log(allProducts, 'allProducts')
+  const {
+    data: pendingProducts,
+    isError: isPendingProductsError,
+    isFetching: isPendingProductsFetching,
+    isSuccess: isPendingProductsSuccess,
+    refetch: refetchPendingProducts,
+  } = useFetchProducts('isPublishTime')
 
+  useEffect(() => {
     if (allProducts) setProductsPagination(allProducts)
   }, [allProducts])
 
   useEffect(() => {
-    console.log(activeProducts, 'activeProducts')
-
     if (activeProducts) setProductsActivePagination(activeProducts)
   }, [activeProducts])
 
   useEffect(() => {
-    console.log(inactiveProducts, 'inactiveProducts')
-
     if (inactiveProducts) setProductsInActivePagination(inactiveProducts)
   }, [inactiveProducts])
 
   useEffect(() => {
-    console.log(deletedProducts, 'deletedProducts')
-
     if (deletedProducts) setProductsIsDeletedPagination(deletedProducts)
   }, [deletedProducts])
+  useEffect(() => {
+    if (pendingProducts) setProductsIsPendingPagination(pendingProducts)
+  }, [pendingProducts])
   useEffect(() => {
     switch (name) {
       case 'allProducts':
@@ -199,6 +204,9 @@ const Products: NextPage = () => {
         break
       case 'deletedProducts':
         setTabKey('deletedProducts')
+        break
+      case 'pendingProducts':
+        setTabKey('pendingProducts')
         break
       default:
         setTabKey('allArticles')
@@ -515,8 +523,8 @@ const Products: NextPage = () => {
         <DashboardLayout>
           <section id="_adminProducts" className=" w-full">
             <div className="bg-white rounded-lg shadow-item mx-3">
-              <div className='flex justify-between mt-7'>
-              <h2 className="p-4 text-gray-600">همه محصولات</h2>
+              <div className="flex justify-between mt-7">
+                <h2 className="p-4 text-gray-600">همه محصولات</h2>
                 {/* filter control  */}
                 <div className="flex justify-end px-4 gap-x-6 gap-y-2.5 flex-wrap py-4">
                   {/* first group work */}
@@ -646,8 +654,10 @@ const Products: NextPage = () => {
                       ? 1
                       : tabKey === 'inactiveProducts'
                       ? 2
-                      : tabKey === 'deletedProducts'
+                      : tabKey === 'pendingProducts'
                       ? 3
+                      : tabKey === 'deletedProducts'
+                      ? 4
                       : 0
                   }
                   onChange={(index) => {
@@ -662,6 +672,9 @@ const Products: NextPage = () => {
                         setTabKey('inactiveProducts')
                         break
                       case 3:
+                        setTabKey('pendingProducts')
+                        break
+                      case 4:
                         setTabKey('deletedProducts')
                         break
                       default:
@@ -696,6 +709,15 @@ const Products: NextPage = () => {
                       }
                     >
                       غیرفعال ({digitsEnToFa(productsInActivePagination?.data?.pagination.totalCount ?? 0)})
+                    </Tab>
+                    <Tab
+                      className={({ selected }) =>
+                        selected
+                          ? 'px-4 py-2 text-sky-500 rounded cursor-pointer text-sm'
+                          : 'px-4 py-2 hover:text-sky-500 rounded cursor-pointer text-sm'
+                      }
+                    >
+                      در انتظار ({digitsEnToFa(productsIsPendingPagination?.data?.pagination.totalCount ?? 0)})
                     </Tab>
                     <Tab
                       className={({ selected }) =>
@@ -749,6 +771,7 @@ const Products: NextPage = () => {
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">نوع</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">تعداد</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[10%]">فروشنده</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">دیدگاه</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal">وضعیت</th>
                                 <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[2%]">عملیات</th>
                               </tr>
@@ -802,8 +825,19 @@ const Products: NextPage = () => {
                                         : digitsEnToFa(product.inStock)}
                                     </td>
                                     <td className="text-center text-sm text-gray-600">{generalSetting?.title}</td>
+                                    <td className="text-center text-sm text-gray-600">
+                                      {product.reviewCount === 0 ? (
+                                        '-'
+                                      ) : (
+                                        <Link className="text-sky-500" href={`/`}>
+                                          {'✓'}
+                                        </Link>
+                                      )}
+                                    </td>
                                     <td className="text-center">
-                                      {product.isActive ? (
+                                      {product.publishTime ? (
+                                        <span className="text-sm text-orange-400 font-medium">در انتظار</span>
+                                      ) : product.isActive ? (
                                         <span className="text-sm text-green-500">فعال</span>
                                       ) : (
                                         <span className="text-sm text-red-500">غیر فعال</span>
@@ -1200,6 +1234,173 @@ const Products: NextPage = () => {
                               <Pagination
                                 pagination={productsInActivePagination?.data.pagination}
                                 section="_adminInActiveProducts"
+                                client
+                              />
+                            </div>
+                          )}
+                      </div>
+                    </Tab.Panel>
+                    <Tab.Panel>
+                      <div id="_adminIsPublishTimeProducts">
+                        <DataStateDisplay
+                          isError={isInactiveProductsError}
+                          refetch={refetchInactiveProducts}
+                          isFetching={isInactiveProductsFetching}
+                          isSuccess={isInactiveProductsSuccess}
+                          dataLength={
+                            productsIsPendingPagination?.data?.pagination.data
+                              ? productsIsPendingPagination.data?.productsLength
+                              : 0
+                          }
+                          loadingComponent={<TableSkeleton count={20} />}
+                        >
+                          <table className=" w-[700px] md:w-full mx-auto">
+                            <thead className="bg-sky-300">
+                              <tr>
+                                <th className="text-sm py-3 px-2 pr-3 font-normal w-[1%] text-center">
+                                  <div className="flex items-center">
+                                    <input
+                                      className="appearance-none checked:bg-sky-500 border-none focus:ring-offset-0 focus:outline-offset-0 focus:outline-0 focus:ring-0 rounded-md text-xl w-4 h-4"
+                                      type="checkbox"
+                                      onChange={(e) =>
+                                        handleSelectAll(e, productsIsPendingPagination?.data?.pagination?.data ?? [])
+                                      }
+                                      checked={
+                                        selectedProducts[tabKey]?.length ===
+                                        productsIsPendingPagination?.data?.pagination.data?.length
+                                      }
+                                    />
+                                    <ArrowDown className="icon text-gray-500" />
+                                  </div>
+                                </th>
+                                <th className="text-sm py-3 px-2 font-normal w-[70px] text-start"></th>
+                                <th className="text-sm py-3 px-2 pr-0 text-gray-600 font-normal w-[30%] text-start">
+                                  نام محصول
+                                </th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[10%]">کد</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[150px]">دسته بندی</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">نوع</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">تعداد</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[10%]">فروشنده</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal">وضعیت</th>
+                                <th className="text-sm py-3 px-2 text-gray-600 font-normal w-[2%]">عملیات</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {productsIsPendingPagination?.data?.pagination?.data &&
+                                productsIsPendingPagination.data?.pagination.data.map((product, index) => (
+                                  <tr
+                                    key={product.id}
+                                    className={`h-16 border-b ${index % 2 === 0 ? 'bg-gray-50' : ''}`}
+                                  >
+                                    <td className="text-sm py-3 px-2 pr-3 font-normal w-[1%] text-start">
+                                      <input
+                                        className="appearance-none border border-gray-300 checked:bg-sky-500 focus:ring-offset-0 focus:outline-offset-0 focus:outline-0 focus:ring-0 rounded-md text-xl w-4 h-4"
+                                        type="checkbox"
+                                        checked={selectedProducts[tabKey]?.includes(product) || false}
+                                        onChange={() => handleSelectProduct(product)}
+                                      />
+                                    </td>
+                                    <td>
+                                      <img
+                                        className="w-[50px] h-[50px] rounded"
+                                        src={product.mainImageSrc.imageUrl}
+                                        alt="p-img"
+                                      />
+                                    </td>
+                                    <td className="text-sm text-gray-600  line-clamp-2 overflow-hidden text-ellipsis pt-2">
+                                      <Link className="text-sky-500" href={`/products/${product.slug}`}>
+                                        {product.title}
+                                      </Link>
+                                    </td>
+                                    <td className="text-center text-sm text-gray-600">{digitsEnToFa(product.code)}</td>
+                                    {/* <td
+                                      title={`${product.parentCategories.category.name}`}
+                                      className="text-sm text-gray-600 text-center"
+                                    >
+                                      {product.parentCategories.category.name}
+                                    </td> */}
+                                    <td className="tooltip-container text-sm text-gray-600 text-center cursor-pointer">
+                                      {product.parentCategories.category.name}
+                                      <span className="tooltip-text">
+                                        <ProductBreadcrumb categoryLevels={product.parentCategories} isAdmin />
+                                      </span>
+                                    </td>
+                                    <td className="text-center text-sm text-gray-600">
+                                      {handleIsChangeable(product) ? 'متغیر' : 'ساده'}
+                                    </td>
+                                    <td className="text-center text-sm text-gray-600">
+                                      {handleIsChangeable(product) ? '✓' : digitsEnToFa('1')}
+                                    </td>
+                                    <td className="text-center text-sm text-gray-600">{generalSetting?.title}</td>
+                                    <td className="text-center">
+                                      {product.publishTime ? (
+                                        <span className="text-sm text-orange-400 font-medium">در انتظار</span>
+                                      ) : product.isActive ? (
+                                        <span className="text-sm text-green-500">فعال</span>
+                                      ) : (
+                                        <span className="text-sm text-red-500">غیر فعال</span>
+                                      )}
+                                    </td>
+                                    <td className="text-center text-sm text-gray-600">
+                                      <Menu as="div" className="dropdown">
+                                        <Menu.Button className="">
+                                          <div className="w-full flex justify-center items-center">
+                                            <span className="text-2xl hover:bg-gray-300 cursor-pointer  bg-gray-200 text-gray-700 p-1 pb-1.5 px-1.5 h-8 flex justify-center items-center rounded-md">
+                                              :
+                                            </span>
+                                          </div>
+                                        </Menu.Button>
+
+                                        <Transition
+                                          as={Fragment}
+                                          enter="transition ease-out duration-100"
+                                          enterFrom="transform opacity-0 scale-95"
+                                          enterTo="transform opacity-100 scale-100"
+                                          leave="transition ease-in duration-75"
+                                          leaveFrom="transform opacity-100 scale-100"
+                                          leaveTo="transform opacity-0 scale-95"
+                                        >
+                                          <Menu.Items className="dropdown__items w-32 ">
+                                            <Menu.Item>
+                                              {({ close }) => (
+                                                <>
+                                                  <Link
+                                                    href={`/admin/products/edit/${product.id}`}
+                                                    onClick={close}
+                                                    className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
+                                                  >
+                                                    <span>ویرایش</span>
+                                                  </Link>
+                                                  <button
+                                                    onClick={() => {
+                                                      handleDeleteTrash(product.id)
+                                                      close()
+                                                    }}
+                                                    className="flex justify-start gap-x-2 px-3 py-2 hover:bg-gray-100 w-full"
+                                                  >
+                                                    <span>زباله دان</span>
+                                                  </button>
+                                                </>
+                                              )}
+                                            </Menu.Item>
+                                          </Menu.Items>
+                                        </Transition>
+                                      </Menu>
+                                    </td>
+                                  </tr>
+                                ))}
+                            </tbody>
+                          </table>
+                        </DataStateDisplay>
+
+                        {productsIsPendingPagination &&
+                          productsIsPendingPagination.data &&
+                          productsIsPendingPagination?.data?.productsLength > 0 && (
+                            <div className="mx-auto py-4 lg:max-w-5xl">
+                              <Pagination
+                                pagination={productsIsPendingPagination?.data.pagination}
+                                section="_adminIsPublishTimeProducts"
                                 client
                               />
                             </div>

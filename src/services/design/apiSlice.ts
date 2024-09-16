@@ -6,6 +6,7 @@ import {
   GetArticlesResult,
   HeaderTextUpsertQuery,
   IdQuery,
+  StoreBrandBulkForm,
   StoreCategoryBulkForm,
   UpsertGeneralSettingQuery,
 } from './types'
@@ -14,6 +15,7 @@ import {
   IArticleBanner,
   IArticleBannerForm,
   IBanner,
+  IBrand,
   ICategory,
   IColumnFooter,
   ICopyright,
@@ -24,6 +26,7 @@ import {
   IPagination,
   IRedirect,
   ISloganFooter,
+  IStoreBrand,
   IStoreCategory,
   ISupport,
   QueryParams,
@@ -176,6 +179,14 @@ export const designApiSlice = baseApi.injectEndpoints({
       invalidatesTags: ['ColumnFooter'],
     }),
 
+    deleteFooterArticleColumn: builder.mutation<ServiceResponse<boolean>, string>({
+      query: (id) => ({
+        url: `/api/design/footerArticleColumn/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['ColumnFooter'],
+    }),
+
     upsertDesignItems: builder.mutation<ServiceResponse<boolean>, FormData>({
       query: (body) => {
         return {
@@ -318,6 +329,25 @@ export const designApiSlice = baseApi.injectEndpoints({
           : ['StoreCategories'],
     }),
 
+    getStoreBrands: builder.query<ServiceResponse<IStoreBrand[]>, void>({
+      query: () => {
+        return {
+          url: '/api/design/storeBrands',
+          method: 'GET',
+        }
+      },
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result.data.map(({ id }) => ({
+                type: 'StoreBrands' as const,
+                id: id,
+              })),
+              'StoreBrands',
+            ]
+          : ['StoreBrands'],
+    }),
+
     getStoreCategoryList: builder.query<ServiceResponse<ICategory[]>, void>({
       query: () => {
         return {
@@ -335,6 +365,25 @@ export const designApiSlice = baseApi.injectEndpoints({
               'StoreCategories',
             ]
           : ['StoreCategories'],
+    }),
+
+    getStoreBrandList: builder.query<ServiceResponse<IBrand[]>, void>({
+      query: () => {
+        return {
+          url: '/api/design/storeBrandList',
+          method: 'GET',
+        }
+      },
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result.data.map(({ id }) => ({
+                type: 'StoreBrands' as const,
+                id: id,
+              })),
+              'StoreBrands',
+            ]
+          : ['StoreBrands'],
     }),
 
     getSingleArticle: builder.query<ServiceResponse<IArticle>, IdQuery>({
@@ -376,6 +425,17 @@ export const designApiSlice = baseApi.injectEndpoints({
         }
       },
       invalidatesTags: ['StoreCategories'],
+    }),
+
+    upsertStoreBrands: builder.mutation<ServiceResponse<boolean>, StoreBrandBulkForm>({
+      query: (body) => {
+        return {
+          url: '/api/design/storeBrand',
+          method: 'POST',
+          body: body,
+        }
+      },
+      invalidatesTags: ['StoreBrands'],
     }),
 
     upsertArticleBanner: builder.mutation<ServiceResponse<boolean>, ArticleBannerBulkForm>({
@@ -420,6 +480,15 @@ export const designApiSlice = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['StoreCategories'],
     }),
+
+    deleteStoreBrand: builder.mutation<ServiceResponse<boolean>, string>({
+      query: (id) => ({
+        url: `/api/design/storeBrand/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['StoreBrands'],
+    }),
+
     deleteTrashArticle: builder.mutation<ServiceResponse<boolean>, IdQuery>({
       query: ({ id }) => {
         return {
@@ -486,6 +555,7 @@ export const {
   useDeleteStoreCategoryMutation,
   useGetStoreCategoriesQuery,
   useUpsertStoreCategoriesMutation,
+  useUpsertStoreBrandsMutation,
   useUpsertSloganFooterMutation,
   useGetSloganFooterQuery,
   useGetRedirectsQuery,
@@ -498,4 +568,8 @@ export const {
   useUpsertColumnFooterMutation,
   useGetStoreCategoryListQuery,
   useDeleteColumnFooterMutation,
+  useDeleteFooterArticleColumnMutation,
+  useDeleteStoreBrandMutation,
+  useGetStoreBrandListQuery,
+  useGetStoreBrandsQuery,
 } = designApiSlice

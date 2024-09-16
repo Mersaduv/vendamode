@@ -14,11 +14,12 @@ import type { ILoginForm } from '@/types'
 import type { NextPage } from 'next'
 import { LoginForm } from '@/components/form'
 import { digitsFaToEn } from '@persian-tools/persian-tools'
+import { useAppSelector } from '@/hooks'
 
 const LoginPage: NextPage = () => {
   // ? Assets
   const { replace, query } = useRouter()
-
+  const { generalSetting, logoImages } = useAppSelector((state) => state.design)
   // ? Login User
   const [login, { data, isSuccess, isError, isLoading, error }] = useLoginMutation()
 
@@ -48,8 +49,8 @@ const LoginPage: NextPage = () => {
           <title>مدیریت | ورود</title>
         </Head>
         <section className="container max-w-xl space-y-6 px-12 py-6 lg:rounded-lg lg:border-gray-100">
-          <Link className="flex justify-center" passHref href="/">
-            <img width={280} src={'/logo/Logo.png'} alt="Venda Mode" />
+          <Link className="flex justify-center pb-4" passHref href="/">
+            <img width={280} src={(logoImages?.orgImage && logoImages?.orgImage.imageUrl) || ''} alt="Venda Mode" />
           </Link>
 
           <LoginForm isLoading={isLoading} onSubmit={submitHander} />

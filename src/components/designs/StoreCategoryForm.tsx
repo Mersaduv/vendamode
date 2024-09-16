@@ -67,7 +67,7 @@ const StoreCategoryForm: React.FC<Props> = ({ storeCategories, setStoreCategorie
       )
       return
     }
-    setStoreCategories([...storeCategories, { id: '', categoryId: '' }])
+    setStoreCategories([...storeCategories, { id: '', categoryId: '', isActive: false }])
   }
 
   const handleDelete = (index: number, storeCategory: IStoreCategory) => {
@@ -82,31 +82,40 @@ const StoreCategoryForm: React.FC<Props> = ({ storeCategories, setStoreCategorie
   }
 
   const handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>, index: number) => {
-    const selectedCategoryId = event.target.value;
+    const selectedCategoryId = event.target.value
 
-    const newStoreCategories = storeCategories.map((category, i) => 
-        i === index ? { ...category, categoryId: selectedCategoryId } : category
-    );
+    const newStoreCategories = storeCategories.map((category, i) =>
+      i === index ? { ...category, categoryId: selectedCategoryId } : category
+    )
 
-    setStoreCategories(newStoreCategories);
-};
+    setStoreCategories(newStoreCategories)
+  }
 
   return (
     <div className="flex flex-1">
       <div className="bg-white w-full rounded-md shadow-item">
-        <div className="flex justify-between items-center border-b p-5 px-6">
+        {/* <div className="flex justify-between items-center border-b p-5 px-6">
           <h3 className=" text-gray-600 whitespace-nowrap">دسته بندی ها</h3>
           <div className="flex justify-end w-[260px] gap-4 items-center">
             <Button className=" px-5 py-2.5 bg-sky-500 hover:bg-sky-400" onClick={handleAddStoreCategory}>
               {'افزودن'}
             </Button>
           </div>
+        </div> */}
+        <div className="flex justify-between items-center border-b p-5 px-6">
+          <h3 className=" text-gray-600 whitespace-nowrap">دسته بندی ها</h3>
+          <div className="flex justify-end w-[260px] gap-4 items-center">
+            <Button className=" px-5 py-2.5 bg-sky-500 hover:bg-sky-400" onClick={handleAddStoreCategory}>
+              {'افزودن'}
+            </Button>
+            <ControlledCheckbox name="storeCategoryIsActive" control={control} label="وضعیت نمایش" inLabel />
+          </div>
         </div>
         <div className="flex flex-col px-6 pb-10 pt-4">
           <div className="flex justify-end mb-4"></div>
           <div className="grid w-full justify-center  grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 ">
             {storeCategories.length === 0 ? (
-              <div className="flex justify-center col-span-5">دسته بندی {generalSetting?.title} مورد نظر را اضافه کنید</div>
+              <div className="flex justify-center col-span-5">دسته بندی مورد نظر را اضافه کنید</div>
             ) : (
               storeCategories.map((storeCategory, index) => (
                 <div key={index} className="mb-4 w-full flex-1 rounded-lg  relative">
@@ -130,7 +139,7 @@ const StoreCategoryForm: React.FC<Props> = ({ storeCategories, setStoreCategorie
                             onChange={(e) => handleCategoryChange(e, index)}
                           >
                             <option className="appearance-none text-sm" value="">
-                              دسته بندی
+                            انتخاب دسته بندی
                             </option>
                             {allCategories?.map((category) => (
                               <option
@@ -152,7 +161,9 @@ const StoreCategoryForm: React.FC<Props> = ({ storeCategories, setStoreCategorie
           </div>
         </div>
         <div className="bg-gray-50 bottom-0 w-full rounded-b-lg px-8 flex flex-col pb-2">
-          <span className="font-normal text-[11px] pt-2">برای نمایش در صفحه اصلی ، یک دسته بندی انتخاب کنید</span>
+          <span className="font-normal text-[11px] pt-2">
+            دسته بندی مورد نظر را برای نمایش در صفحه اصلی انتخاب کنید
+          </span>
         </div>
       </div>
     </div>

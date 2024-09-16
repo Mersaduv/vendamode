@@ -41,7 +41,7 @@ const ArticleCombobox: React.FC<ArticleComboboxProps> = ({
   }
 
   return (
-    <div className="md:w-[318px] relative">
+    <div className="w-full relative">
       <Combobox value={controlledSelectedArticle} onChange={handleSelect}>
         <div className="relative">
           <Combobox.Button className="absolute w-full top-1 -left-1 flex items-center justify-end pr-2">

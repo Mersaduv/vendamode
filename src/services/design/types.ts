@@ -1,4 +1,4 @@
-import { IArticle, IArticleBannerForm, IColumnFooter, IPagination, IStoreCategory, ServiceResponse } from '@/types'
+import { IArticle, IArticleBannerForm, IColumnFooter, IPagination, IStoreBrand, IStoreCategory, ServiceResponse } from '@/types'
 
 export type IdQuery = { id: string }
 export type HeaderTextUpsertQuery = {
@@ -19,6 +19,9 @@ export type ArticleBannerBulkForm = {
 }
 export type StoreCategoryBulkForm = {
   storeCategories: IStoreCategory[]
+}
+export type StoreBrandBulkForm = {
+  storeBrands: IStoreBrand[]
 }
 export type ColumnFooterBulkForm = {
   columnFooters: IColumnFooter[]

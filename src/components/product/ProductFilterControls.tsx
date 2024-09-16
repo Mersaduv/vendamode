@@ -112,7 +112,7 @@ const ProductFilterControls: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (data?.data?.data) {
-      const filtered = data.data.data.filter((brand) => brand.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      const filtered = data.data.data.filter((brand) => brand.nameFa.toLowerCase().includes(searchTerm.toLowerCase()))
       setFilteredBrands(filtered)
     }
   }, [searchTerm, data])
@@ -287,7 +287,7 @@ const ProductFilterControls: React.FC<Props> = (props) => {
                           <div className="overflow-auto max-h-[105px]">
                             {filteredBrands.map((brand) => (
                               <div className="mb-1.5 flex justify-between px-4" key={brand.id}>
-                                <label className="ml-2">{brand.name}</label>
+                                <label className="ml-2">{brand.nameFa}</label>
                                 <input
                                   className="bg-gray-200 border-none rounded checked:bg-[#e90089]"
                                   type="checkbox"

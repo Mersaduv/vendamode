@@ -620,10 +620,13 @@ const Articles: NextPage = () => {
                                         )}
                                       </td>
                                       <td className="text-center text-sm text-gray-600">
-                                        <Link className="text-sky-500" href={`/`}>
-                                          {' '}
-                                          {digitsEnToFa(article.numReviews)}
-                                        </Link>
+                                        {article.numReviews === 0 ? (
+                                          '-'
+                                        ) : (
+                                          <Link className="text-sky-500" href={`/`}>
+                                            {'✓'}
+                                          </Link>
+                                        )}
                                       </td>
                                       <td
                                         title={

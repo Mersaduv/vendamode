@@ -4,7 +4,7 @@ export interface IColumnFooter {
   id?: string | undefined
   name: string
   index?: number
-  footerArticleColumn: IFooterArticleColumn[]
+  footerArticleColumns: IFooterArticleColumn[]
   created?: string
   lastUpdated?: string
 }

@@ -30,12 +30,13 @@ const DesignTabDashboardLayout: React.FC<DesignTabDashboardLayoutProps> = ({ chi
   const renderedTabs = useMemo(
     () =>
       tabs.map((tab) => (
-        <div
+        <a
           key={tab.path}
-          onClick={() => handleTabClick(tab.path)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && handleTabClick(tab.path)}
+          href={tab.path}
+          onClick={(e) => {
+            e.preventDefault()
+            handleTabClick(tab.path)
+          }}
           className={clsx(
             'px-3 py-2.5 whitespace-nowrap rounded-[10px] hover:shadow cursor-pointer text-sm',
             pathname.startsWith(tab.path) ? 'bg-[#e90089] text-white hover:bg-[#cf057b]' : 'bg-white text-black'
@@ -43,7 +44,7 @@ const DesignTabDashboardLayout: React.FC<DesignTabDashboardLayoutProps> = ({ chi
           aria-current={pathname.startsWith(tab.path) ? 'page' : undefined}
         >
           {tab.label}
-        </div>
+        </a>
       )),
     [handleTabClick, pathname]
   )

@@ -10,10 +10,14 @@ import {
 } from '@/services'
 import { IArticle } from '@/types'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-
+import { useEffect, useMemo, useState } from 'react'
+interface Article {
+  id: number
+  title: string
+}
 const Footer = () => {
   // ? States
+  const { logoImages } = useAppSelector((state) => state.design)
   const [columnFooters, setColumnFooters] = useState<IArticle[]>([])
   //  ? Query
   const { data: copyrightData, isLoading: isLoadingCopyright, isError: isErrorCopyright } = useGetCopyrightQuery()
@@ -36,22 +40,40 @@ const Footer = () => {
     pageSize: 9999,
   })
 
+  const {
+    data: columnFootersData,
+    isLoading: isLoadingColumnFooter,
+    isError: isErrorColumnFooter,
+  } = useGetColumnFootersQuery()
   useEffect(() => {
     if (articlesData) {
-      const filteredArticles = (articlesData.data?.data || []).filter(
-        (article: IArticle) => article.place !== 1 && article.place !== 0
-      )
-
-      const sortedArticles = filteredArticles.sort((a: IArticle, b: IArticle) => a.place - b.place)
-
-      setColumnFooters(sortedArticles)
     }
   }, [articlesData])
 
-  console.log(columnFooters, 'columnFooters')
+  const articleTitleMap = useMemo<Record<string, string>>(() => {
+    if (!articlesData?.data?.data) return {} as Record<string, string>
+    return articlesData.data?.data?.reduce((acc: Record<string, string>, article: IArticle) => {
+      acc[article.id] = article.title
+      return acc
+    }, {} as Record<string, string>)
+  }, [articlesData])
 
-  // ? States
-  const { logoImages } = useAppSelector((state) => state.design)
+  const getArticleTitleById = (articleId: string): string => {
+    return articleTitleMap[articleId] || 'عنوان موجود نیست'
+  }
+
+  const articleSlugMap = useMemo<Record<string, string>>(() => {
+    if (!articlesData?.data?.data) return {} as Record<string, string>
+    return articlesData.data?.data?.reduce((acc: Record<string, string>, article: IArticle) => {
+      acc[article.id] = article.slug
+      return acc
+    }, {} as Record<string, string>)
+  }, [articlesData])
+
+  const getArticleSlugById = (articleId: string): string => {
+    return articleSlugMap[articleId] || 'اسلک موجود نیست'
+  }
+
   return (
     <footer className="w-full bg-gray-100 text-gray-800 py-8 mt-20">
       <div className="mx-auto flex flex-col px-8">
@@ -64,9 +86,8 @@ const Footer = () => {
             />
           </div>
 
-          <div className=" w-full bg-blue-950 my-8 rounded-lg">
+          <div className="w-full bg-blue-950 my-8 rounded-lg">
             <div className="flex items-center w-full">
-              {' '}
               <div className="text-white flex flex-col justify-center pr-6 h-full w-[30%]">
                 <div className="text-[#e90089] line-clamp-2 overflow-hidden text-ellipsis">
                   {supportData?.data?.contactAndSupport}
@@ -78,40 +99,73 @@ const Footer = () => {
                   {designItemsData?.data
                     ?.filter((item) => item.type === 'services')
                     .map((designItem) => {
-                      return (
-                        <a key={designItem.id} href={designItem.link}>
+                      const validLink = designItem.link
+                        ? designItem.link.startsWith('http')
+                          ? designItem.link
+                          : `https://${designItem.link}`
+                        : '#'
+
+                      return designItem.link !== '' ? (
+                        <a key={designItem.id} href={validLink}>
                           <div className="flex justify-center flex-col items-center gap-1.5">
                             <img
                               className="w-[50px] h-[50px]"
-                              src={designItem.image.imageUrl}
+                              src={designItem.image?.imageUrl || '/default-image.jpg'}
                               alt={designItem.title || 'تصویر سرویس ها'}
                             />
                             <div className="text-center text-white text-xs">{designItem.title || ''}</div>
                           </div>
                         </a>
+                      ) : (
+                        <div key={designItem.id}>
+                          <div className="flex justify-center flex-col items-center gap-1.5">
+                            <img
+                              className="w-[50px] h-[50px]"
+                              src={designItem.image?.imageUrl || '/default-image.jpg'}
+                              alt={designItem.title || 'تصویر سرویس ها'}
+                            />
+                            <div className="text-center text-white text-xs">{designItem.title || ''}</div>
+                          </div>
+                        </div>
                       )
                     })}
                 </div>
               </div>
               <div className="flex flex-col pt-0 justify-center h-full w-[30%] pl-2 pr-6 gap-1">
-                <div className="text-white flex flex-col justify-center ">
+                <div className="text-white flex flex-col justify-center">
                   <div className="text-[#e90089] whitespace-nowrap">همراه ما باشید</div>
                 </div>
-                <div className="flex flex-col  justify-center">
+                <div className="flex flex-col justify-center">
                   <div className="flex gap-4 flex-wrap">
                     {designItemsData?.data
                       ?.filter((item) => item.type === 'socialMedia')
                       .map((designItem) => {
-                        return (
-                          <a key={designItem.id} href={designItem.link}>
+                        const validLink = designItem.link
+                          ? designItem.link.startsWith('http')
+                            ? designItem.link
+                            : `https://${designItem.link}`
+                          : '#'
+
+                        return designItem.link !== '' ? (
+                          <a title={designItem.title} key={designItem.id} href={validLink}>
                             <div>
                               <img
                                 className="w-[30px] h-[30px]"
-                                src={designItem.image.imageUrl}
+                                src={designItem.image?.imageUrl || '/default-image.jpg'}
                                 alt={designItem.title || 'تصویر شبکه های اجتماعی'}
                               />
                             </div>
                           </a>
+                        ) : (
+                          <div title={designItem.title} key={designItem.id}>
+                            <div>
+                              <img
+                                className="w-[30px] h-[30px]"
+                                src={designItem.image?.imageUrl || '/default-image.jpg'}
+                                alt={designItem.title || 'تصویر شبکه های اجتماعی'}
+                              />
+                            </div>
+                          </div>
                         )
                       })}
                   </div>
@@ -135,52 +189,23 @@ const Footer = () => {
               />
             </div>
             {/*column footers*/}
-            {columnFooters.length > 0 ? (
-              <div className="flex justify-between w-full">
-                <div className=" flex justify-around w-full">
-                  {columnFooters[0] && (
-                    <div className="mb-8 lg:mb-0  text-center lg:text-start">
-                      <h3 className="text-lg font-bold">{columnFooters[0].title}</h3>
-                      <div
-                        className="ck ck-content ck-editor__editable ck-rounded-corners ck-editor__editable_inline ck-blurred"
-                        dangerouslySetInnerHTML={{ __html: columnFooters[0].description }}
-                      />
-                    </div>
-                  )}
-
-                  {columnFooters[1] && (
-                    <div className="mb-8 lg:mb-0  text-center lg:text-start">
-                      <h3 className="text-lg font-bold">{columnFooters[1].title}</h3>
-                      <div
-                        className="ck ck-content ck-editor__editable ck-rounded-corners ck-editor__editable_inline ck-blurred"
-                        dangerouslySetInnerHTML={{ __html: columnFooters[1].description }}
-                      />
-                    </div>
-                  )}
-
-                  {columnFooters[2] && (
-                    <div className="mb-8 lg:mb-0  text-center lg:text-start">
-                      <h3 className="text-lg font-bold">{columnFooters[2].title}</h3>
-                      <div
-                        className="ck ck-content ck-editor__editable ck-rounded-corners ck-editor__editable_inline ck-blurred"
-                        dangerouslySetInnerHTML={{ __html: columnFooters[2].description }}
-                      />
-                    </div>
-                  )}
-
-                  {columnFooters[3] && (
-                    <div className="mb-8 lg:mb-0  text-center lg:text-start">
-                      <h3 className="text-lg font-bold">{columnFooters[3].title}</h3>
-                      <div
-                        className="ck ck-content ck-editor__editable ck-rounded-corners ck-editor__editable_inline ck-blurred"
-                        dangerouslySetInnerHTML={{ __html: columnFooters[3].description }}
-                      />
-                    </div>
-                  )}
-                  
+            <div className="flex justify-between w-full">
+              {columnFootersData?.data?.map((columnFooterItem) => (
+                <div key={columnFooterItem.id} className="mb-8 lg:mb-0 text-center lg:text-start">
+                  <h3 className="text-lg font-bold">{columnFooterItem.name}</h3>
+                  <div className="flex flex-col">
+                    {columnFooterItem.footerArticleColumns.map((footerArticleColumn) => (
+                      <Link
+                        href={`/articles/${getArticleSlugById(footerArticleColumn.articleId)}`}
+                        key={footerArticleColumn.id}
+                      >
+                        {getArticleTitleById(footerArticleColumn.articleId)}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ) : null}
+              ))}
+            </div>
           </div>
         </div>
         <div className="flex justify-center border-t pt-6">

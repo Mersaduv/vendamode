@@ -21,8 +21,12 @@ export interface IProduct {
   price: number
   isFake: boolean
   isActive: boolean
+  date: any
+  parsedDate: string | null
+  publishTime: boolean
   isDeleted: boolean
   status: number
+  productType: number
   brandId?: string
   brandName?: string
   brandData: IBrand
@@ -59,6 +63,8 @@ export interface GetStockItems {
   idx?: string
   quantity: number
   price: number
+  weight: number
+  purchasePrice: number
   discount: number
   discountRemainingTime?: string
   [key: string]: any
