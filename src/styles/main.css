@@ -41,6 +41,7 @@
     .shadow-article {
       box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;
     }
+
   }
   @media (max-width: 640px) {
     .h-slider{
@@ -49,6 +50,17 @@
   }
   .margin-brandSlider {
     margin-top: 55px !important;
+  }
+  .rmdp-input {
+    border: 1px solid #c0c4d6 !important;
+    border-radius: 5px 0 0 5px !important;
+    height: 42px !important;
+    width: 100% !important;
+    padding: 0 0px !important;
+    text-align: center;
+  }
+  .rmdp-container {
+    width: 100% !important;
   }
 .shadow-article-banner {
   box-shadow: rgb(208, 208, 208) -2px 0px 5px 2px;
@@ -577,6 +589,39 @@ color: red;
         padding-right: 0 !important;
         padding-left:0 !important;
       }
+      .new-brand-slider {
+        padding-right: 42px !important;
+        padding-left:42px !important;
+      }
+      .new-brand-slider  .owl-nav .owl-prev .custom-prev{
+        background-color: #f0eeee; 
+        border: none;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        margin: 0 5px;
+        position: absolute !important;
+        z-index: 10;
+        left: -30px;
+        bottom: -10px;
+      }
+  
+      .new-brand-slider .owl-nav .owl-next .custom-next{
+        background-color: #f0eeee; 
+        border: none;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        margin: 0 5px;
+        position: absolute;
+        z-index: 10;
+        right: -30px;
+        bottom: -10px;
+      }
     }
 
     .custom-next img , .custom-prev img {
@@ -591,8 +636,8 @@ color: red;
     .owl-stage-outer {
       
       /* width: 93%; */
-padding: 10px;
-padding-top: 20px;
+      padding: 10px;
+      padding-top: 20px;
     }
     .owl-stage{
     }
@@ -609,6 +654,9 @@ padding-top: 20px;
       /* margin: 0 50px; */
       padding-right: 50px;
       padding-left:50px;
+  }
+  .new-brand-slider .owl-nav {
+    margin-top: -130px !important;
   }
     .owl-nav {
       width: 100%;
@@ -662,27 +710,8 @@ padding-top: 20px;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
 }
 
+ 
 
-.custom-next, .custom-prev {
-    background-color: #ff0000;
-}
-  
-.custom-next {
-    right: 10px;
-}
-  
-.custom-prev {
-    left: 10px;
-}
-.custom-next:hover, .custom-prev:hover {
-    background-color: #555;
-}
-  
-
-.swiper-button-next {
-    background-color: #ff0000;
-color: red;
-}
 
 @media (max-width: 766px) {
     .shadow-add {
@@ -697,62 +726,3 @@ color: red;
       scrollbar-color: #b7bdc2 transparent;
     }
 }
-.ql-editor {
-    height: 515px;
-    direction: rtl;
-    text-align: right;
-    height: 355px !important; 
-}
-.ql-editor p{
-    border-radius: 6px;
-    direction: rtl;
-    text-align: right;
-}
-.ql-blank{
-}
-
-.ql-picker-label {
-    display: flex;
-    justify-content: space-between;
-}
-.ql-picker-label svg{
-display: none;
-}
-
-.ql-toolbar{
- margin-top: 14px;
- margin-bottom: 8px;
-border: solid gray 1px;
-border-radius: 6px;
-}
-.ql-container {
-    margin-top: 10px;
-}
-
-.ql-container.ql-snow {
-    border:1px solid #ccc !important;
-    border-radius: 6px
-}
-
-.quill {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding-right: 14px;
-    padding-left: 14px; 
-    padding-bottom: 16px;
-}
-
-.custom-z {
-    z-index: 6;
-}
-.custom-z2 {
-    z-index: 7;
-}
-.custom-z3 {
-    z-index:9;
-}
-.custom-z4 {
-    z-index:9;
-}
-

@@ -12,6 +12,7 @@ import {
   useGetArticlesQuery,
   useGetBrandsQuery,
   useGetProductsQuery,
+  useGetStoreBrandListQuery,
 } from '@/services'
 import config from '@/configs'
 import {
@@ -120,16 +121,22 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
     }
   )
 
+  // const {
+  //   data: brandData,
+  //   isLoading: isLoadingBrand,
+  //   isFetching: isFetchingBrand,
+  //   isError: isErrorBrand,
+  // } = useGetBrandsQuery({
+  //   page: 1,
+  //   pageSize: 99999,
+  //   isActiveSlider: true,
+  // })
   const {
-    data: brandData,
-    isLoading: isLoadingBrand,
+    data: storeBrandData,
+    isLoading: isLoadingStoreBrand,
     isFetching: isFetchingBrand,
     isError: isErrorBrand,
-  } = useGetBrandsQuery({
-    page: 1,
-    pageSize: 99999,
-    isActiveSlider: true,
-  })
+  } = useGetStoreBrandListQuery()
 
   const {
     data: articleData,
@@ -237,15 +244,27 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
           )}
 
           {/* brand slider */}
-          {brandData && brandData.data?.data && brandData.data?.data?.length > 0 && (
+          {/* {storeBrandData && storeBrandData.data && storeBrandData.data.length > 0 && (
             <div className="margin-brandSlider ">
-              <BrandSlider brandData={brandData} isFetching={isFetchingBrand} />
+              <BrandSlider brandData={storeBrandData.data} isFetching={isFetchingBrand} />
               <hr className="pb-8 mx-8 border-t-2 mt-6" />
+            </div>
+          )} */}
+          {storeBrandData && storeBrandData.data && storeBrandData.data.length > 0 && (
+            <div className="sm:margin-brandSlider py-28 sm:pt-0">
+              <BrandSlider brandData={storeBrandData.data} isFetching={isFetchingBrand} />
+              <div className="text-center mt-[200px]">
+                <div
+                  className=" rounded-lg py-2 px-8"
+                >
+                </div>
+              </div>
+              <hr className="pb-20 mx-8 border-t-2 mt-16" />
             </div>
           )}
 
           {/* best seller slider */}
-          {bestSellingProductsData && bestSellingProductsData.length && (
+          {bestSellingProductsData && bestSellingProductsData.length > 0 && (
             <div className="pt-28 sm:pt-0 relative">
               <div className="w-full block text-center px-3 line-clamp-2 overflow-hidden text-ellipsis  sm:hidden whitespace-nowrap -mt-20 text-lg text-gray-400 ">
                 پرفروش های
@@ -286,7 +305,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
 
           {/* Readable Article Place slider */}
           {articleData && articleData.data && articleData.data.data && articleData.data.data.length > 0 && (
-            <div className="sm:margin-brandSlider">
+            <div className="sm:margin-brandSlider pt-28 sm:pt-0">
               <h1 className="w-full text-center text-gray-400 font-normal text-lg">خواندنی ها</h1>
               <ReadableArticlePlace isFetching={isFetchingArticle} articleData={articleData} />
               <div className="text-center mt-[200px]">

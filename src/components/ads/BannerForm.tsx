@@ -276,7 +276,7 @@ const BannerForm: React.FC<BannerFormProps> = ({ banners, setBanners }) => {
                           disabled={banner.type !== 'category'}
                         >
                           <option className="appearance-none text-sm" value="">
-                            دسته بندی
+                          انتخاب دسته بندی
                           </option>
                           {allCategories?.map((category) => (
                             <option

@@ -1,4 +1,4 @@
-import { IArticle, IColumnFooter, ITextMarqueeForm } from '@/types'
+import { IArticle, IColumnFooter, IFooterArticleColumn, ITextMarqueeForm } from '@/types'
 import { profileFormSchema, textMarqueeSchema } from '@/utils'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useForm } from 'react-hook-form'
@@ -10,21 +10,21 @@ import { showAlert } from '@/store'
 import { useAppDispatch } from '@/hooks'
 import { MdClose } from 'react-icons/md'
 import { digitsEnToFa } from '@persian-tools/persian-tools'
-import { useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { BiAddToQueue } from 'react-icons/bi'
 import { Plus } from '@/icons'
 import { useGetArticlesQuery } from '@/services'
 import { ArticleCombobox } from '../selectorCombobox'
 interface Props {
-  setColumnFooter: React.Dispatch<React.SetStateAction<IColumnFooter[]>>
+  setColumnFooter: Dispatch<SetStateAction<IColumnFooter[]>>
   columnFooters: IColumnFooter[]
-  setDeletedColumnFooter: React.Dispatch<React.SetStateAction<IColumnFooter[]>>
+  setDeletedFooterArticle: Dispatch<SetStateAction<IFooterArticleColumn[]>>
 }
-const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDeletedColumnFooter }) => {
+const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDeletedFooterArticle }) => {
   const { control, setValue } = useFormContext()
   const dispatch = useAppDispatch()
-  const [selectedArticles, setSelectedArticles] = useState<(IArticle | null)[]>([])
 
+  // ? Queries
   const {
     data: articleData,
     isLoading: isLoadingArticle,
@@ -34,8 +34,39 @@ const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDe
     pageSize: 99999,
   })
 
+  // ? States
+  const [selectedArticles, setSelectedArticles] = useState<(IArticle | null)[][]>([])
+
+  // ? Effect for initializing selectedArticles
   useEffect(() => {
-    const columnFootersWithName = columnFooters.filter((columnFooter) => columnFooter.name !== '')
+    if (articleData && columnFooters) {
+      const updatedSelectedArticles = columnFooters.map((columnFooter) =>
+        columnFooter.footerArticleColumns.map((footerArticleColumn) => {
+          const matchedArticle = articleData?.data?.data?.find(
+            (article) => article.id === footerArticleColumn.articleId
+          )
+          return matchedArticle || null
+        })
+      )
+
+      setSelectedArticles(updatedSelectedArticles)
+    }
+  }, [articleData, columnFooters])
+
+  useEffect(() => {
+    const updatedColumnFooters = columnFooters.map((columnFooter) => {
+      const filteredFooterArticleColumns = columnFooter.footerArticleColumns.filter(
+        (footerArticle) => footerArticle.articleId !== ''
+      )
+
+      return {
+        ...columnFooter,
+        footerArticleColumns: filteredFooterArticleColumns,
+      }
+    })
+
+    const columnFootersWithName = updatedColumnFooters.filter((columnFooter) => columnFooter.name !== '')
+
     setValue('columnFooters', columnFootersWithName)
   }, [columnFooters, setValue])
 
@@ -48,25 +79,79 @@ const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDe
     setColumnFooter(newColumnFooters)
   }
 
-  const handleAdd = () => {
-    
+  const handleAdd = (index: number) => {
+    const updatedColumnFooters = columnFooters.map((columnFooter, i) => {
+      if (i === index) {
+        const updatedFooterArticleColumn = [
+          ...columnFooter.footerArticleColumns,
+          { id: '', articleId: '', index: columnFooter.footerArticleColumns.length + 1 },
+        ]
+
+        return {
+          ...columnFooter,
+          footerArticleColumns: updatedFooterArticleColumn,
+        }
+      }
+
+      return columnFooter
+    })
+
+    setColumnFooter(updatedColumnFooters)
+
+    const newSelectedArticles = [...selectedArticles]
+    newSelectedArticles[index] = [...(selectedArticles[index] || []), null]
+    setSelectedArticles(newSelectedArticles)
   }
 
-  const handleArticleSelect = (article: IArticle, index: number) => {
+  const handleRemove = (columnIndex: number, footerIndex: number) => {
+    const updatedColumnFooters = columnFooters.map((columnFooter, i) => {
+      if (i === columnIndex) {
+        var footerArticleColumn = columnFooter.footerArticleColumns.find((_, idx) => idx === footerIndex)
+
+        if (footerArticleColumn !== undefined && footerArticleColumn.id) {
+          setDeletedFooterArticle((prevDeleted) => [...prevDeleted, footerArticleColumn!])
+        }
+        const updatedFooterArticleColumn = columnFooter.footerArticleColumns.filter((_, idx) => idx !== footerIndex)
+        return {
+          ...columnFooter,
+          footerArticleColumns: updatedFooterArticleColumn,
+        }
+      }
+
+      return columnFooter
+    })
+
+    setColumnFooter(updatedColumnFooters)
+
+    const newSelectedArticles = [...selectedArticles]
+    newSelectedArticles[columnIndex] = newSelectedArticles[columnIndex].filter((_, idx) => idx !== footerIndex)
+    setSelectedArticles(newSelectedArticles)
+  }
+
+  const handleArticleSelect = (article: IArticle, columnIndex: number, footerIndex: number) => {
     if (!article) return
 
     const updatedSelectedArticles = [...selectedArticles]
-    const updatedArticleBanners = [...articleBanners]
-
-    if (article.title === 'انتخاب کنید') {
-      updatedArticleBanners[index] = { ...updatedArticleBanners[index], articleId: '' }
-    } else {
-      updatedSelectedArticles[index] = article
-      updatedArticleBanners[index] = { ...updatedArticleBanners[index], articleId: article.id }
-    }
-
+    updatedSelectedArticles[columnIndex][footerIndex] = article
     setSelectedArticles(updatedSelectedArticles)
-    setArticleBanners(updatedArticleBanners)
+
+    const updatedColumnFooters = columnFooters.map((columnFooter, i) => {
+      if (i === columnIndex) {
+        const updatedFooterArticleColumns = [...columnFooter.footerArticleColumns]
+        updatedFooterArticleColumns[footerIndex] = {
+          ...updatedFooterArticleColumns[footerIndex],
+          articleId: article.id,
+        }
+        return {
+          ...columnFooter,
+          footerArticleColumns: updatedFooterArticleColumns,
+        }
+      }
+
+      return columnFooter
+    })
+
+    setColumnFooter(updatedColumnFooters)
   }
 
   return (
@@ -74,48 +159,80 @@ const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDe
       <div className="bg-white flex flex-col justify-between w-full rounded-md shadow-item">
         <div>
           <div className="flex justify-between items-center border-b p-5 px-6">
-            <h3 className=" text-gray-600 whitespace-nowrap">ستون فوتر</h3>
+            <h3 className="text-gray-600 whitespace-nowrap">ستون فوتر</h3>
           </div>
-          <div className="flex flex-col sm:flex-row  py-10 pt-6 gap-4">
+          <div className="flex flex-col sm:flex-row py-6 pt-8  gap-4">
             {columnFooters.length === 0 ? (
               <div className="text-center w-full">ستون ها خالی است</div>
             ) : (
               <div className="flex flex-col items-center md:flex-row w-full">
                 {columnFooters.map((columnFooter, index) => {
                   return (
-                    <div key={index} className="mb-4 w-full max-w-[25%] flex-1 rounded-lg flex items-center gap-1 px-4">
-                      <div className="w-full relative">
-                        <input
-                          type="text"
-                          placeholder={`ستون ${digitsEnToFa(index + 1)}`}
-                          value={columnFooter.name}
-                          onChange={(e) => handleInputChange(index, e.target.value)}
-                          className={`peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-clip-padding px-3 py-4 text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]`}
-                          id="floatingCopy"
+                    <div
+                      key={index}
+                      className="mb-4 w-full max-w-[25%] h-full flex-1 rounded-lg flex flex-col items-center justify-start gap-1 px-4"
+                    >
+                      <div className="flex items-center gap-1 w-full">
+                        <div className="w-full relative">
+                          <input
+                            type="text"
+                            placeholder={`ستون ${digitsEnToFa(index + 1)}`}
+                            value={columnFooter.name}
+                            onChange={(e) => handleInputChange(index, e.target.value)}
+                            className={`peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-clip-padding px-3 py-4 text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]`}
+                            id="floatingCopy"
+                          />
+                          <label
+                            htmlFor="floatingCopy"
+                            className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-2 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
+                          >
+                            ستون {digitsEnToFa(index + 1)}{' '}
+                          </label>
+                        </div>
+                        <Plus
+                          onClick={() => handleAdd(index)}
+                          className="text-4xl text-[#e90089] hover:text-[#ff6ac1] cursor-pointer"
                         />
-                        <label
-                          htmlFor="floatingCopy"
-                          className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-2 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
-                        >
-                          ستون {digitsEnToFa(index + 1)}{' '}
-                        </label>
                       </div>
-                      <Plus onClick={handleAdd} className="text-4xl text-[#e90089]" />
+                      <div className="w-full space-y-5 mt-4">
+                        {[...columnFooter.footerArticleColumns]
+                          .sort((a, b) => {
+                            const dateA = b.lastUpdated ? new Date(b.lastUpdated).getTime() : 0
+                            const dateB = a.lastUpdated ? new Date(a.lastUpdated).getTime() : 0
+                            return dateB - dateA
+                            // return dateA - dateB
+                          })
+                          .map((footerArticle, footerIndex) => (
+                            <div
+                              key={footerIndex}
+                              className="flex w-full flex-col justify-center items-center gap-3 relative"
+                            >
+                              <div
+                                className="absolute cursor-pointer -top-2 -right-2 shadow-product bg-gray-50 z-40 hover:bg-red-600 hover:text-white p-1 rounded-full text-gray-500"
+                                onClick={() => handleRemove(index, footerIndex)}
+                              >
+                                <MdClose className="text-lg" /> {/* Add your delete icon here */}
+                              </div>
+                              <ArticleCombobox
+                                articles={articleData?.data?.data ?? []}
+                                selectedArticle={
+                                  selectedArticles[index] && selectedArticles[index][footerIndex]
+                                    ? selectedArticles[index][footerIndex]
+                                    : null
+                                }
+                                setSelectedArticle={(article) =>
+                                  handleArticleSelect(article as IArticle, index, footerIndex)
+                                }
+                                onArticleSelect={(article) =>
+                                  handleArticleSelect(article as IArticle, index, footerIndex)
+                                }
+                              />
+                            </div>
+                          ))}
+                      </div>
                     </div>
                   )
                 })}
-
-                {/* {articleBanners.map((articleBanner, index) => (
-                  <div key={index} className="flex w-full flex-col justify-center items-center gap-3">
-                    <span className="text-center">بنر {digitsEnToFa(articleBanner.index)}</span>
-                    <ArticleCombobox
-                      articles={articleData?.data?.data ?? []}
-                      selectedArticle={selectedArticles[index]}
-                      setSelectedArticle={(article) => handleArticleSelect(article as IArticle, index)}
-                      onArticleSelect={(article) => handleArticleSelect(article as IArticle, index)}
-                    />
-                  </div>
-                ))} */}
               </div>
             )}
           </div>

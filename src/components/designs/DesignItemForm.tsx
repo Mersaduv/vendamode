@@ -54,14 +54,12 @@ const DesignItemForm: React.FC<Props> = ({
     if (files) {
       const validFiles: any[] = []
 
-      // تعیین مقادیر پیش‌فرض
-      let maxFileSize = 15 * 1024 // 15 کیلوبایت
+      let maxFileSize = 15 * 1024
       let exactWidth = 50
       let exactHeight = 50
 
-      // بررسی نوع آیتم
       if (newDesignItems[index].type === 'services') {
-        maxFileSize = 60 * 1024 // 60 کیلوبایت
+        maxFileSize = 60 * 1024
         exactWidth = 250
         exactHeight = 250
       }
@@ -181,7 +179,9 @@ const DesignItemForm: React.FC<Props> = ({
                             <img
                               src={URL.createObjectURL(designItem.thumbnail)}
                               alt="Design Item"
-                              className="w-[210px] h-[125px] object-contain rounded-md"
+                              className={`${
+                                type === 'lists' || type === 'socialMedia' ? 'w-[50px] h-[125px]' : 'w-[210px] h-[125px]'
+                              } object-contain rounded-md`}
                             />
                           ) : (
                             <img

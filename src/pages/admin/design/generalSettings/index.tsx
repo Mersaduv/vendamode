@@ -42,7 +42,6 @@ const fetchImageAsFile = async (url: string): Promise<File> => {
 }
 interface FormData {
   designItems: IDesignItemForm[]
-  storeCategories: IStoreCategory[]
   redirects: IRedirect
 }
 const GeneralSettings: NextPage = () => {
@@ -52,7 +51,6 @@ const GeneralSettings: NextPage = () => {
   const methods: UseFormReturn<FormData> = useForm<FormData>({
     defaultValues: {
       designItems: [],
-      storeCategories: [],
       redirects: {},
     },
   })
@@ -64,12 +62,6 @@ const GeneralSettings: NextPage = () => {
   const [deletedDesignItems, setDeletedDesignItems] = useState<IDesignItemForm[]>([])
 
   // ? Query
-  const {
-    data: storeCategoriesData,
-    isLoading: isLoadingStoreCategories,
-    isError: isErrorStoreCategories,
-  } = useGetStoreCategoriesQuery()
-
   const {
     data: designItemsData,
     isLoading: isLoadingDesignItems,
@@ -86,15 +78,6 @@ const GeneralSettings: NextPage = () => {
       error: upsertRedirectError,
     },
   ] = useUpsertRedirectsMutation()
-  const [
-    upsertStoreCategory,
-    {
-      isLoading: isUpsertLoadingStoreCategory,
-      isSuccess: isUpsertSuccessStoreCategory,
-      isError: isUpsertErrorStoreCategory,
-      error: upsertStoreCategoryError,
-    },
-  ] = useUpsertStoreCategoriesMutation()
   const [
     upsertDesignItems,
     {
@@ -117,16 +100,6 @@ const GeneralSettings: NextPage = () => {
     },
   ] = useDeleteDesignItemsMutation()
 
-  const [
-    deleteStoreCategory,
-    {
-      isSuccess: isSuccessDeleteStoreCategory,
-      isError: isErrorDeleteStoreCategory,
-      error: errorDeleteStoreCategory,
-      data: dataDeleteStoreCategory,
-      isLoading: isLoadingDeleteStoreCategory,
-    },
-  ] = useDeleteStoreCategoryMutation()
 
   // ? SUBMIT From
   const onSubmit = async (data: FormData) => {
@@ -158,18 +131,6 @@ const GeneralSettings: NextPage = () => {
       promises.push(upsertRedirectPromise)
     }
 
-    // ? delete Store Category
-    if (deletedStoreCategories.length > 0) {
-      promises.push(
-        Promise.all(
-          deletedStoreCategories.map((deletedStoreCategory) => {
-            if (deletedStoreCategory.id) {
-              return deleteStoreCategory(deletedStoreCategory.id)
-            }
-          })
-        )
-      )
-    }
     // design items
     const upsertDesignItemsPromise = (async () => {
       if (data.designItems && data.designItems.length > 0) {
@@ -188,23 +149,6 @@ const GeneralSettings: NextPage = () => {
       }
     })()
     promises.push(upsertDesignItemsPromise)
-
-    // store Categories items
-    if (data.storeCategories && data.storeCategories.length > 0) {
-      const upsertStoreCategoryPromise = (async () => {
-        const storeCategories: IStoreCategory[] = data.storeCategories.map((storeCategory, index) => ({
-          id: storeCategory.id || undefined,
-          categoryId: storeCategory.categoryId || undefined,
-        }))
-
-        const jsonData: StoreCategoryBulkForm = {
-          storeCategories: storeCategories,
-        }
-
-        await upsertStoreCategory(jsonData)
-      })()
-      promises.push(upsertStoreCategoryPromise)
-    }
 
     await Promise.all(promises)
   }
@@ -235,18 +179,14 @@ const GeneralSettings: NextPage = () => {
       }
 
       setListItems(listItems)
-      if (storeCategoriesData?.data) {
-        setStoreCategories(storeCategoriesData.data)
-      }
-
       methods.reset({
-        storeCategories: storeCategoriesData?.data || [],
+
         redirects: redirectData?.data || {},
       })
     }
 
     loadAllData()
-  }, [storeCategoriesData, designItemsData, redirectData, methods])
+  }, [designItemsData, redirectData, methods])
 
   //   handle success alert
   useEffect(() => {
@@ -256,9 +196,6 @@ const GeneralSettings: NextPage = () => {
 
     if (isUpsertErrorDesignItems) {
       errors.push('به‌روزرسانی  فهرست')
-    }
-    if (isUpsertErrorStoreCategory) {
-      errors.push('به‌روزرسانی دسته بندی')
     }
     if (isUpsertErrorRedirect) {
       errors.push('به‌روزرسانی ریدایرکت')
@@ -271,10 +208,8 @@ const GeneralSettings: NextPage = () => {
     if (
       isUpsertSuccessRedirect ||
       isUpsertSuccessDesignItems ||
-      isUpsertSuccessStoreCategory ||
       isUpsertErrorRedirect ||
-      isUpsertErrorDesignItems ||
-      isUpsertErrorStoreCategory
+      isUpsertErrorDesignItems
     ) {
       dispatch(
         showAlert({
@@ -286,10 +221,8 @@ const GeneralSettings: NextPage = () => {
   }, [
     isUpsertSuccessRedirect,
     isUpsertSuccessDesignItems,
-    isUpsertSuccessStoreCategory,
     isUpsertErrorRedirect,
     isUpsertErrorDesignItems,
-    isUpsertErrorStoreCategory,
   ])
 
   const showAlertForMaxItems = (type: string) => {
@@ -328,7 +261,7 @@ const GeneralSettings: NextPage = () => {
         break
     }
   }
-  const isFormSubmitting = isUpsertDesignItemsSetting || isUpsertLoadingStoreCategory || isUpsertLoadingRedirect
+  const isFormSubmitting = isUpsertDesignItemsSetting || isUpsertLoadingRedirect
   return (
     <>
       <DashboardLayout>
@@ -344,16 +277,6 @@ const GeneralSettings: NextPage = () => {
                 setDesignItems={setListItems}
                 setDeletedDesignItems={setDeletedDesignItems}
                 onAddDesignItem={() => handleAddDesignItem('lists')}
-              />
-              <StoreCategoryForm
-                setDeletedStoreCategories={setDeletedStoreCategories}
-                setStoreCategories={setStoreCategories}
-                storeCategories={storeCategories}
-              />
-              <StoreBrandForm
-                setDeletedStoreCategories={setDeletedStoreCategories}
-                setStoreCategories={setStoreCategories}
-                storeCategories={storeCategories}
               />
               <RedirectForm />
               <div className="w-full flex justify-end mt-6">

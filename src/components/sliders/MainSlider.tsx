@@ -32,12 +32,7 @@ const MainSlider: React.FC<Props> = (props) => {
   )
 
   // ? Render(s)
-  if (data?.filter((item) => item.isActive).length === 0)
-    return (
-      <div className="w-full mt-24 ">
- 
-      </div>
-    )
+  if (data?.filter((item) => item.isActive).length === 0) return <div className="w-full mt-24 "></div>
 
   return (
     <section className={`section-swiper ${isActive ? '' : ''} relative`}>
@@ -55,11 +50,17 @@ const MainSlider: React.FC<Props> = (props) => {
           .map((item, index) => (
             <SwiperSlide key={index}>
               {item.type === 'link' ? (
-                <a href={item.link} target="_blank" className="">
-                  <SliderImage index={index} item={item} />
-                </a>
+                item.link !== '' ? (
+                  <a href={item.link.startsWith('http') ? item.link : `https://${item.link}`} className="">
+                    <SliderImage index={index} item={item} />
+                  </a>
+                ) : (
+                  <div className="">
+                    <SliderImage index={index} item={item} />
+                  </div>
+                )
               ) : item.type === 'category' ? (
-                <a href={`/products?categoryId=${item.categoryId}`} target="_blank" className="">
+                <a href={`/products?categoryId=${item.categoryId}`} className="">
                   <SliderImage index={index} item={item} />
                 </a>
               ) : (

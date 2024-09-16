@@ -75,9 +75,10 @@ const Header = () => {
                   ?.filter((item) => item.type === 'lists')
                   .map((designItem) => {
                     return (
-                      <div
+                      <a
                         className="flex gap-2 border-[#e90089] hover:border-b-2 cursor-pointer py-3"
                         key={designItem.id}
+                        href={designItem.link}
                       >
                         <div>
                           <img
@@ -87,7 +88,7 @@ const Header = () => {
                           />
                         </div>
                         <div className="text-sm">{designItem.title}</div>
-                      </div>
+                      </a>
                     )
                   })}
             </div>

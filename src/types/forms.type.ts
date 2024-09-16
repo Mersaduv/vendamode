@@ -56,6 +56,7 @@ export interface IProductForm {
   Description: string
   IsFake: boolean
   status: 'New' | 'Used'
+  productType: 'Product' | 'ProductFile'
   BrandId?: string
   FeatureValueIds?: string[]
   StockItems?: IStockItem[]
@@ -72,6 +73,8 @@ export interface IStockItem {
   quantity?: number
   price?: number
   discount?: number
+  weight?: number
+  purchasePrice?: number
   offerTime?: number | null
   minuteTime?: number
   secondTime?: number
@@ -142,6 +145,10 @@ export interface IProductSizeForm {
 
 export interface IProductStatus {
   id: 'New' | 'Used'
+  name: string
+}
+export interface IProductType {
+  id: 'Product' | 'ProductFile'
   name: string
 }
 

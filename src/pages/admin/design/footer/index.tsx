@@ -7,6 +7,7 @@ import { useAppDispatch } from '@/hooks'
 import {
   useDeleteColumnFooterMutation,
   useDeleteDesignItemsMutation,
+  useDeleteFooterArticleColumnMutation,
   useGetColumnFootersQuery,
   useGetCopyrightQuery,
   useGetDesignItemsQuery,
@@ -28,6 +29,7 @@ import {
   IColumnFooter,
   ICopyright,
   IDesignItemForm,
+  IFooterArticleColumn,
   IGeneralSettingForm,
   ILogosForm,
   ISloganFooter,
@@ -99,6 +101,7 @@ const Footer: NextPage = () => {
   const [deletedDesignItems, setDeletedDesignItems] = useState<IDesignItemForm[]>([])
   const [columnFooters, setColumnFooters] = useState<IColumnFooter[]>([])
   const [deletedColumnFooter, setDeletedColumnFooter] = useState<IColumnFooter[]>([])
+  const [deletedFooterArticleColumn, setDeletedFooterArticle] = useState<IFooterArticleColumn[]>([])
   // ? Upsert
   const [
     upsertDesignItems,
@@ -172,6 +175,17 @@ const Footer: NextPage = () => {
     },
   ] = useDeleteColumnFooterMutation()
 
+  const [
+    deleteFooterArticleColumn,
+    {
+      isSuccess: isSuccessFooterArticleColumn,
+      isError: isErrorFooterArticleColumn,
+      error: errorFooterArticleColumn,
+      data: dataFooterArticleColumn,
+      isLoading: isLoadingFooterArticleColumn,
+    },
+  ] = useDeleteFooterArticleColumnMutation()
+
   const onSubmit = async (data: FormData) => {
     console.log(data, 'data all')
 
@@ -201,6 +215,19 @@ const Footer: NextPage = () => {
       )
     }
 
+    // ? delete delete Footer Article
+    if (deletedFooterArticleColumn.length > 0) {
+      promises.push(
+        Promise.all(
+          deletedFooterArticleColumn.map((deletedFooterArticleItem) => {
+            if (deletedFooterArticleItem.id) {
+              return deleteFooterArticleColumn(deletedFooterArticleItem.id)
+            }
+          })
+        )
+      )
+    }
+
     //  columnFooters
     if (data.columnFooters && data.columnFooters.length > 0) {
       const upsertColumnFooterPromise = (async () => {
@@ -208,7 +235,14 @@ const Footer: NextPage = () => {
           id: columnFooter.id || undefined,
           name: columnFooter.name,
           index: columnFooter.index,
-          footerArticleColumn: columnFooter.footerArticleColumn,
+          footerArticleColumns: columnFooter.footerArticleColumns.map((item) => {
+            var footerArticleColumn: IFooterArticleColumn = {
+              id: item.id || undefined,
+              articleId: item.articleId,
+              index: item.index,
+            }
+            return footerArticleColumn
+          }),
         }))
 
         const jsonData: ColumnFooterBulkForm = {
@@ -388,10 +422,10 @@ const Footer: NextPage = () => {
   useEffect(() => {
     if (columnFooters.length === 0) {
       setColumnFooters([
-        { index: 1, id: '', name: '', footerArticleColumn: [] },
-        { index: 2, id: '', name: '', footerArticleColumn: [] },
-        { index: 3, id: '', name: '', footerArticleColumn: [] },
-        { index: 4, id: '', name: '', footerArticleColumn: [] },
+        { index: 1, id: '', name: '', footerArticleColumns: [] },
+        { index: 2, id: '', name: '', footerArticleColumns: [] },
+        { index: 3, id: '', name: '', footerArticleColumns: [] },
+        { index: 4, id: '', name: '', footerArticleColumns: [] },
       ])
     }
   }, [columnFooters])
@@ -487,7 +521,7 @@ const Footer: NextPage = () => {
               <AdditionalForm
                 columnFooters={columnFooters}
                 setColumnFooter={setColumnFooters}
-                setDeletedColumnFooter={setDeletedColumnFooter}
+                setDeletedFooterArticle={setDeletedFooterArticle}
               />
 
               <CopyrightForm />

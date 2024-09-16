@@ -1,5 +1,4 @@
-import { ChangeEvent, ChangeEventHandler, Dispatch, Fragment, SetStateAction, useEffect, useState } from 'react'
-
+import { ChangeEvent, ChangeEventHandler, Dispatch, Fragment, SetStateAction, useEffect, useRef, useState } from 'react'
 import { SubmitHandler, useForm, Resolver } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { FaArrowDownLong } from 'react-icons/fa6'
@@ -18,6 +17,7 @@ import type {
   ISizeInfoModel,
   IProductStatus,
   IProductIsFake,
+  IProductType,
 } from '@/types'
 import { CategorySelector } from '../categories'
 import {
@@ -36,6 +36,7 @@ import {
   BrandCombobox,
   CategoryCombobox,
   FeatureCombobox,
+  ProductTypeCombobox,
   StatusCombobox,
 } from '../selectorCombobox'
 import { Button } from '../ui'
@@ -50,11 +51,13 @@ import { FeatureValue, ProductFeature, SizeDTO } from '@/services/feature/types'
 import dynamic from 'next/dynamic'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { IoIosTimer } from 'react-icons/io'
-import { HandleResponse } from '../shared'
+import { HandleResponse, JalaliDatePicker } from '../shared'
 import { ConfirmDeleteModal } from '../modals'
 import { useRouter } from 'next/router'
 import IsFakeCombobox from '../selectorCombobox/IsFakeCombobox'
-
+import { BiCartDownload } from 'react-icons/bi'
+import DateObject from 'react-date-object'
+import persian from 'react-date-object/calendars/persian'
 const generateUniqueId = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     const r = (Math.random() * 16) | 0,
@@ -144,6 +147,8 @@ interface CurrentRow {
   isHidden?: boolean
   featureValueId?: string[]
   price?: number
+  weight?: number
+  purchasePrice?: number
   quantity?: number
 }
 const CustomEditor = dynamic(() => import('@/components/form/TextEditor'), { ssr: false })
@@ -153,6 +158,9 @@ const ProductFormEdit: React.FC<Props> = (props) => {
   const isUpdated = useAppSelector((state) => state.stateUpdate.isUpdated)
   const dispatch = useAppDispatch()
   // ? States
+  const [date, setDate] = useState<any>()
+  const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false)
+  const datePickerRef = useRef<any>(null)
   const [isDetailsSkip, setIsDetailsSkip] = useState(true)
   const [isProductScale, setIsProductScale] = useState(false)
   const [isStock, setIsStock] = useState(false)
@@ -190,6 +198,10 @@ const ProductFormEdit: React.FC<Props> = (props) => {
   const [shamsiDate, setShamsiDate] = useState('')
   const [updateShamsiDate, setUpdateShamsiDate] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<IProductStatus | null>({ id: 'New', name: 'آکبند' })
+  const [selectedProductType, setSelectedProductType] = useState<IProductType | null>({
+    id: 'Product',
+    name: 'کالا برای فروش',
+  })
   const [isFake, setIsFake] = useState<IProductIsFake | null>({ id: 'false', name: 'محصول اصل' })
   const [isSecondRequest, setIsSecondRequest] = useState(false)
   const [rowsData, setRowsData] = useState<CurrentRow[]>([])
@@ -216,10 +228,10 @@ const ProductFormEdit: React.FC<Props> = (props) => {
     },
   })
   useEffect(() => {
-    if (selectedProduct && selectedProduct.created) {
+    if (selectedProduct && selectedProduct.date) {
       console.log(selectedProduct.created, 'selectedProduct.created example =  2024-08-11T08:05:09.49494Z')
 
-      const gregorianDateString = selectedProduct.created
+      const gregorianDateString = selectedProduct.date
       const gregorianDate = new Date(gregorianDateString)
       if (!isNaN(gregorianDate.getTime())) {
         // Convert to Jalali Date
@@ -290,9 +302,11 @@ const ProductFormEdit: React.FC<Props> = (props) => {
     }
   }, [productScales])
 
-  if (productSizeScale || productScales) {
-    // console.log(productSizeScale, 'productSizeScale', productScales, 'productScales')
-  }
+useEffect(()=>{
+if (!isCalendarOpen) {
+  setDate(new DateObject().setCalendar(persian))
+}
+},[isCalendarOpen])
   //؟ all Features Query
   const { data: allFeatures, refetch: refetchAllFeature } = useGetFeaturesQuery(
     { pageSize: 999999 },
@@ -417,7 +431,11 @@ const ProductFormEdit: React.FC<Props> = (props) => {
           productSizeInfo,
           stockItems: stockItemsData,
           brandData,
+          date: dateData,
+          parsedDate,
+          publishTime,
         } = selectedProduct
+        console.log(selectedProduct, 'selectedProduct')
 
         setIsActive(isActive ? 'true' : 'false')
 
@@ -426,6 +444,12 @@ const ProductFormEdit: React.FC<Props> = (props) => {
         } else {
           setSelectedStatus({ id: 'Used', name: 'کارکرده' })
         }
+        setIsCalendarOpen(parsedDate === null || !publishTime ? false : true)
+        // if (selectedProduct.productType === 0) {
+        setSelectedProductType({ id: 'Product', name: 'کالا برای فروش' })
+        // } else {
+        //   setSelectedProductType({ id: 'ProductFile', name: 'فایل برای فروش' })
+        // }
 
         if (isFake) {
           setIsFake({ id: 'true', name: 'محصول غیر اصل' })
@@ -457,6 +481,8 @@ const ProductFormEdit: React.FC<Props> = (props) => {
               idx: stock.idx,
               quantity: stock.quantity,
               price: stock.price,
+              weight: stock.weight,
+              purchasePrice: stock.purchasePrice,
               discount: stock.discount,
               discountRemainingTime: stock.discountRemainingTime,
             }
@@ -506,6 +532,10 @@ const ProductFormEdit: React.FC<Props> = (props) => {
           setStateSizeData(filteredSizeDTOs)
         }
 
+        if (dateData) {
+          setDate(dateData)
+        }
+
         setSelectedBrand(brandData)
         setTextEditor(description)
         reset({
@@ -518,6 +548,7 @@ const ProductFormEdit: React.FC<Props> = (props) => {
           FeatureValueIds: featureValuesIds,
           IsFake: isFake,
           status: selectedProduct.status === 0 ? 'New' : 'Used',
+          productType: selectedProduct.productType === 0 ? 'Product' : 'ProductFile',
         })
       }
     }
@@ -574,6 +605,8 @@ const ProductFormEdit: React.FC<Props> = (props) => {
 
   // ? Handlers
   const editedCreateHandler: SubmitHandler<IProductForm> = (data) => {
+    console.log(data , "datadata");
+    
     const formData = new FormData()
     formData.append('Id', data.Id)
     formData.append('Title', data.Title)
@@ -623,7 +656,12 @@ const ProductFormEdit: React.FC<Props> = (props) => {
     if (data.ProductScale) {
       formData.append('ProductScale', JSON.stringify(data.ProductScale))
     }
-
+    if (!isCalendarOpen) {
+      setDate(new DateObject().setCalendar(persian))
+      formData.append('Date', digitsEnToFa(new DateObject().setCalendar(persian).format("HH:mm:ss - YYYY/MM/DD")))
+    } else {
+      if (date !== undefined) formData.append('Date', date)
+    }
     if (mode == 'edit') {
       updateHandle(formData)
     }
@@ -1022,6 +1060,17 @@ const ProductFormEdit: React.FC<Props> = (props) => {
     confirmTrashDeleteModalHandlers.close()
     setDeleteTrashInfo({ id: '' })
   }
+
+  const toggleCalendar = () => {
+    if (isCalendarOpen) {
+      datePickerRef.current.closeCalendar()
+    } else {
+      datePickerRef.current.openCalendar()
+    }
+    setIsCalendarOpen((prev) => !prev)
+  }
+  console.log(date, 'datedatedatedate')
+
   return (
     <>
       {/* Handle Delete Product Response */}
@@ -1053,6 +1102,20 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                   ویرایش محصول : <div className="text-sky-500">{selectedProduct?.title}</div>
                 </h3>
                 <div className="flex flex-col">
+                  <div className="flex px-10 py-6 pb-0 flex-col xs:flex-row">
+                    <label
+                      htmlFor=""
+                      className="flex items-center justify-center xs:py-0 py-2 h-[44px] rounded-l-none rounded-md bg-[#f5f8fa]  gap-1 w-[180px]"
+                    >
+                      {/* <img className="w-5 h-5" src="/assets/svgs/duotone/barcode.svg" alt="" /> */}
+                      <BiCartDownload className="w-7 h-7 text-gray-400 " />
+                      <span className="whitespace-nowrap text-center mr-2 pl-2">نوع محصول</span>
+                    </label>
+                    <ProductTypeCombobox
+                      selectedProductType={selectedProductType}
+                      setSelectedProductType={setSelectedProductType}
+                    />
+                  </div>
                   <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-6">
                     <label
                       htmlFor="title"
@@ -1096,17 +1159,70 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                     </Button>
                   </div>
                 </div>
-                <div className="flex- flex-col space-y-4">
-                  <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-6">
-                    <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]">
+                <div className="flex- flex-col">
+                  <div className="flex flex-col xs:flex-row px-10  pb-0 pt-6">
+                    <div className="flex items-center  justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa] h-[42px]">
                       <PiUserDuotone className="w-5 h-5 opacity-50" />
                       <span className="whitespace-nowrap text-center w-[113px]">انتشار توسط</span>
                     </div>
-                    <div className="w-full text-sm py-2 border-r text-center  bg-[#f5f8fa] rounded-r-none rounded-md ">
+                    <div className="w-full text-sm py-2 whitespace-nowrap border-r flex items-center justify-center bg-[#f5f8fa] rounded-r-none rounded-md ">
                       {generalSetting?.title} - {userInfo?.fullName}
                     </div>
                   </div>
-                  <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-0">
+                  {/* {isCalendarOpen ? <div className="flex flex-1 px-10 py-10 pt-3  pb-3 flex-col xs:flex-row">
+                    <label
+                      onClick={toggleCalendar}
+                      htmlFor="date"
+                      className="flex items-center cursor-pointer justify-center  py px-3  mdx:rounded-l-none rounded-t-md mdx:rounded-md bg-[#f5f8fa]  gap-1 mdx:w-[207px]"
+                    >
+                      <img className="w-5 h-5  opacity-50" src="/assets/svgs/duotone/calendar-days.svg" alt="" />
+                      <span className="whitespace-nowrap text-center w-[113px] ">زمان انتشار</span>
+                    </label>
+
+                    <div className={`${isCalendarOpen ? 'block w-full' : 'hidden'}`}>
+                      <JalaliDatePicker setDate={setDate} date={date} datePickerRef={datePickerRef} />
+                    </div>
+                  </div> :           } */}
+
+                  {selectedProduct?.parsedDate !== null && selectedProduct?.publishTime !== false ? (
+                    <div className="flex flex-1 px-10 pt-6 flex-col mdx:flex-row">
+                      <label
+                        onClick={toggleCalendar}
+                        htmlFor="date"
+                        className="flex items-center cursor-pointer justify-center  px-3  mdx:rounded-l-none rounded-t-md mdx:rounded-md bg-[#abd7ff]  gap-1 mdx:w-[160px]"
+                      >
+                        <img className="w-5 h-5  opacity-50" src="/assets/svgs/duotone/calendar-days.svg" alt="" />
+                        <span className="whitespace-nowrap text-center w-[113px]">زمان انتشار</span>
+                      </label>
+                      <div className={`${isCalendarOpen ? 'block w-full' : 'hidden'}`}>
+                        <JalaliDatePicker setDate={setDate} date={date} datePickerRef={datePickerRef} />
+                      </div>
+                      <div
+                        className={`${
+                          isCalendarOpen
+                            ? 'hidden'
+                            : 'border h-[42px] w-full rounded-l-md flex justify-center items-center'
+                        }`}
+                      >
+                        فوری{' '}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-1 px-10  pt-6  flex-col mdx:flex-row">
+                      <label
+                        htmlFor="date"
+                        className="flex items-center justify-center  py px-3  mdx:rounded-l-none rounded-t-md mdx:rounded-md bg-[#f5f8fa] h-[42px]  gap-1 w-[202px]"
+                      >
+                        <img className="w-5 h-5  opacity-50" src="/assets/svgs/duotone/calendar-days.svg" alt="" />
+                        <span className="whitespace-nowrap text-center w-[113px]"> انتشار</span>
+                      </label>
+                      <div className="w-full py-2 border-r flex justify-center items-center text-sm  bg-[#f5f8fa] rounded-r-none rounded-md ">
+                        {digitsEnToFa(selectedProduct.date)}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-0">
                     <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]">
                       <img className="w-5 h-5  opacity-50" src="/assets/svgs/duotone/calendar-days.svg" alt="" />
                       <span className="whitespace-nowrap text-center w-[133px]">زمان انتشار</span>
@@ -1114,21 +1230,38 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                     <div className="w-full py-2 border-r text-center text-sm  bg-[#f5f8fa] rounded-r-none rounded-md ">
                       {digitsEnToFa(shamsiDate)}
                     </div>
-                  </div>
-                  <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-0">
-                    <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]">
+                  </div> */}
+                  {/* <div className="flex flex-1 px-10 py-10 pt-3  pb-3 flex-col xs:flex-row">
+                    <label
+                      onClick={toggleCalendar}
+                      htmlFor="date"
+                      className="flex items-center cursor-pointer justify-center  py px-3  mdx:rounded-l-none rounded-t-md mdx:rounded-md bg-[#f5f8fa]  gap-1 mdx:w-[207px]"
+                    >
+                      <img className="w-5 h-5  opacity-50" src="/assets/svgs/duotone/calendar-days.svg" alt="" />
+                      <span className="whitespace-nowrap text-center w-[113px] ">زمان انتشار</span>
+                    </label>
+
+                    {isCalendarOpen ?
+                    <div className={`${isCalendarOpen ? 'block w-full' : 'hidden'}`}>
+                      <JalaliDatePicker setDate={setDate} date={date} datePickerRef={datePickerRef} />
+                    </div> :  
+                      <div className="w-full py-2 border-r text-center text-sm  bg-[#f5f8fa] rounded-r-none rounded-md ">
+                        {digitsEnToFa(shamsiDate)}
+                      </div>
+                  }
+                  </div> */}
+
+                  <div className="flex flex-col xs:flex-row px-10 pt-6  h-[42px] pb-0">
+                    <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa] h-[42px]">
                       <img className="w-5 h-5 opacity-50" src="/assets/svgs/duotone/calendar-days.svg" alt="" />
                       <span className="whitespace-nowrap text-center w-[133px]"> ویرایش</span>
                     </div>
-                    <div className="w-full text-sm  py-2 border-r text-center  bg-[#f5f8fa] rounded-r-none rounded-md  flex justify-center gap-3">
+                    <div className="w-full text-sm  py-2 border-r flex items-center justify-center  bg-[#f5f8fa] rounded-r-none rounded-md h-[42px] gap-3">
                       {digitsEnToFa(updateShamsiDate)} <div>توسط {userInfo?.fullName}</div>
                     </div>
                   </div>
-                  <div className="flex px-10 py-10 pt-0 flex-col xs:flex-row">
-                    <label
-                      htmlFor="title"
-                      className="flex items-center justify-center xs:py-0 py-2 px-3 rounded-l-none rounded-md bg-[#f5f8fa]"
-                    >
+                  <div className="flex px-10 py-10 mt-2 flex-col xs:flex-row">
+                    <label className="flex items-center justify-center xs:py-0 py-2 px-3 rounded-l-none rounded-md bg-[#f5f8fa] h-[42px]">
                       <img className="w-5 h-5" src="/assets/svgs/duotone/eye.svg" alt="" />
                       <span className="whitespace-nowrap text-center w-[133px]">وضعیت</span>
                     </label>
@@ -1236,8 +1369,8 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                                     type="button"
                                     className="absolute -top-2 -right-2 shadow-product hover:bg-red-500 hover:text-white bg-gray-50 p-0.5 rounded-full text-gray-500"
                                     onClick={(e) => {
-                                      e.stopPropagation() // جلوگیری از انتشار رویداد
-                                      e.preventDefault() // جلوگیری از رفتار پیش‌فرض
+                                      e.stopPropagation()
+                                      e.preventDefault()
                                       handleDelete(index)
                                     }}
                                   >
@@ -1526,7 +1659,12 @@ const ProductFormEdit: React.FC<Props> = (props) => {
                       isSecondRequest={isSecondRequest}
                     />
                     <div className="bg-gray-50 bottom-0 w-full  rounded-b-lg px-8 flex flex-col pb-2">
-                      <span className="font-normal text-[11px] pt-2">قیمت هارا به تومان وارد کنید</span>
+                      <div className="font-normal text-[11px] pt-2 flex gap-1">
+                        قیمت ها را به <div className="text-red-600">تومان</div> وارد کنید
+                      </div>
+                      <div className="font-normal text-[11px] pt-2 flex gap-1">
+                        وزن محصول را به <div className="text-red-600">گرم</div> وارد کنید
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1825,6 +1963,8 @@ const Table: React.FC<PropTable> = (props) => {
         sizeId: row.sizeId || undefined,
         price: matchingRowData ? matchingRowData.price : null,
         discount: matchingRowData ? matchingRowData.discount : null,
+        purchasePrice: matchingRowData ? matchingRowData.purchasePrice : null,
+        weight: matchingRowData ? matchingRowData.weight : null,
         quantity: matchingRowData ? matchingRowData.quantity : null,
         isHidden: matchingRowData?.isHidden ?? false,
         imageStock: matchingRowData?.imageStock,
@@ -1998,22 +2138,42 @@ const Table: React.FC<PropTable> = (props) => {
                     </th>
                   )
               )}
+              <th className="px-4 whitespace-nowrap py-2 font-normal">
+                <div className="flex items-center justify-center gap-1">
+                  <div>قیمت خرید</div>
+                  <div title="تکرار مبلغ خرید" className="py-2 px-1 cursor-pointer">
+                    <FaArrowDownLong
+                      onClick={() => handleCheckboxChange('purchasePrice', true)}
+                      className="text-gray-400 hover:border border-gray-400"
+                    />
+                  </div>
+                </div>
+              </th>
+              <th className="px-4 whitespace-nowrap py-2 font-normal">
+                <div className="flex items-center justify-center gap-1">
+                  <div>وزن</div>
+                  <div title="تکرار وزن" className="py-2 px-1 cursor-pointer">
+                    <FaArrowDownLong
+                      onClick={() => handleCheckboxChange('weight', true)}
+                      className="text-gray-400 hover:border border-gray-400"
+                    />
+                  </div>
+                </div>
+              </th>
               <th className="px-4 whitespace-nowrap py-2 font-normal">موجودی</th>
               <th className="px-4 whitespace-nowrap py-2 font-normal">
                 <div className="flex items-center  justify-center gap-1">
                   <div>
-                    قیمت محصول
+                    قیمت فروش
                     {/* <input
                       className="bg-gray-200 border-gray-400 focus:outline-0 focus:ring-0 text-2xl w-5  h-5 mr-1 cursor-pointer focus:border-none rounded appearance-none checked:bg-[#e90089]"
                       type="checkbox"
                       onChange={(e) => handleCheckboxChange('price', e.target.checked)}
                     /> */}
                   </div>{' '}
-                  <div title="تکرار مبلغ" className=" py-2 px-1 cursor-pointer ">
+                  <div title="تکرار مبلغ" className="py-2 px-1 cursor-pointer ">
                     <FaArrowDownLong
-                      onClick={() =>
-                        handleCheckboxChange('price', true)
-                }
+                      onClick={() => handleCheckboxChange('price', true)}
                       className="text-gray-400 hover:border border-gray-400"
                     />
                   </div>
@@ -2082,6 +2242,66 @@ const Table: React.FC<PropTable> = (props) => {
                     )}
                   </Fragment>
                 )}
+                <td className="px-4 text-center py-2">
+                  {shouldHideHeader ? (
+                    <div className="relative mb-3 w-full">
+                      <input
+                        dir="ltr"
+                        type="text"
+                        className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
+                        id="floatingInput"
+                        placeholder="قیمت خرید"
+                        onChange={(e) => handleInputChange(idx, 'purchasePrice', digitsFaToEn(e.target.value))}
+                        value={digitsEnToFa(addCommas(stockItems[idx]?.purchasePrice || ''))}
+                      />
+                      <label
+                        htmlFor="floatingInput"
+                        className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
+                      >
+                        قیمت خرید
+                      </label>
+                    </div>
+                  ) : (
+                    <input
+                      dir="ltr"
+                      type="text"
+                      placeholder=""
+                      value={digitsEnToFa(addCommas(stockItems[idx]?.purchasePrice || ''))}
+                      onChange={(e) => handleInputChange(idx, 'purchasePrice', digitsFaToEn(e.target.value))}
+                      className={`w-36 h-9 rounded-lg text-center border border-gray-300`}
+                    />
+                  )}
+                </td>
+                <td className="px-4 text-center py-2">
+                  {shouldHideHeader ? (
+                    <div className="relative mb-3 w-full">
+                      <input
+                        dir="ltr"
+                        type="text"
+                        className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
+                        id="floatingInput"
+                        placeholder="وزن"
+                        onChange={(e) => handleInputChange(idx, 'weight', digitsFaToEn(e.target.value))}
+                        value={digitsEnToFa(addCommas(stockItems[idx]?.weight || ''))}
+                      />
+                      <label
+                        htmlFor="floatingInput"
+                        className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
+                      >
+                        وزن
+                      </label>
+                    </div>
+                  ) : (
+                    <input
+                      dir="ltr"
+                      type="text"
+                      placeholder=""
+                      value={digitsEnToFa(addCommas(stockItems[idx]?.weight || ''))}
+                      onChange={(e) => handleInputChange(idx, 'weight', digitsFaToEn(e.target.value))}
+                      className={`w-36 h-9 rounded-lg text-center border border-gray-300`}
+                    />
+                  )}
+                </td>
                 <td className="px-4 whitespace-nowrap text-center py-2">
                   {shouldHideHeader ? (
                     <div className="relative mb-3">
@@ -2124,7 +2344,7 @@ const Table: React.FC<PropTable> = (props) => {
                         type="text"
                         className="peer m-0 block rounded-lg h-[50px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-0 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
                         id="floatingInput"
-                        placeholder="قیمت محصول"
+                        placeholder="قیمت فروش"
                         onChange={(e) => handleInputChange(idx, 'price', digitsFaToEn(e.target.value))}
                         value={digitsEnToFa(addCommas(stockItems[idx]?.price || ''))}
                       />
@@ -2132,7 +2352,7 @@ const Table: React.FC<PropTable> = (props) => {
                         htmlFor="floatingInput"
                         className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-3 pb-4 pt-3.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
                       >
-                        قیمت محصول
+                        قیمت فروش
                       </label>
                     </div>
                   ) : (
@@ -2271,10 +2491,7 @@ const Table: React.FC<PropTable> = (props) => {
                         placeholder=""
                         value={digitsEnToFa(addCommas(stockItems[idx]?.discount || ''))}
                         onChange={(e) => handleInputChange(idx, 'discount', digitsFaToEn(e.target.value))}
-                        className={`w-36 h-9 rounded-lg text-center ${
-                          !isDiscountEditable ? 'bg-gray-100' : ''
-                        } border border-gray-300`}
-                        disabled={!isDiscountEditable}
+                        className={`w-36 h-9 rounded-lg text-center border border-gray-300`}
                       />
                       <Menu as="div" className="relative inline-block text-left">
                         <div>
