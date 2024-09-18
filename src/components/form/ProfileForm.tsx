@@ -67,17 +67,17 @@ const ProfileForm: React.FC<Props> = ({ onSubmit, isLoading, defaultValues }) =>
   const dispatch = useAppDispatch()
 
   useEffect(() => {
-    if (defaultValues.birthDate !== '' && defaultValues.birthDate != '--') {
-      const defaultBirthDate = new Date(defaultValues.birthDate!)
-      const jalaaliBirthDate = toJalaali(defaultBirthDate)
-      setValue(
-        'birthDate',
-        `${digitsEnToFa(jalaaliBirthDate.year)}/${digitsEnToFa(jalaaliBirthDate.month)}/${digitsEnToFa(
-          jalaaliBirthDate.day
-        )}`
-      )
-    }
-    reset(defaultValues)
+    // if (defaultValues?.birthDate !== '' && defaultValues?.birthDate != '--') {
+    //   const defaultBirthDate = new Date(defaultValues?.birthDate)
+    //   const jalaaliBirthDate = toJalaali(defaultBirthDate)
+    //   setValue(
+    //     'birthDate',
+    //     `${digitsEnToFa(jalaaliBirthDate.year)}/${digitsEnToFa(jalaaliBirthDate.month)}/${digitsEnToFa(
+    //       jalaaliBirthDate.day
+    //     )}`
+    //   )
+    // }
+    // reset(defaultValues)
   }, [defaultValues, reset, setValue])
 
   const handleDateChange = (field: 'day' | 'month' | 'year', value: string) => {

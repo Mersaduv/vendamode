@@ -163,7 +163,7 @@ const ReviewModal: React.FC<Props> = (props) => {
       <Modal isShow={isShowReviewModal} onClose={reviewModalHandlers.close} effect="bottom-to-top">
         <Modal.Content
           onClose={reviewModalHandlers.close}
-          className="flex h-full flex-col gap-y-3 bg-white py-3 pl-2 pr-4 md:rounded-lg lg:h-[770px]"
+          className="flex h-full flex-col gap-y-3 bg-white py-3 pl-2 pr-4 md:rounded-lg lg:h-[793px] overflow-auto"
         >
           <Modal.Header onClose={reviewModalHandlers.close}>ثبت دیدگاه</Modal.Header>
           <Modal.Body>
@@ -171,8 +171,8 @@ const ReviewModal: React.FC<Props> = (props) => {
               className="flex flex-1 flex-col justify-between gap-y-5 overflow-y-auto pl-4"
               onSubmit={handleSubmit(submitHander)}
             >
-              <div className="flex items-center justify-around">
-                <div className="flex items-center">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center flex-1">
                   <ResponsiveImage
                     dimensions="w-24 h-24 md:h-32 md:w-32"
                     src={productImg[0].imageUrl}
@@ -180,7 +180,7 @@ const ReviewModal: React.FC<Props> = (props) => {
                     alt={productTitle}
                     imageStyles="object-contain"
                   />
-                  <h3>{productTitle}</h3>
+                  <h3 className="mr-4">{productTitle}</h3>
                 </div>
                 <div>
                   <div className="my-2 text-center">
@@ -308,20 +308,24 @@ const ReviewModal: React.FC<Props> = (props) => {
                   onChange={handleFileChange}
                 />
                 <label htmlFor="Thumbnail" className="block cursor-pointer p-8  text-base font-normal">
-                  عکس ها را اینجا بکشید یا برای انتخاب کلیک کنید
+                  برای انتخاب عکس کلیک کنید{' '}
                 </label>
               </div>
-                {selectedFiles.length > 0 && (
-                  <div className="flex gap-2">
-                    {selectedFiles.map((file, index) => (
-                      <div key={index} className="text-sm text-gray-600">
-                        <img src={URL.createObjectURL(file)} alt={file.name} className="w-16 h-16 object-cover  rounded-lg shadow-product" />
-                      </div>
-                    ))}
-                  </div>
-                )}
+              {selectedFiles.length > 0 && (
+                <div className="flex gap-2">
+                  {selectedFiles.map((file, index) => (
+                    <div key={index} className="text-sm text-gray-600">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={file.name}
+                        className="w-16 h-16 object-cover  rounded-lg shadow-product"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
 
-              <div className="border-t-2 border- py-3 lg:pb-0 ">
+              <div className="border-t-2 border- py-3 pb-0  ">
                 <SubmitModalButton isLoading={isLoading}>ثبت دیدگاه</SubmitModalButton>
               </div>
             </form>

@@ -1010,7 +1010,7 @@ const ProductForm: React.FC<Props> = (props) => {
                 <div className="flex flex-1">
                   <div className="bg-white w-full rounded-md shadow-item overflow-auto">
                     <h3 className="border-b p-6 text-gray-600">اندازه ها</h3>
-                    <div className="flex justify-center  text-sm mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
+                    <div className="flex justify-center  text-xs mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
                       {/* table  */}
                       برای این دسته بندی, اندازه تعریف نشده است
                       {/* image  */}
@@ -1021,7 +1021,7 @@ const ProductForm: React.FC<Props> = (props) => {
                 <div className="flex flex-1">
                   <div className="bg-white w-full rounded-md shadow-item overflow-auto">
                     <h3 className="border-b p-6 text-gray-600">اندازه ها</h3>
-                    <div className="flex justify-center  text-sm mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
+                    <div className="flex justify-center  text-xs mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
                       {/* table  */}
                       برای وارد کردن اندازه ها, مقدار سایز بندی را وارد کنید
                       {/* image  */}

@@ -92,7 +92,7 @@ const ProductsHome: NextPage = () => {
                       دسته بندی محصولات :
                       {singleCategoryData && singleCategoryData?.data !== undefined && singleCategoryData?.data !== null ? (
                         <div className="flex items-center">
-                          <ProductBreadcrumb categoryLevelProductList={singleCategoryData?.data} isAdmin />
+                          <ProductBreadcrumb  categoryLevelProductList={singleCategoryData?.data} isAdmin />
                         </div>
                       ) : null}
                       {/* <span className="text-[#00c3e1] md:font-bold">{generalSetting?.title}</span> */}

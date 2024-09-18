@@ -615,7 +615,11 @@ const Articles: NextPage = () => {
                                           : '-'}
                                         {article.parentCategories !== null && (
                                           <span className="tooltip-text">
-                                            <ProductBreadcrumb categoryLevels={article.parentCategories} isAdmin />
+                                            <ProductBreadcrumb
+                                              categoryLevels={article.parentCategories}
+                                              isAdmin
+                                              isAdminTable
+                                            />
                                           </span>
                                         )}
                                       </td>

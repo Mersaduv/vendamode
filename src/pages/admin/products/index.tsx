@@ -825,7 +825,7 @@ const Products: NextPage = () => {
                                     <td className="tooltip-container text-sm text-gray-600 text-center cursor-pointer">
                                       {product.parentCategories.category.name}
                                       <span className="tooltip-text">
-                                        <ProductBreadcrumb isAdmin categoryLevels={product.parentCategories} />
+                                        <ProductBreadcrumb isAdmin categoryLevels={product.parentCategories} isAdminTable/>
                                       </span>
                                     </td>
                                     <td className="text-center text-sm text-gray-600">

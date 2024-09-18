@@ -29,7 +29,8 @@ const Articles: NextPage = () => {
   //*    Get Products Data
   const { data: articleData, ...articlesQueryProps } = useGetArticlesQuery({ ...query, isCategory: true })
   const { data: latestArticlesData, ...latestArticlesQueryProps } = useGetArticlesQuery(
-    { ...query, sort: '1' } // Passing 'created' to fetch latest articles
+    { ...query, sort: '1', isCategory: true ,
+      pageSize: 5, } 
   )
 
   const { products: productData, isFetching: isFetchingNew } = useGetProductsQuery(

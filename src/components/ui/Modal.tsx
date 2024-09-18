@@ -4,7 +4,7 @@ import { Close } from '@/icons'
 interface ModalProps {
   isShow: boolean
   onClose: () => void
-  effect: 'bottom-to-fix' | 'bottom-to-top' | 'ease-out' | 'buttom-to-fit'
+  effect: 'bottom-to-fix' | 'bottom-to-top' | 'ease-out' | 'buttom-to-fit'  | 'bottom-to-top-scale'
   children: React.ReactNode
 }
 
@@ -37,7 +37,9 @@ const Modal: React.FC<ModalProps> = (props) => {
 
   // ? Styles
   const effectClasses =
-  effect === 'bottom-to-top'
+  effect === 'bottom-to-top-scale' ? `  ${isShow ? 'bottom-0 md:top-20' : '-bottom-full md:top-60'} w-full h-full  md:h-fit md:max-w-6xl 
+   fixed transition-all duration-700 left-0 right-0 mx-auto`
+   : 'bottom-to-top'
       ? `
   ${isShow ? 'bottom-0 md:top-20' : '-bottom-full md:top-60'} w-full h-full  md:h-fit md:max-w-3xl 
    fixed transition-all duration-700 left-0 right-0 mx-auto`

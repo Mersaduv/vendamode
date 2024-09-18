@@ -146,6 +146,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
   } = useGetArticlesQuery({
     page: 1,
     pageSize: 99999,
+    isCategory: true 
   })
 
   // ? Render(s)
@@ -197,7 +198,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
           )}
 
           <CategoryList childCategories={childCategories} name={generalSetting?.title ?? ''} homePage />
-          
+
           <LargeBanner data={banners} />
           {/* // Discount slider */}
           {/* <div className="relative w-full flex bg-slate-300">
@@ -253,9 +254,9 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
           {storeBrandData && storeBrandData.data && storeBrandData.data.length > 0 && (
             <div className="sm:margin-brandSlider pt-10 sm:pt-20">
               <BrandSlider brandData={storeBrandData.data} isFetching={isFetchingBrand} />
-              <div className={`text-center ${storeBrandData.data.length > 3 ? " mt-[130px]" : "sm:mt-[20px] -mt-[30px]" }`}>
-
-              </div>
+              <div
+                className={`text-center ${storeBrandData.data.length > 3 ? ' mt-[130px]' : 'sm:mt-[20px] -mt-[30px]'}`}
+              ></div>
               <hr className="pb-20 mx-8 border-t-2 mt-16 sm:mt-0" />
             </div>
           )}
@@ -301,21 +302,21 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
           )}
 
           {/* Readable Article Place slider */}
-          {articleData && articleData.data && articleData.data.data && articleData.data.data.length > 0 && (
-            <div className="sm:margin-brandSlider pt-4">
-              <h1 className="w-full text-center text-gray-400 font-normal text-lg">خواندنی ها</h1>
-              <ReadableArticlePlace isFetching={isFetchingArticle} articleData={articleData} />
-              <div className="text-center mt-[200px] sxl:mt-0">
-                <Link
-                  href={`/articles`}
-                  className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white"
-                >
-                  نمایش همه
-                </Link>
+          {articleData &&
+            articleData.data &&
+            articleData.data.data &&
+            articleData.data.data.filter((x) => x.isActive).length > 0 && (
+              <div className="sm:margin-brandSlider pt-4">
+                <h1 className="w-full text-center text-gray-400 font-normal text-lg">خواندنی ها</h1>
+                <ReadableArticlePlace isFetching={isFetchingArticle} articleData={articleData} />
+                <div className="text-center mt-[200px] sxl:mt-0">
+                  <Link href={`/articles`} className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">
+                    نمایش همه
+                  </Link>
+                </div>
+                <hr className="pb-20 mx-8 border-t-2 mt-16" />
               </div>
-              <hr className="pb-20 mx-8 border-t-2 mt-16" />
-            </div>
-          )}
+            )}
 
           {/* last seen slider
           {lastSeen.length > 0 && (
