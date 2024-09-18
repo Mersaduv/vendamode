@@ -211,7 +211,7 @@ const Categories: NextPage = () => {
       <DashboardLayout>
         <TabDashboardLayout>
           <Head>
-            <title>مدیریت | دسته بندی محصولات</title>
+            <title> دسته بندی محصولات</title>
           </Head>
           <div className="flex gap-y-4 pt-4 sm:flex-row flex-col items-center w-full">
             <div className="w-full">

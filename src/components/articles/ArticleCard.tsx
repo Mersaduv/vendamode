@@ -35,9 +35,9 @@ const ArticleCard: React.FC<Props> = (props) => {
             alt={article.title}
             imageStyles="object-center rounded-t-lg"
           />
-          <div className="h-[120px] flex flex-col items-center gap-y-4 pt-4 pb-2 w-full">
-            <h2 className="text-center text-gray-500 line-clamp-2 overflow-hidden text-ellipsis">{article.title}</h2>
-            <hr className=" border-b-2 border-sky-300 w-16 " />
+          <div className="h-[80px] flex flex-col items-center gap-y-4 pt-4 pb-2 w-full px-4">
+            <h4 className="text-start w-full text-gray-500 line-clamp-2 overflow-hidden text-ellipsis">{article.title}</h4>
+            {/* <hr className=" border-b-2 border-sky-300 w-16 " /> */}
           </div>
         </>
       </article>

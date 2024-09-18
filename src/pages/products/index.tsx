@@ -26,7 +26,7 @@ import { CategoryWithAllParents, ICategory } from '@/types'
 
 const ProductsHome: NextPage = () => {
   // ? Assets
-  const { query } = useRouter()
+  const { query, events } = useRouter()
   const category = query?.categorySlug?.toString() ?? ''
   const categoryId = query?.categoryId?.toString() ?? undefined
   const brands = typeof query.brands === 'string' ? query.brands.split(',') : undefined
@@ -34,27 +34,32 @@ const ProductsHome: NextPage = () => {
   // ? Querirs
   //*    Get Products Data
   const { data, ...productsQueryProps } = useGetProductsQuery(query)
-
+  
   const { data: singleCategoryData, refetch: refetchSingleCategoryData } = useGetSingleCategoryQuery({
     id: categoryId,
   })
-
+  
   // ? States
   const [slugData, setSlugData] = useState<CategoryWithAllParents | null>(null)
 
-  // ? Handlers
-  const handleCheckboxChange = (category: ICategory) => {
-    setSlugData({ ...slugData, category: category, parentCategories: category.parentCategories ?? [] })
-  }
-
   useEffect(() => {
     if (singleCategoryData && singleCategoryData.data) {
+      console.log(singleCategoryData, 'singleCategoryData')
+
       setSlugData({
         category: singleCategoryData.data,
         parentCategories: singleCategoryData.data?.parentCategories ?? [],
       })
     }
-  }, [singleCategoryData])
+  }, [refetchSingleCategoryData])
+
+  useEffect(() => {
+    events.on('routeChangeComplete', refetchSingleCategoryData)
+
+    return () => {
+      events.off('routeChangeComplete', refetchSingleCategoryData)
+    }
+  }, [events, refetchSingleCategoryData])
 
   // ? Render(s)
   return (
@@ -69,7 +74,7 @@ const ProductsHome: NextPage = () => {
           <ProductSubCategoriesList category={category} />
 
           <div className="px-1 lg:flex lg:gap-x-0 xl:gap-x-3">
-              {/* incorrect  */}
+            {/* incorrect  */}
             {!productsQueryProps.isLoading && (
               <aside className="hidden lg:static lg:top-40 lg:mt-6 lg:block lg:h-fit max-w-md w-[40%] lg:rounded-md lg:border-gray-200 lg:px-3 lg:py-4 ">
                 <ProductFilterControls
@@ -85,9 +90,9 @@ const ProductsHome: NextPage = () => {
                   <div className="w-full lg:flex flex-col hidden">
                     <div className="mb-6 text-gray-400 text-sm -mt-2 md:-mt-0 md:text-lg md:text-gray-800 flex">
                       دسته بندی محصولات :
-                      {slugData !== null ? (
+                      {singleCategoryData && singleCategoryData?.data !== undefined && singleCategoryData?.data !== null ? (
                         <div className="flex items-center">
-                          <ProductBreadcrumb categoryLevels={slugData} isAdmin />
+                          <ProductBreadcrumb categoryLevelProductList={singleCategoryData?.data} isAdmin />
                         </div>
                       ) : null}
                       {/* <span className="text-[#00c3e1] md:font-bold">{generalSetting?.title}</span> */}
@@ -96,7 +101,7 @@ const ProductsHome: NextPage = () => {
                     <ProductSort />
                   </div>
                   <div className="block lg:hidden mt-4">
-                     {/* incorrect  */}
+                    {/* incorrect  */}
                     {/* {!productsQueryProps.isLoading && (
                       <FilterModal mainMaxPrice={data?.data?.mainMaxPrice} mainMinPrice={data?.data?.mainMinPrice} />
                     )} */}

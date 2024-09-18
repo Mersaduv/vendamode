@@ -146,7 +146,6 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
   } = useGetArticlesQuery({
     page: 1,
     pageSize: 99999,
-    place: '1',
   })
 
   // ? Render(s)
@@ -169,7 +168,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
               </div>
               <div className="flex w-full bg-slate-300 relative h-[340px] sm:h-[275px] mt-28">
                 <div className="hidden w-[38%] sm:block md:w-[20%]">
-                  <div className="hidden sm:block">
+                  <div className="hidden sm:block h-[72px]">
                     <div className=" line-clamp-2 overflow-hidden text-ellipsis text-center -mt-20 text-lg text-gray-400  px-3 pt-4 w-full">
                       جدید ترین های {generalSetting?.title}
                     </div>
@@ -193,11 +192,12 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
                   <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
                 </Link>
               </div>
-              <hr className="pb-2 mx-8 border-t-2 mt-20" />
+              <hr className="pb-20 mx-8 border-t-2 mt-20" />
             </div>
           )}
 
           <CategoryList childCategories={childCategories} name={generalSetting?.title ?? ''} homePage />
+          
           <LargeBanner data={banners} />
           {/* // Discount slider */}
           {/* <div className="relative w-full flex bg-slate-300">
@@ -213,7 +213,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
               </div>
               <div className="flex w-full bg-[#dcb6db] relative h-[340px] sm:h-[275px] mt-28">
                 <div className="hidden w-[38%] sm:block md:w-[20%]">
-                  <div className="hidden sm:block">
+                  <div className="hidden sm:block h-[72px]">
                     <div className=" line-clamp-2 overflow-hidden text-ellipsis text-center -mt-20 text-lg text-gray-400  px-3 w-full">
                       تخفیف های {generalSetting?.title}
                     </div>
@@ -251,15 +251,12 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
             </div>
           )} */}
           {storeBrandData && storeBrandData.data && storeBrandData.data.length > 0 && (
-            <div className="sm:margin-brandSlider py-28 sm:pt-0">
+            <div className="sm:margin-brandSlider pt-10 sm:pt-20">
               <BrandSlider brandData={storeBrandData.data} isFetching={isFetchingBrand} />
-              <div className="text-center mt-[200px]">
-                <div
-                  className=" rounded-lg py-2 px-8"
-                >
-                </div>
+              <div className={`text-center ${storeBrandData.data.length > 3 ? " mt-[130px]" : "sm:mt-[20px] -mt-[30px]" }`}>
+
               </div>
-              <hr className="pb-20 mx-8 border-t-2 mt-16" />
+              <hr className="pb-20 mx-8 border-t-2 mt-16 sm:mt-0" />
             </div>
           )}
 
@@ -270,15 +267,15 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
                 پرفروش های
                 {generalSetting?.title}
               </div>
-              <div className="flex w-full bg-slate-300 relative h-[340px] sm:h-[275px] mt-28">
+              <div className="flex w-full bg-slate-300 relative h-[340px] sm:h-[275px] mt-16">
                 <div className="hidden w-[38%] sm:block md:w-[20%]">
-                  <div className="hidden sm:block">
+                  <div className="hidden sm:block h-[72px]">
                     <div className=" line-clamp-2 overflow-hidden text-ellipsis text-center -mt-20 text-lg text-gray-400  px-3 w-full">
                       پرفروش های
                       {generalSetting?.title}
                     </div>
                   </div>
-                  <div className="mt-20 flex justify-center">
+                  <div className="mt-10 flex justify-center">
                     <img className="w-[220px]" src="/images/Top Seller.webp" alt="offer" />
                   </div>
                   <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">
@@ -299,18 +296,18 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
                   <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
                 </Link>
               </div>
-              <hr className="pb-8 mx-8 border-t-2 mt-20" />
+              <hr className="pb-10 mx-8 border-t-2 mt-20" />
             </div>
           )}
 
           {/* Readable Article Place slider */}
           {articleData && articleData.data && articleData.data.data && articleData.data.data.length > 0 && (
-            <div className="sm:margin-brandSlider pt-28 sm:pt-0">
+            <div className="sm:margin-brandSlider pt-4">
               <h1 className="w-full text-center text-gray-400 font-normal text-lg">خواندنی ها</h1>
               <ReadableArticlePlace isFetching={isFetchingArticle} articleData={articleData} />
-              <div className="text-center mt-[200px]">
+              <div className="text-center mt-[200px] sxl:mt-0">
                 <Link
-                  href={`/articles?place=1`}
+                  href={`/articles`}
                   className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white"
                 >
                   نمایش همه
@@ -320,7 +317,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
             </div>
           )}
 
-          {/* last seen slider */}
+          {/* last seen slider
           {lastSeen.length > 0 && (
             <div className="pt-10 sm:pt-0 relative">
               <div className="w-full block text-center px-3 line-clamp-2 overflow-hidden text-ellipsis  sm:hidden whitespace-nowrap -mt-20 text-lg text-gray-400 ">
@@ -356,7 +353,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
               </div>
               <hr className="pb-10 mx-8 border-t-2 mt-20" />
             </div>
-          )}
+          )} */}
 
           {/* article Banners  */}
           <ArticleBanners />

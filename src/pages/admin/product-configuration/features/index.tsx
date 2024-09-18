@@ -185,7 +185,7 @@ const Features: NextPage = () => {
       <DashboardLayout>
         <TabDashboardLayout>
           <Head>
-            <title>مدیریت | ویژگی محصولات</title>
+            <title> ویژگی محصولات</title>
           </Head>
 
           <div id="_adminFeatures">

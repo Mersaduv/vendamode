@@ -518,7 +518,7 @@ const ArticleForm: React.FC<Props> = (props) => {
             {/* is active  */}
             <div className="flex flex-1">
               <div className="bg-white w-full rounded-md shadow-item">
-                <div className="flex items-center justify-between border-b p-6 py-6">
+                <div className={`flex items-center justify-between border-b p-6 ${mode === "edit" ? "py-5" : "py-6"} `}>
                   <h3 className=" text-gray-600">وضعیت مقاله</h3>
                   {mode === 'edit' && (
                     <div className="flex gap-2">
@@ -537,9 +537,9 @@ const ArticleForm: React.FC<Props> = (props) => {
 
                 {/* is active select */}
                 {mode === 'edit' ? (
-                  <div className="flex flex-col space-y-4">
+                  <div className="flex flex-col space-y-6">
                     <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-6">
-                      <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]">
+                      <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa] h-[42px]">
                         <PiUserDuotone className="w-5 h-5 opacity-50" />
                         <span className="whitespace-nowrap text-center w-[113px]">انتشار توسط</span>
                       </div>
@@ -548,7 +548,7 @@ const ArticleForm: React.FC<Props> = (props) => {
                       </div>
                     </div>
                     <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-0">
-                      <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]">
+                      <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]  h-[42px]">
                         <img className="w-5 h-5  opacity-50" src="/assets/svgs/duotone/calendar-days.svg" alt="" />
                         <span className="whitespace-nowrap text-center w-[133px]">زمان انتشار</span>
                       </div>
@@ -557,7 +557,7 @@ const ArticleForm: React.FC<Props> = (props) => {
                       </div>
                     </div>
                     <div className="flex flex-col xs:flex-row px-10 py-10 pb-0 pt-0">
-                      <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]">
+                      <div className="flex items-center xs:py-0 py-2 justify-center px-3 rounded-l-none rounded-md bg-[#f5f8fa]  h-[42px]">
                         <img className="w-5 h-5 opacity-50" src="/assets/svgs/duotone/calendar-days.svg" alt="" />
                         <span className="whitespace-nowrap text-center w-[133px]"> ویرایش</span>
                       </div>
@@ -565,7 +565,7 @@ const ArticleForm: React.FC<Props> = (props) => {
                         {digitsEnToFa(updateShamsiDate)} توسط {author}
                       </div>
                     </div>
-                    <div className="flex px-10 py-10 pt-6 flex-col xs:flex-row">
+                    <div className={`flex px-10 py-10 ${mode === 'edit' ? 'pt-0' : 'pt-6'}  flex-col xs:flex-row`}>
                       <label
                         htmlFor="title"
                         className="flex items-center justify-center xs:py-0 py-2 px-3 rounded-l-none rounded-md bg-[#f5f8fa]"

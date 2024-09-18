@@ -8,8 +8,7 @@ interface DesignTabDashboardLayoutProps {
 
 const tabs = [
   { path: '/admin/ads/main', label: 'صفحه اصلی' },
-  { path: '/admin/design/siteItems', label: 'عناوین سایت' },
-  { path: '/admin/design/generalSettings', label: 'تنظیمات عمومی' },
+  { path: '/admin/design/siteItems', label: 'تنظیمات عمومی' },
   { path: '/admin/design/footer', label: 'فوتر' },
   { path: '/admin/design/paints', label: 'رنگ آمیزی' },
 ]

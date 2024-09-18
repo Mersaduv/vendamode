@@ -33,8 +33,8 @@ const ProductSubCategoriesList: React.FC<Props> = (props) => {
       ) : childCategories && childCategories.length > 0 ? (
         <>
           <h4 className="mb-4 text-base text-black sm:hidden lg:pt-4">دسته‌بندی‌ها</h4>
-          <div className="flex gap-3 overflow-x-auto pb-3">
-            {childCategories.map((item) => (
+          <div className="flex gap-3 overflow-x-auto scroll-smooth pb-3">
+            {childCategories.filter(x=>x.isActive).map((item) => (
               <Link
                 key={item.id}
                 href={`/products?${generateQueryParams({
@@ -42,10 +42,10 @@ const ProductSubCategoriesList: React.FC<Props> = (props) => {
                   categoryId: item.id,
                   sort: '',
                 })}`}
-                className="rounded-md border-4 border-gray-100 px-3 pb-2 pt-4 text-center"
+                className="rounded-md bg-gray-50 border-4 border-gray-100 px-3 pb-2 pt-4 text-center"
               >
                 <ResponsiveImage
-                  dimensions="w-24 h-24 md:h-32 md:w-32 xl:w-40 xl:h-40"
+                  dimensions="w-24 h-24"
                   src={item.imagesSrc?.imageUrl!}
                   blurDataURL={item.imagesSrc?.placeholder}
                   alt={item.name}

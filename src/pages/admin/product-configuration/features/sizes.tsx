@@ -172,7 +172,7 @@ const Sizes: NextPage = () => {
       <DashboardLayout>
         <TabDashboardLayout>
           <Head>
-            <title>پیکربندی | مقدار های سایزبندی</title>
+            <title> مقدار های سایزبندی</title>
           </Head>
 
           <div id="_adminSizes">

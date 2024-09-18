@@ -251,6 +251,7 @@ const Products: NextPage = () => {
     refetchDeletedProducts()
     refetchInactiveProducts()
     refetchActiveProducts()
+    refetchPendingProducts()
   }
 
   const [isShowConfirmDeleteModal, confirmDeleteModalHandlers] = useDisclosure()
@@ -329,7 +330,6 @@ const Products: NextPage = () => {
     }
 
     handleAllRefetch()
-
     setSelectedProducts((prev) => ({
       ...prev,
       [tabKey]: [],
@@ -348,6 +348,25 @@ const Products: NextPage = () => {
       setSelectedProducts((prev) => ({
         ...prev,
         [tabKey]: [],
+      }))
+    }
+  }
+
+  const handleSelectAllProduct = () => {
+    const currentProducts = productsPagination?.data?.pagination?.data || []
+    const selectedTabProducts = selectedProducts[tabKey] || []
+
+    // اگر تمام محصولات صفحه فعلی انتخاب شده‌اند، آنها را حذف کنید.
+    if (selectedTabProducts.length === currentProducts.length) {
+      setSelectedProducts((prevSelected) => ({
+        ...prevSelected,
+        [tabKey]: [], // حذف تمام محصولات صفحه فعلی از انتخاب
+      }))
+    } else {
+      // در غیر این صورت، همه محصولات صفحه فعلی را به انتخاب اضافه کنید.
+      setSelectedProducts((prevSelected) => ({
+        ...prevSelected,
+        [tabKey]: currentProducts, // انتخاب همه محصولات صفحه جاری
       }))
     }
   }
@@ -518,7 +537,7 @@ const Products: NextPage = () => {
       )}
       <main>
         <Head>
-          <title>مدیریت | محصولات</title>
+          <title>همه محصولات</title>
         </Head>
         <DashboardLayout>
           <section id="_adminProducts" className=" w-full">
@@ -751,13 +770,11 @@ const Products: NextPage = () => {
                                     <input
                                       className="appearance-none checked:bg-sky-500 border-none focus:ring-offset-0 focus:outline-offset-0 focus:outline-0 focus:ring-0 rounded-md text-xl w-4 h-4"
                                       type="checkbox"
-                                      onChange={(e) =>
-                                        handleSelectAll(e, productsPagination?.data?.pagination?.data ?? [])
-                                      }
                                       checked={
                                         selectedProducts[tabKey]?.length ===
-                                        productsPagination?.data?.pagination.data?.length
+                                        productsPagination?.data?.pagination?.data?.length
                                       }
+                                      onChange={handleSelectAllProduct}
                                     />
                                     <ArrowDown className="icon text-gray-500" />
                                   </div>
@@ -804,12 +821,7 @@ const Products: NextPage = () => {
                                       </Link>
                                     </td>
                                     <td className="text-center text-sm text-gray-600">{digitsEnToFa(product.code)}</td>
-                                    {/* <td
-                                      title={`${product.parentCategories.category.name}`}
-                                      className="text-sm text-gray-600 text-center"
-                                    >
-                                      {product.parentCategories.category.name}
-                                    </td> */}
+
                                     <td className="tooltip-container text-sm text-gray-600 text-center cursor-pointer">
                                       {product.parentCategories.category.name}
                                       <span className="tooltip-text">
@@ -1243,10 +1255,10 @@ const Products: NextPage = () => {
                     <Tab.Panel>
                       <div id="_adminIsPublishTimeProducts">
                         <DataStateDisplay
-                          isError={isInactiveProductsError}
-                          refetch={refetchInactiveProducts}
-                          isFetching={isInactiveProductsFetching}
-                          isSuccess={isInactiveProductsSuccess}
+                          isError={isPendingProductsError}
+                          refetch={refetchPendingProducts}
+                          isFetching={isPendingProductsFetching}
+                          isSuccess={isPendingProductsSuccess}
                           dataLength={
                             productsIsPendingPagination?.data?.pagination.data
                               ? productsIsPendingPagination.data?.productsLength

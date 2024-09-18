@@ -8,7 +8,7 @@ interface Props {
 const LargeBanner: React.FC<Props> = (props) => {
   const { data: bannerAds } = props
 
-  if (bannerAds.length === 0) return null
+  if (bannerAds.filter((x) => x.isActive).length === 0) return null
 
   const getWrapperTag = (banner: IBanner, index: number) => {
     const href =

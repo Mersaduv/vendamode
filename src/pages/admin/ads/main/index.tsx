@@ -32,7 +32,7 @@ const Main: NextPage = () => {
 
       <main className="grid min-h-screen items-center">
         <Head>
-          <title>مدیریت | صفحه اصلی</title>
+          <title>نمای سایت | صفحه اصلی</title>
         </Head>
         <DashboardLayout>
         <DesignTabDashboardLayout>

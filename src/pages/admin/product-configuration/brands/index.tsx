@@ -245,7 +245,7 @@ const Brands: NextPage = () => {
       <DashboardLayout>
         <TabDashboardLayout>
           <Head>
-            <title>مدیریت | برندها</title>
+            <title> برندها</title>
           </Head>
 
           <div id="_adminBrands">
@@ -392,8 +392,8 @@ const Brands: NextPage = () => {
 
                                     <td className="text-center">
                                       <div
-                                        onClick={() => handlerEditBrandModal(brand)}
-                                        className="text-sm text-sky-500 cursor-pointer px-2"
+                                        
+                                        className="text-sm  px-2"
                                       >
                                         {brand.nameEn}
                                       </div>

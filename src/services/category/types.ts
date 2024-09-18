@@ -1,7 +1,7 @@
 import type { ICategoriesList, ICategory, ICategoryForm, IPagination, QueryParams, ServiceResponse } from '@/types'
 
 export type MsgResult = ServiceResponse<boolean>
-export type IdQuery = { id: string | undefined }
+export type IdQuery = { id: string | undefined; isActive?: boolean }
 export type IdAndQuery = { id: string | undefined; query: QueryParams }
 export type GetCategoriesQuery = QueryParams
 export type CategoriesResult = {

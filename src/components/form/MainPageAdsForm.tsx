@@ -6,6 +6,7 @@ import {
   IArticleBannerForm,
   IArticleForm,
   IBannerForm,
+  IDesignItemForm,
   IFooterBannerForm,
   ISlider,
   ISliderForm,
@@ -14,6 +15,7 @@ import {
   ITextMarqueeForm,
 } from '@/types'
 import {
+  useDeleteDesignItemsMutation,
   useDeleteSliderMutation,
   useDeleteStoreBrandMutation,
   useDeleteStoreCategoryMutation,
@@ -22,11 +24,13 @@ import {
   useGetAllFooterBannersQuery,
   useGetAllSlidersQuery,
   useGetArticlesQuery,
+  useGetDesignItemsQuery,
   useGetHeaderTextQuery,
   useGetStoreBrandsQuery,
   useGetStoreCategoriesQuery,
   useUpsertArticleBannerMutation,
   useUpsertBannerMutation,
+  useUpsertDesignItemsMutation,
   useUpsertFooterBannerMutation,
   useUpsertHeaderTextMutation,
   useUpsertSlidersMutation,
@@ -38,7 +42,7 @@ import { ArticleBannerBulkForm, StoreBrandBulkForm, StoreCategoryBulkForm } from
 import { HandleResponse } from '../shared'
 import { useAppDispatch } from '@/hooks'
 import { showAlert } from '@/store'
-import { StoreBrandForm, StoreCategoryForm } from '../designs'
+import { DesignItemForm, StoreBrandForm, StoreCategoryForm } from '../designs'
 const fetchImageAsFile = async (url: string): Promise<File> => {
   try {
     const response = await fetch(url)
@@ -67,6 +71,7 @@ interface FormData {
   articleBanners: IArticleBannerForm[]
   banners: IBannerForm[]
   footerBanners: IFooterBannerForm[]
+  designItems: IDesignItemForm[]
 }
 const MainPageAdsForm: React.FC = () => {
   //states :
@@ -79,8 +84,15 @@ const MainPageAdsForm: React.FC = () => {
   const [banners, setBanners] = useState<IBannerForm[]>([])
   const [articleBanners, setArticleBanners] = useState<IArticleBannerForm[]>([])
   const [footerBanner, setFooterBanner] = useState<IFooterBannerForm[]>([])
+  const [listItems, setListItems] = useState<IDesignItemForm[]>([])
+  const [deletedDesignItems, setDeletedDesignItems] = useState<IDesignItemForm[]>([])
   const dispatch = useAppDispatch()
   // Queries
+  const {
+    data: designItemsData,
+    isLoading: isLoadingDesignItems,
+    isError: isErrorDesignItems,
+  } = useGetDesignItemsQuery()
   const {
     data: storeCategoriesData,
     isLoading: isLoadingStoreCategories,
@@ -116,6 +128,15 @@ const MainPageAdsForm: React.FC = () => {
   } = useGetAllFooterBannersQuery()
 
   // Upsert
+  const [
+    upsertDesignItems,
+    {
+      isLoading: isUpsertDesignItemsSetting,
+      isSuccess: isUpsertSuccessDesignItems,
+      isError: isUpsertErrorDesignItems,
+      error: upsertDesignItemsError,
+    },
+  ] = useUpsertDesignItemsMutation()
   const [
     upsertStoreCategory,
     {
@@ -184,7 +205,7 @@ const MainPageAdsForm: React.FC = () => {
     },
   ] = useUpsertFooterBannerMutation()
 
-  //*    Delete Slider
+  //*    Delete
   const [
     deleteStoreCategory,
     {
@@ -215,6 +236,16 @@ const MainPageAdsForm: React.FC = () => {
       isLoading: isLoadingDelete,
     },
   ] = useDeleteSliderMutation()
+  const [
+    deleteDesignItem,
+    {
+      isSuccess: isSuccessDesignItemDelete,
+      isError: isErrorDesignItemDelete,
+      error: errorDesignItemDelete,
+      data: dataDesignItemDelete,
+      isLoading: isLoadingDesignItemDelete,
+    },
+  ] = useDeleteDesignItemsMutation()
 
   const methods: UseFormReturn<FormData> = useForm<FormData>({
     defaultValues: {
@@ -223,6 +254,7 @@ const MainPageAdsForm: React.FC = () => {
         name: '',
         isActive: false,
       },
+      designItems: [],
       storeCategories: [],
       storeBrands: [],
       slidersIsActive: false,
@@ -272,7 +304,7 @@ const MainPageAdsForm: React.FC = () => {
       if (sliderData?.data) {
         return await Promise.all(
           sliderData.data.map(async (slider) => {
-            const imageFile = await fetchImageAsFile(slider.image.imageUrl);
+            const imageFile = await fetchImageAsFile(slider.image.imageUrl)
             return {
               id: slider.id,
               thumbnail: imageFile,
@@ -280,18 +312,41 @@ const MainPageAdsForm: React.FC = () => {
               link: slider.link,
               type: slider.type,
               isActive: slider.isActive,
-            };
+            }
           })
-        );
+        )
       }
-      return [];
-    };
-  
+      return []
+    }
+
+    const loadDesignItemImages = async () => {
+      if (designItemsData?.data) {
+        return await Promise.all(
+          designItemsData.data.map(async (designItem) => {
+            const imageFile = designItem.image ? await fetchImageAsFile(designItem.image.imageUrl) : null
+            const item: IDesignItemForm = {
+              id: designItem.id,
+              thumbnail: imageFile,
+              title: designItem.title,
+              link: designItem.link,
+              type: designItem.type,
+              index: designItem.index,
+              created: designItem.created,
+              lastUpdated: designItem.lastUpdated,
+            }
+
+            if (designItem.type === 'lists') listItems.push(item)
+          })
+        )
+      }
+      return []
+    }
+
     const loadBannerImages = async () => {
       if (bannerData?.data) {
         return await Promise.all(
           bannerData.data.map(async (banner) => {
-            const imageFile = await fetchImageAsFile(banner.image.imageUrl);
+            const imageFile = await fetchImageAsFile(banner.image.imageUrl)
             return {
               id: banner.id,
               index: banner.index,
@@ -300,13 +355,13 @@ const MainPageAdsForm: React.FC = () => {
               link: banner.link,
               type: banner.type,
               isActive: banner.isActive,
-            };
+            }
           })
-        );
+        )
       }
-      return [];
-    };
-  
+      return []
+    }
+
     const loadArticleBanners = async () => {
       if (articleBannerData?.data) {
         return await Promise.all(
@@ -316,16 +371,16 @@ const MainPageAdsForm: React.FC = () => {
             isActive: articleBanner.isActive,
             articleId: articleBanner.articleId,
           }))
-        );
+        )
       }
-      return [];
-    };
-  
+      return []
+    }
+
     const loadFooterBannerImages = async () => {
       if (footerBannerData?.data) {
         return await Promise.all(
           footerBannerData.data.map(async (banner) => {
-            const imageFile = await fetchImageAsFile(banner.image.imageUrl);
+            const imageFile = await fetchImageAsFile(banner.image.imageUrl)
             return {
               id: banner.id,
               thumbnail: imageFile,
@@ -333,28 +388,50 @@ const MainPageAdsForm: React.FC = () => {
               link: banner.link,
               type: banner.type,
               isActive: banner.isActive,
-            };
+            }
           })
-        );
+        )
       }
-      return [];
-    };
-  
+      return []
+    }
+
     const loadAllData = async () => {
       const [slidersWithFiles, bannersWithFiles, articleBanners, footerBannersWithFiles] = await Promise.all([
         loadSliderImages(),
         loadBannerImages(),
         loadArticleBanners(),
         loadFooterBannerImages(),
-      ]);
-  
+        // loadDesignItemImages(),
+      ])
+      const listItemsLoad: IDesignItemForm[] = []
+      if (designItemsData?.data) {
+        await Promise.all(
+          designItemsData.data.map(async (designItem) => {
+            const imageFile = designItem.image ? await fetchImageAsFile(designItem.image.imageUrl) : null
+            const item: IDesignItemForm = {
+              id: designItem.id,
+              thumbnail: imageFile,
+              title: designItem.title,
+              link: designItem.link,
+              type: designItem.type,
+              index: designItem.index,
+              created: designItem.created,
+              lastUpdated: designItem.lastUpdated,
+            }
+
+            if (designItem.type === 'lists') listItemsLoad.push(item)
+          })
+        )
+      }
+
+      setListItems(listItemsLoad)
       if (storeCategoriesData?.data) {
-        setStoreCategories(storeCategoriesData.data);
+        setStoreCategories(storeCategoriesData.data)
       }
       if (storeBrandsData?.data) {
-        setStoreBrands(storeBrandsData.data);
+        setStoreBrands(storeBrandsData.data)
       }
-  
+      setListItems(listItems)
       methods.reset({
         textMarquee: {
           id: headerTextData?.data?.id || '',
@@ -373,33 +450,54 @@ const MainPageAdsForm: React.FC = () => {
         footerBannersIsActive: footerBannerData?.data?.length > 0 && footerBannerData.data[0].isActive,
         articleBanners: articleBanners,
         articleBannersIsActive: articleBannerData?.data?.length > 0 && articleBannerData.data[0].isActive,
-      });
-  
-      setSliders(slidersWithFiles);
+      })
+
+      setSliders(slidersWithFiles)
       setArticleBanners((prev) => {
         return prev.map((defaultArticleBanner) => {
           const newArticleBanner = articleBanners.find(
             (articleBanner) => articleBanner.index === defaultArticleBanner.index
-          );
-          return newArticleBanner ? newArticleBanner : defaultArticleBanner;
-        });
-      });
+          )
+          return newArticleBanner ? newArticleBanner : defaultArticleBanner
+        })
+      })
       setBanners((prevBanners) =>
         prevBanners.map((defaultBanner) => {
-          const newBanner = bannersWithFiles.find((banner) => banner.index === defaultBanner.index);
-          return newBanner ? newBanner : defaultBanner;
+          const newBanner = bannersWithFiles.find((banner) => banner.index === defaultBanner.index)
+          return newBanner ? newBanner : defaultBanner
         })
-      );
-      setFooterBanner(footerBannersWithFiles);
-    };
-  
-    loadAllData();
-  }, [headerTextData, sliderData, bannerData, footerBannerData, storeBrandsData, storeCategoriesData, methods]);
-  
+      )
+      setFooterBanner(footerBannersWithFiles)
+    }
+
+    loadAllData()
+  }, [
+    headerTextData,
+    sliderData,
+    bannerData,
+    footerBannerData,
+    storeBrandsData,
+    storeCategoriesData,
+    designItemsData,
+    methods,
+  ])
 
   const onSubmit = async (data: FormData) => {
     console.log(data, 'data all')
     const promises = []
+
+    // ? delete Design Items
+    if (deletedDesignItems.length > 0) {
+      promises.push(
+        Promise.all(
+          deletedDesignItems.map((deletedDesign) => {
+            if (deletedDesign.id) {
+              return deleteDesignItem(deletedDesign.id)
+            }
+          })
+        )
+      )
+    }
 
     // sliders items
     if (deletedSliders.length > 0) {
@@ -564,6 +662,25 @@ const MainPageAdsForm: React.FC = () => {
       promises.push(upsertStoreBrandPromise)
     }
 
+    // design items
+    const upsertDesignItemsPromise = (async () => {
+      if (data.designItems && data.designItems.length > 0) {
+        const formSliderData = new FormData()
+        data.designItems.forEach((designItem, index) => {
+          if (designItem.id !== undefined && designItem.id !== '')
+            formSliderData.append(`DesignItems[${index}].Id`, designItem.id)
+          formSliderData.append(`DesignItems[${index}].Title`, designItem.title)
+          formSliderData.append(`DesignItems[${index}].Thumbnail`, designItem.thumbnail!)
+          formSliderData.append(`DesignItems[${index}].Link`, designItem.link)
+          formSliderData.append(`DesignItems[${index}].Type`, designItem.type)
+          formSliderData.append(`DesignItems[${index}].Index`, designItem.index.toString())
+        })
+
+        await upsertDesignItems(formSliderData)
+      }
+    })()
+    promises.push(upsertDesignItemsPromise)
+
     await Promise.all(promises)
   }
 
@@ -575,6 +692,9 @@ const MainPageAdsForm: React.FC = () => {
 
     if (isUpsertErrorHeaderText) {
       errors.push('به‌روزرسانی متن هدر')
+    }
+    if (isUpsertErrorDesignItems) {
+      errors.push('به‌روزرسانی  فهرست')
     }
     if (isUpsertErrorSlider) {
       errors.push('به‌روزرسانی اسلایدر')
@@ -601,6 +721,7 @@ const MainPageAdsForm: React.FC = () => {
 
     if (
       isUpsertSuccessHeaderText ||
+      isUpsertSuccessDesignItems ||
       isUpsertSuccessSlider ||
       isUpsertSuccessBanner ||
       isUpsertSuccessFooterBanner ||
@@ -613,7 +734,8 @@ const MainPageAdsForm: React.FC = () => {
       isUpsertErrorFooterBanner ||
       isUpsertErrorArticleBanner ||
       isUpsertErrorStoreCategory ||
-      isUpsertErrorStoreCategory
+      isUpsertErrorStoreCategory ||
+      isUpsertErrorDesignItems
     ) {
       dispatch(
         showAlert({
@@ -630,6 +752,7 @@ const MainPageAdsForm: React.FC = () => {
     isUpsertSuccessFooterBanner,
     isUpsertSuccessArticleBanner,
     isUpsertSuccessStoreCategory,
+    isUpsertSuccessDesignItems,
     isUpsertErrorHeaderText,
     isUpsertErrorSlider,
     isUpsertErrorBanner,
@@ -637,7 +760,46 @@ const MainPageAdsForm: React.FC = () => {
     isUpsertErrorArticleBanner,
     isUpsertErrorStoreCategory,
     isUpsertErrorStoreCategory,
+    isUpsertErrorDesignItems,
   ])
+
+  const showAlertForMaxItems = (type: string) => {
+    const title = type === 'lists' ? 'فهرست ها' : type === 'services' ? 'سرویس ها' : 'شبکه های اجتماعی'
+    dispatch(
+      showAlert({
+        status: 'error',
+        title: `حداکثر تعداد ${title} 6 عدد می‌باشد`,
+      })
+    )
+  }
+
+  const handleAddDesignItem = (type: string) => {
+    let newItem: IDesignItemForm
+
+    switch (type) {
+      case 'lists':
+        if (listItems.length === 6) {
+          showAlertForMaxItems(type)
+          return
+        }
+        newItem = {
+          id: '',
+          thumbnail: null,
+          link: '',
+          title: '',
+          type: type,
+          isActive: false,
+          index: listItems.length,
+          created: new Date().toISOString(),
+        }
+        setListItems([...listItems, newItem])
+        break
+
+      default:
+        break
+    }
+  }
+
   const isFormSubmitting =
     isUpsertLoadingStoreCategory ||
     isUpsertLoadingHeaderText ||
@@ -645,7 +807,8 @@ const MainPageAdsForm: React.FC = () => {
     isUpsertLoadingBanner ||
     isUpsertLoadingArticleBanner ||
     isUpsertLoadingFooterBanner ||
-    isUpsertLoadingStoreBrand
+    isUpsertLoadingStoreBrand ||
+    isUpsertDesignItemsSetting
 
   return (
     <>
@@ -653,6 +816,13 @@ const MainPageAdsForm: React.FC = () => {
         <form className="space-y-5 mb-2 mx-3" onSubmit={methods.handleSubmit(onSubmit)}>
           {/* 1. متن متحرک */}
           <TextMarqueeForm />
+          <DesignItemForm
+            type="lists"
+            designItems={listItems}
+            setDesignItems={setListItems}
+            setDeletedDesignItems={setDeletedDesignItems}
+            onAddDesignItem={() => handleAddDesignItem('lists')}
+          />
           {/* 2. اسلایدر اصلی */}
           <SliderForm sliders={sliders} setSliders={setSliders} setDeletedSliders={setDeletedSliders} />
           <StoreCategoryForm

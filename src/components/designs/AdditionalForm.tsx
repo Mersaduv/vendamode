@@ -19,11 +19,17 @@ interface Props {
   setColumnFooter: Dispatch<SetStateAction<IColumnFooter[]>>
   columnFooters: IColumnFooter[]
   setDeletedFooterArticle: Dispatch<SetStateAction<IFooterArticleColumn[]>>
+  setDeletedColumnFooter: Dispatch<SetStateAction<IColumnFooter[]>>
 }
-const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDeletedFooterArticle }) => {
+const AdditionalForm: React.FC<Props> = ({
+  columnFooters,
+  setColumnFooter,
+  setDeletedFooterArticle,
+  setDeletedColumnFooter,
+}) => {
   const { control, setValue } = useFormContext()
   const dispatch = useAppDispatch()
-
+  const [nextIndex, setNextIndex] = useState(2)
   // ? Queries
   const {
     data: articleData,
@@ -103,6 +109,22 @@ const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDe
     setSelectedArticles(newSelectedArticles)
   }
 
+  const handleColumnAdd = () => {
+    if (columnFooters.length === 4) {
+      dispatch(
+        showAlert({
+          status: 'error',
+          title: 'حداکثر تعداد ستون های فوتر 4 عدد میباشد',
+        })
+      )
+      return
+    }
+
+    const nextIndex = columnFooters.length + 2
+
+    setColumnFooter([...columnFooters, { id: '', name: '', index: nextIndex, footerArticleColumns: [] }])
+  }
+
   const handleRemove = (columnIndex: number, footerIndex: number) => {
     const updatedColumnFooters = columnFooters.map((columnFooter, i) => {
       if (i === columnIndex) {
@@ -128,6 +150,16 @@ const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDe
     setSelectedArticles(newSelectedArticles)
   }
 
+  const handleDeleteColumnFooter = (index: number, columnFooter: IColumnFooter) => {
+    if (columnFooter.id) {
+      setDeletedColumnFooter((prevDeleted) => [...prevDeleted, columnFooter])
+    }
+    setColumnFooter((prevFiles) => {
+      const updatedFiles = [...prevFiles]
+      updatedFiles.splice(index, 1)
+      return updatedFiles
+    })
+  }
   const handleArticleSelect = (article: IArticle, columnIndex: number, footerIndex: number) => {
     if (!article) return
 
@@ -160,18 +192,30 @@ const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDe
         <div>
           <div className="flex justify-between items-center border-b p-5 px-6">
             <h3 className="text-gray-600 whitespace-nowrap">ستون فوتر</h3>
+            <div className="flex justify-end w-[260px] gap-4 items-center">
+              <Button className=" px-5 py-2.5 bg-sky-500 hover:bg-sky-400" onClick={handleColumnAdd}>
+                {'افزودن'}
+              </Button>
+            </div>
           </div>
-          <div className="flex flex-col sm:flex-row py-6 pt-8  gap-4">
+          <div className="flex flex-col sm:flex-row py-6 pt-10  gap-4">
             {columnFooters.length === 0 ? (
-              <div className="text-center w-full">ستون ها خالی است</div>
+              <div className="text-center w-full">ستون موزد نظر را اضافه کنید</div>
             ) : (
               <div className="flex flex-col items-center md:flex-row w-full">
                 {columnFooters.map((columnFooter, index) => {
                   return (
                     <div
                       key={index}
-                      className="mb-4 w-full max-w-[25%] h-full flex-1 rounded-lg flex flex-col items-center justify-start gap-1 px-4"
+                      className="mb-4 w-full max-w-[25%] h-full flex-1 rounded-lg flex flex-col items-center justify-start gap-1 px-4 relative" 
                     >
+                      <button
+                        type="button"
+                        className="absolute -top-4 right-1 z-20 shadow-product bg-gray-50 hover:bg-red-600 hover:text-white p-1 rounded-full text-gray-500"
+                        onClick={() => handleDeleteColumnFooter(index, columnFooter)}
+                      >
+                        <MdClose className="text-lg" /> {/* Add your delete icon here */}
+                      </button>
                       <div className="flex items-center gap-1 w-full">
                         <div className="w-full relative">
                           <input
@@ -191,7 +235,7 @@ const AdditionalForm: React.FC<Props> = ({ columnFooters, setColumnFooter, setDe
                         </div>
                         <Plus
                           onClick={() => handleAdd(index)}
-                          className="text-4xl text-[#e90089] hover:text-[#ff6ac1] cursor-pointer"
+                          className="text-2xl text-[#e90089] hover:text-[#ff6ac1] cursor-pointer"
                         />
                       </div>
                       <div className="w-full space-y-5 mt-4">

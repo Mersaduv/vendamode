@@ -367,7 +367,7 @@ const SubCategorySizesUpdateModal: React.FC<Props> = (props) => {
                       <img
                         src={URL.createObjectURL(selectedFile[0])}
                         alt={selectedFile[0].name}
-                        className="w-[125px] object-contain h-[125px] rounded-md"
+                        className="w-[300px] object-contain h-[300px] rounded-md"
                       />
                     </div>
                   )}

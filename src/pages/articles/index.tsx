@@ -19,6 +19,7 @@ import { ResponsiveImage } from '@/components/ui'
 
 import type { IProduct, ISlider } from '@/types'
 import { digitsEnToFa } from '@persian-tools/persian-tools'
+import { ProductDiscountTag, ProductPriceDisplay } from '@/components/product'
 const Articles: NextPage = () => {
   // ? Assets
   const { query } = useRouter()
@@ -26,16 +27,20 @@ const Articles: NextPage = () => {
   const { generalSetting } = useAppSelector((state) => state.design)
   // ? Querirs
   //*    Get Products Data
-  const { data: articleData, ...articlesQueryProps } = useGetArticlesQuery(query)
+  const { data: articleData, ...articlesQueryProps } = useGetArticlesQuery({ ...query, isCategory: true })
   const { data: latestArticlesData, ...latestArticlesQueryProps } = useGetArticlesQuery(
     { ...query, sort: '1' } // Passing 'created' to fetch latest articles
   )
 
-  const { data: productData } = useGetProductsQuery(
-    { pageSize: 5 },
+  const { products: productData, isFetching: isFetchingNew } = useGetProductsQuery(
     {
-      selectFromResult: ({ data }) => ({
-        data: data?.data?.pagination.data,
+      inStock: '1',
+      pageSize: 30,
+    },
+    {
+      selectFromResult: ({ data, isFetching }) => ({
+        products: data?.data?.pagination.data,
+        isFetching,
       }),
     }
   )
@@ -52,6 +57,9 @@ const Articles: NextPage = () => {
       blurDataURL={item.mainImageSrc.placeholder}
     />
   )
+  if (isFetchingNew) {
+    return <div>Loading...</div>
+  }
 
   // ? Render(s)
   return (
@@ -62,7 +70,7 @@ const Articles: NextPage = () => {
         keywords={generalSetting?.googleTags || ' اینترنتی, فروشگاه'}
       />
       <ClientLayout>
-        <main className="lg:container overflow-y-auto lg:max-w-[1700px] lg:px-3 xl:mt-10 relative">
+        <main className="lg:container overflow-y-auto lg:max-w-[1700px] lg:px-3 relative">
           <h1 className="mt-10 sm:mt-20 xl:mt-10">مقالات</h1>
 
           <div className="flex flex-col sm:flex-row relative">
@@ -84,18 +92,15 @@ const Articles: NextPage = () => {
                 )}
               </DataStateDisplay>
 
-              {articleData &&
-                articleData.data &&
-                articleData?.data?.data &&
-                articleData?.data?.data?.length > 0 && (
-                  <div className="mx-auto mt-10 py-4 lg:max-w-5xl">
-                    <Pagination pagination={articleData?.data} section="articles" client />
-                  </div>
-                )}
+              {articleData && articleData.data && articleData?.data?.data && articleData?.data?.data?.length > 0 && (
+                <div className="mx-auto mt-10 py-4 lg:max-w-5xl">
+                  <Pagination pagination={articleData?.data} section="articles" client />
+                </div>
+              )}
             </div>
             {/* sticky content */}
             <div className="flex- flex-col ">
-              <aside className="left-0 top-0 w-[274px] h-[274px] border rounded-lg p-3 shadow-item  px-4 mb-8">
+              <aside className="left-0 top-0 w-[274px] border rounded-lg p-3 shadow-item  px-4 mb-8">
                 <h3 className="my-2 mb-5 text-gray-600 text-center">پیشنهاد لحظه ای</h3>
                 <Swiper
                   pagination={{ clickable: true }}
@@ -108,17 +113,42 @@ const Articles: NextPage = () => {
                   className="articlePageSwiper overflow-hidden"
                 >
                   {productData &&
-                    productData.map((item, index) => {
-                      const stockItemPrice = item.stockItems.find(
-                        (stockItem) => stockItem.quantity! > 0 && (stockItem.price !== undefined || stockItem.price > 0)
-                      )
+                    productData.map((product, index) => {
+                      const filteredItems = product?.stockItems.filter((item) => {
+                        if (item.discount === 0 && item.price > 0 && item.quantity === 0) {
+                          return true
+                        } else if (item.discount > 0 && item.price > 0 && item.quantity === 0) {
+                          return true
+                        } else if (item.discount === 0 && item.price > 0 && item.quantity > 0) {
+                          return true
+                        } else if (item.discount > 0 && item.price > 0 && item.quantity > 0) {
+                          return true
+                        }
+                        return false
+                      })
+                      console.log(filteredItems, 'filteredItemsfilteredItemsfilteredItems')
+
                       return (
                         <SwiperSlide key={index}>
-                          <a href={`/products/${item.slug}`} target="_blank" className="">
-                            <SliderImage index={index} item={item} />
-                            <h2 className="text-gray-500 text-center mt-6">{item.title}</h2>
-                            <div className="text-gray-400 text-center text-sm">
-                              {digitsEnToFa(stockItemPrice?.price ?? '')} تومان
+                          <a href={`/products/${product.slug}`} target="_blank" className="">
+                            <SliderImage index={index} item={product} />
+                            <h3 className="text-gray-500 text-start mt-2">{product.title}</h3>
+                            <div className="mt-1.5 flex justify-center gap-x-2 px-2 relative">
+                              <div className="">
+                                {filteredItems[0].discount > 0 && (
+                                  <ProductDiscountTag
+                                    price={filteredItems[0].price}
+                                    discount={filteredItems[0].discount}
+                                    isSlider
+                                  />
+                                )}
+                              </div>
+                              <ProductPriceDisplay
+                                inStock={product.inStock}
+                                discount={filteredItems[0].discount}
+                                price={filteredItems[0].price}
+                                
+                              />
                             </div>
                           </a>
                         </SwiperSlide>

@@ -1,21 +1,22 @@
 import { useAppSelector } from '@/hooks'
-import type { CategoryWithAllParents, ICategoryLevel, IProduct } from '@/types'
+import type { CategoryWithAllParents, ICategory, ICategoryLevel, IProduct } from '@/types'
 import Link from 'next/link'
 
 interface Props {
-  categoryLevels: CategoryWithAllParents
+  categoryLevels?: CategoryWithAllParents
+  categoryLevelProductList?: ICategory
   isAdmin?: boolean
   isSelector?: boolean
 }
 
-const ProductBreadcrumb: React.FC<Props> = ({ categoryLevels, isAdmin, isSelector }) => {
+const ProductBreadcrumb: React.FC<Props> = ({ categoryLevels, isAdmin, isSelector,categoryLevelProductList }) => {
   const { generalSetting } = useAppSelector((state) => state.design)
   // ? Render(s)
   return (
     <>
       {isSelector ? (
         <div className={` ${isAdmin ? '' : 'pr-2 '}flex items-center`}>
-          {categoryLevels.parentCategories
+          {categoryLevels?.parentCategories
             ?.filter((x) => x.level !== 0)
             .map((category, index) => (
               <div key={category.id}>
@@ -31,10 +32,10 @@ const ProductBreadcrumb: React.FC<Props> = ({ categoryLevels, isAdmin, isSelecto
 
           <div>
             <Link
-              href={`/products?categorySlug=${categoryLevels.category.slug}`}
+              href={`/products?categorySlug=${categoryLevels?.category.slug}`}
               className="inline-block p-1 text-sm text-gray-500 font-light"
             >
-              {categoryLevels.category.name}
+              {categoryLevels?.category.name}
             </Link>
           </div>
         </div>
@@ -44,30 +45,30 @@ const ProductBreadcrumb: React.FC<Props> = ({ categoryLevels, isAdmin, isSelecto
             <>
               {' '}
               <Link href="/" className="inline-block font-light p-1 text-sm text-[#00c3e1]">
-                وندامد
+          {generalSetting?.title}
               </Link>
               {'>'}
             </>
           )}
-          {categoryLevels.parentCategories?.map((category, index) => (
+          {categoryLevelProductList?.parentCategories?.map((category, index) => (
             <div key={category.id}>
               <Link
-                href={`/products?categorySlug=${category.slug}`}
+                href={`/products?categorySlug=${category.slug}&categoryId=${category.id}`}
                 className="inline-block p-1 text-sm text-[#00c3e1] font-light"
               >
                 {category.name}
               </Link>
-              {index < categoryLevels.parentCategories.length - 1 && '>'}
+              {index < categoryLevelProductList?.parentCategories?.length - 1 && '>'}
             </div>
           ))}
-          {categoryLevels.parentCategories.length !== 0 && '>'}
+          {categoryLevelProductList?.parentCategories?.length !== 0 && '>'}
 
           <div>
             <Link
-              href={`/products?categorySlug=${categoryLevels.category.slug}`}
+              href={`/products?categorySlug=${categoryLevelProductList?.slug}&categoryId=${categoryLevelProductList?.id}`}
               className="inline-block p-1 text-sm text-[#00c3e1] font-light"
             >
-              {categoryLevels.category.name}
+              {categoryLevelProductList?.name}
             </Link>
           </div>
         </div>

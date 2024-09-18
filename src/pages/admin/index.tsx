@@ -17,7 +17,7 @@ const AdminPage: NextPage = () => {
     <ProtectedRouteWrapper allowedRoles={[roles.ADMIN, roles.SUPERADMIN]}>
       <div className="">
         <Head>
-          <title>{generalSetting?.title} | مدیریت</title>
+          <title>پیشخوان  </title>
         </Head>
         <DashboardLayout>
           <div className=" flex " >
