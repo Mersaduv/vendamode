@@ -66,7 +66,7 @@ const SimilarProductsSlider: React.FC<Props> = (props) => {
           {...carouselOptions}
           dir="ltr"
         >
-          {products?.map((product) => {
+          {products && products.map((product) => {
             const filteredItems = product.stockItems.filter((item) => {
               if (item.discount === 0 && item.price > 0 && item.quantity === 0) {
                 return true
@@ -100,18 +100,18 @@ const SimilarProductsSlider: React.FC<Props> = (props) => {
                       </h2>
                       <div className="mt-1.5 flex justify-center gap-x-2 px-2 relative">
                         <div className="">
-                          {filteredItems[0].discount > 0 && (
+                          {filteredItems[0] && filteredItems[0].discount > 0 && (
                             <ProductDiscountTag
-                              price={filteredItems[0].price}
-                              discount={filteredItems[0].discount}
+                              price={filteredItems[0] &&filteredItems[0].price}
+                              discount={filteredItems[0] &&filteredItems[0].discount}
                               isSlider
                             />
                           )}
                         </div>
                         <ProductPriceDisplay
                           inStock={product.inStock}
-                          discount={filteredItems[0].discount}
-                          price={filteredItems[0].price}
+                          discount={filteredItems[0] &&filteredItems[0].discount}
+                          price={filteredItems[0] && filteredItems[0].price}
                           isSlider
                         />
                         s

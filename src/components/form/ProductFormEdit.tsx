@@ -302,11 +302,11 @@ const ProductFormEdit: React.FC<Props> = (props) => {
     }
   }, [productScales])
 
-useEffect(()=>{
-if (!isCalendarOpen) {
-  setDate(new DateObject().setCalendar(persian))
-}
-},[isCalendarOpen])
+  useEffect(() => {
+    if (!isCalendarOpen) {
+      setDate(new DateObject().setCalendar(persian))
+    }
+  }, [isCalendarOpen])
   //؟ all Features Query
   const { data: allFeatures, refetch: refetchAllFeature } = useGetFeaturesQuery(
     { pageSize: 999999 },
@@ -600,8 +600,8 @@ if (!isCalendarOpen) {
 
   // ? Handlers
   const editedCreateHandler: SubmitHandler<IProductForm> = (data) => {
-    console.log(data , "datadata");
-    
+    console.log(data, 'datadata')
+
     const formData = new FormData()
     formData.append('Id', data.Id)
     formData.append('Title', data.Title)
@@ -637,6 +637,13 @@ if (!isCalendarOpen) {
 
       const stockItemsWithoutFile = data.StockItems.map((item) => {
         const { thumbnailsStock, ...rest } = item
+
+        rest.price = rest.price ?? 0
+        rest.discount = rest.discount ?? 0
+        rest.purchasePrice = rest.purchasePrice ?? 0
+        rest.weight = rest.weight ?? 0
+        rest.quantity = rest.quantity ?? 0
+
         return rest
       })
 
@@ -653,7 +660,7 @@ if (!isCalendarOpen) {
     }
     if (!isCalendarOpen) {
       setDate(new DateObject().setCalendar(persian))
-      formData.append('Date', digitsEnToFa(new DateObject().setCalendar(persian).format("HH:mm:ss - YYYY/MM/DD")))
+      formData.append('Date', digitsEnToFa(new DateObject().setCalendar(persian).format('HH:mm:ss - YYYY/MM/DD')))
     } else {
       if (date !== undefined) formData.append('Date', date)
     }
@@ -1548,7 +1555,7 @@ if (!isCalendarOpen) {
                   <div className="flex flex-1">
                     <div className="bg-white w-full rounded-md shadow-item overflow-auto">
                       <h3 className="border-b p-6 text-gray-600">اندازه ها</h3>
-                      <div className="flex justify-center  text-sm mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
+                      <div className="flex justify-center  text-xs mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
                         {/* table  */}
                         برای این دسته بندی, اندازه تعریف نشده است
                         {/* image  */}
@@ -1559,7 +1566,7 @@ if (!isCalendarOpen) {
                   <div className="flex flex-1">
                     <div className="bg-white w-full rounded-md shadow-item overflow-auto">
                       <h3 className="border-b p-6 text-gray-600">اندازه ها</h3>
-                      <div className="flex justify-center  text-sm mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
+                      <div className="flex justify-center  text-xs mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
                         {/* table  */}
                         برای وارد کردن اندازه ها, مقدار سایز بندی را وارد کنید
                         {/* image  */}
@@ -1614,7 +1621,7 @@ if (!isCalendarOpen) {
                         </div>
                         {/* image  */}
                         <div className=" mdx:w-fit flex justify-center w-full mdx:mb-0 pt-3 mb-4">
-                          <div className="rounded-lg  shadow-product w-[240px] h-[240px]">
+                          <div className="rounded-lg  shadow-product w-[400px] h-[400px]">
                             <img
                               className="w-full h-full rounded-lg"
                               src={productSizeScale.imagesSrc?.imageUrl}
@@ -1843,50 +1850,49 @@ const Table: React.FC<PropTable> = (props) => {
     }
   }, [rowsData])
   //............................................................................................................................
-  
+
   useEffect(() => {
     const convertImagesToFiles = async () => {
       if (stockItems.length > 1) {
         // ایجاد یک نسخه کپی از stockItems برای جلوگیری از حلقه بی‌نهایت
         const updatedStockItems = [...stockItems]
-  
+
         const filePromises = stockItems.map(async (item, index) => {
           if (item.imagesSrc && item.imagesSrc.length > 0) {
             const files = await Promise.all(
               item.imagesSrc.map(async (image: { imageUrl: string }) => {
                 const file = await fetchImageAsFile(image.imageUrl)
-                
+
                 // به روزرسانی مستقیم کپی stockItems
                 updatedStockItems[index] = { ...item, imageStock: file }
-  
+
                 return { file, index }
               })
             )
-  
+
             return files.length > 0 ? files[0] : null
           } else {
             if (item.imageStock && item.imageStock.name) {
               const file = { file: item.imageStock, index }
-              console.log(file, "const file = { file: item.imageStock, index: index }")
+              console.log(file, 'const file = { file: item.imageStock, index: index }')
               return file
             } else {
               return null
             }
           }
         })
-  
+
         const selectedFilesWithIds = await Promise.all(filePromises)
-        console.log(selectedFilesWithIds, "selectedFilesWithIds")
-  
+        console.log(selectedFilesWithIds, 'selectedFilesWithIds')
+
         // اینجا setStockItems یکبار و در پایان فراخوانی می‌شود
         setStockItems(updatedStockItems)
         setSelectedStockFiles(selectedFilesWithIds)
       }
     }
-  
+
     convertImagesToFiles()
   }, [stockItems.length])
-  
 
   ///................
 
@@ -2122,6 +2128,8 @@ const Table: React.FC<PropTable> = (props) => {
 
     setStockItems(updatedStockItems)
   }
+  console.log(stockItems, 'stockItems - checked')
+
   return (
     <div className="px-4 py-10 pt-3">
       <table className="table-auto w-full  overflow-x-scroll bg-white  border-gray-200">
@@ -2389,11 +2397,11 @@ const Table: React.FC<PropTable> = (props) => {
                           <MenuButton
                             // title={stockItems[idx]?.offerTime?.toString()}
                             className={`inline-flex w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold text-gray-900 ${
-                              stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined
+                              stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined ||  stockItems[idx]?.discount === null
                                 ? 'cursor-not-allowed'
                                 : ''
                             }`}
-                            disabled={stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined}
+                            disabled={stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined ||  stockItems[idx]?.discount === null}
                           >
                             {/* {!stockItems[idx]?.offerTime && <div>text</div>} */}
                             {stockItems[idx]?.offerTime === undefined ? (
@@ -2498,11 +2506,11 @@ const Table: React.FC<PropTable> = (props) => {
                           <MenuButton
                             // title={stockItems[idx]?.offerTime?.toString()}
                             className={`inline-flex w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold text-gray-900 ${
-                              stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined
+                              stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined  ||  stockItems[idx]?.discount === null
                                 ? 'cursor-not-allowed'
                                 : ''
                             }`}
-                            disabled={stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined}
+                            disabled={stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined ||  stockItems[idx]?.discount === null}
                           >
                             {/* {!stockItems[idx]?.offerTime && <div>text</div>} */}
                             {stockItems[idx]?.offerTime === undefined ? (
@@ -2510,7 +2518,7 @@ const Table: React.FC<PropTable> = (props) => {
                                 title="اعتبار تخفیف"
                                 aria-hidden="true"
                                 className={`h-7 w-7 ${
-                                  stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined
+                                  stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined ||  stockItems[idx]?.discount === null
                                     ? 'text-gray-400'
                                     : stockItems[idx]?.offerTime !== undefined
                                     ? 'text-green-400 hover:text-green-300'
@@ -2522,7 +2530,7 @@ const Table: React.FC<PropTable> = (props) => {
                                 <IoIosTimer
                                   aria-hidden="true"
                                   className={`h-7 w-7 ${
-                                    stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined
+                                    stockItems[idx]?.discount === 0 || stockItems[idx]?.discount === undefined ||  stockItems[idx]?.discount === null
                                       ? 'text-gray-400'
                                       : stockItems[idx]?.offerTime !== null
                                       ? 'text-green-400 hover:text-green-300'

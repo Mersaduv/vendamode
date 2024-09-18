@@ -22,14 +22,14 @@ const ProductScaleModal: React.FC<Props> = (props) => {
         />
       )} */}
 
-      <Modal isShow={isShow} onClose={onClose} effect="bottom-to-top">
-        <Modal.Content onClose={onClose} className="flex h-full flex-col gap-y-5 bg-white md:rounded-lg  w-full">
+      <Modal isShow={isShow} onClose={onClose} effect="bottom-to-top-scale">
+        <Modal.Content onClose={onClose} className="flex h-full flex-col gap-y-5 bg-white  md:rounded-lg  w-full">
           <Modal.Header notBar onClose={onClose}>
             راهنمای سایز
           </Modal.Header>
           <Modal.Body>
-            <div className="flex flex-col-reverse  items-center sm:flex-row gap-x-6 pb-4 px-5">
-              <div className="flex flex-col flex-1">
+            <div className="flex flex-col-reverse  items-center sm:flex-row gap-x-8 pb-4 px-5 w-full">
+              <div className="flex flex-col flex-1 w-full">
                 <div className='text-center sm:text-start'>
                   <span className="font-normal">
                     - تلورانس اندازه گیری تا {digitsEnToFa('5%')} طبیعی است <br /> - اعداد بر حسب{' '}
@@ -65,7 +65,7 @@ const ProductScaleModal: React.FC<Props> = (props) => {
                   </tbody>
                 </table>
               </div>
-              <div className="rounded-lg shadow-product w-[240px] h-[240px]">
+              <div className="rounded-lg shadow-product w-[400px] h-[400px]">
                 <img
                   className="w-full h-full rounded-lg"
                   src={productSizeInfo.imagesSrc?.imageUrl}

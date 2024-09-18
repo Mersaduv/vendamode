@@ -67,6 +67,7 @@ export const getServerSideProps: GetServerSideProps<Props, { slug: string }> = a
 const SingleProduct: NextPage<Props> = (props) => {
   // ? Props
   const { product, smilarProducts } = props
+  console.log(smilarProducts, ' smilarProducts')
 
   // ? Assets
   const dispatch = useAppDispatch()
@@ -109,17 +110,17 @@ const SingleProduct: NextPage<Props> = (props) => {
   const { tempSize, tempColor, tempObjectValue } = useAppSelector((state) => state.cart)
   // ? Add To LastSeen
   useEffect(() => {
-      dispatch(
-        addToLastSeen({
-          productID: product.id,
-          image: product.mainImageSrc,
-          title: product.title,
-          slug: product.slug,
-          discount: product.stockItems[0].discount ?? 0,
-          price: product.stockItems[0].price ?? 0,
-          inStock: product.inStock,
-        })
-      )
+    dispatch(
+      addToLastSeen({
+        productID: product.id,
+        image: product.mainImageSrc,
+        title: product.title,
+        slug: product.slug,
+        discount: product.stockItems[0].discount ?? 0,
+        price: product.stockItems[0].price ?? 0,
+        inStock: product.inStock,
+      })
+    )
   }, [product.id])
 
   // modal
@@ -163,15 +164,21 @@ const SingleProduct: NextPage<Props> = (props) => {
         <main className="mx-auto space-y-4 py-4 lg:max-w-[1550px] lg:mt-4 sm:mt-4 md:mt-6  -mt-20">
           <div className="flex items-center mr-6">
             <div className="text-sm text-gray-400">دسته بندی محصول:</div>{' '}
-            <ProductBreadcrumb categoryLevels={product.parentCategories ?? []} />
+            <ProductBreadcrumb categoryLevels={product.parentCategories ?? []} isAdminTable />
           </div>
-          <div className="flex flex-col lg:flex-row">
+          <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex lg:justify-start justify-end ml-4 lg:ml-0 mb-4 lg:mb-0">
               <div className="flex lg:flex-col items-center shadow-product h-fit rounded-lg mr-4">
-                <div className="py-2 lg:py-5 px-4 lg:px-2 cursor-pointer hover:bg-slate-50 rounded-lg">
+                <div
+                  className="py-2 lg:py-5 px-4 lg:px-2 cursor-pointer hover:bg-slate-50 rounded-lg"
+                  title="افزودن به علاقه مندی ها"
+                >
                   <BsHeart className="text-xl" />
                 </div>
-                <div className="py-2 lg:py-5 px-4 lg:px-2 cursor-pointer hover:bg-slate-50 rounded-lg">
+                <div
+                  className="py-2 lg:py-5 px-4 lg:px-2 cursor-pointer hover:bg-slate-50 rounded-lg"
+                  title="اشتراک گذاری"
+                >
                   <BiShareAlt className="icon" />
                 </div>
               </div>
@@ -183,10 +190,13 @@ const SingleProduct: NextPage<Props> = (props) => {
               productName={product.title}
             />
 
-            <div className="flex px-3 flex-col w-full ml-8">
-              <div className="border-b-2 py-2 flex h-[52px]  items-center">
-                <div className="text-gray-400 text-sm md:text-base">نام محصول :</div>
-                <div className="font-semibold mr-1  text-sm md:text-base">{product.title}</div>
+            <div className="flex px-3 flex-col w-full ml-8 mr-10">
+              <div className="border-b-2 py-2 flex justify-between items-center h-[52px]">
+                <div className="flex">
+                  <div className="text-gray-400 text-sm md:text-base">نام محصول :</div>
+                  <div className="mr-1  text-sm md:text-base">{product.title}</div>
+                </div>
+                {product.status !== 0 && <div className="bg-[#f7d439] text-xs px-1.5 p-1 rounded-3xl">کارکرده</div>}
               </div>
 
               <div className="border-b-2 py-2 flex h-[52px]  items-center">
@@ -194,15 +204,17 @@ const SingleProduct: NextPage<Props> = (props) => {
                 <div className="mr-1  text-sm md:text-base">{product.code}</div>
               </div>
 
-              <div className="border-b-2 py-2 flex justify-between items-center h-[52px]">
-                <div className="flex">
-                  <div className="text-gray-400 text-sm md:text-base">برند محصول :</div>
-                  <div className="mr-1  text-sm md:text-base">{product.brandName}</div>
+              {product.brandName && (
+                <div className="border-b-2 py-2 flex justify-between items-center h-[52px]">
+                  <div className="flex">
+                    <div className="text-gray-400 text-sm md:text-base">برند محصول :</div>
+                    <div className="mr-1  text-sm md:text-base">{product.brandName}</div>
+                  </div>
+                  {product.isFake && <div className="bg-[#f7d439] text-xs px-1.5 p-1 rounded-3xl">غیر اصل</div>}
                 </div>
-                <div className="bg-[#f7d439] text-xs px-1.5 p-1 rounded-3xl">{product.isFake ? 'اصل' : 'غیر اصل'}</div>
-              </div>
+              )}
 
-              {product.inStock > 0 && product.productSizeInfo?.columns?.length! > 0 && (
+              {product.productSizeInfo?.columns?.length! > 0 && (
                 <div className="border-b-2 py-2 flex items-center justify-between sm:h-[52px]">
                   <div className="flex justify-between flex-col gap-2 sm:gap-0 sm:flex-row w-[44%]">
                     <div className="flex">
@@ -219,7 +231,7 @@ const SingleProduct: NextPage<Props> = (props) => {
                 </div>
               )}
 
-              {product.inStock > 0 && product.productFeatureInfo?.colorDTOs?.length! > 0 && (
+              {product.productFeatureInfo?.colorDTOs?.length! > 0 && (
                 <div className="border-b-2 pt-1 items-center flex sm:h-[52px]">
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 justify-between w-[44%]">
                     <div className="flex">
@@ -232,7 +244,7 @@ const SingleProduct: NextPage<Props> = (props) => {
                   </div>
                 </div>
               )}
-              {product.inStock > 0 && product.productFeatureInfo?.featureValueInfos?.length! > 0 && (
+              {product.productFeatureInfo?.featureValueInfos?.length! > 0 && (
                 <div className="border-b-2 pt-1 items-center flex sm:h-[52px]">
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 justify-between w-[44%]">
                     <div className="flex">
@@ -262,16 +274,12 @@ const SingleProduct: NextPage<Props> = (props) => {
                 )}
               </div>
             </div>
+
             <ProductScaleModal
               isShow={isShowModal}
               productSizeInfo={product.productSizeInfo ?? ({} as IProductSizeInfo)}
               onClose={modalHandlers.close}
             />
-          </div>
-          <div className="relative w-full flex pt-28">
-            <div className="bg-[#dee2e6] w-full h-[410px] xs:h-[330px] sm:h-[360px] relative">
-              <SmilarProductsSlider smilarProducts={smilarProducts} />
-            </div>
           </div>
 
           {/* product features tabs :  */}
@@ -321,7 +329,6 @@ const SingleProduct: NextPage<Props> = (props) => {
               </Tab.List>
               <Tab.Panels className="mt-2">
                 <Tab.Panel className={classNames('bg-white rounded-xl p-3', 'bg-opacity-100')}>
-                  {/* محتوای ویژگی محصول */}
                   <div className="text-gray-700">
                     <div className="w-full flex mb-6">
                       <div className="text-[#9e9e9e]  sm:text-base w-[150px]">سایزبندی</div>
@@ -364,9 +371,12 @@ const SingleProduct: NextPage<Props> = (props) => {
                       ))}
                   </div>
                 </Tab.Panel>
-                <Tab.Panel className={classNames('bg-white rounded-xl p-3', 'bg-opacity-100')}>
+                <Tab.Panel className={classNames('bg-white rounded-xl p-3 border', 'bg-opacity-100')}>
                   {/* محتوای توضیحات */}
-                  <div className="text-gray-700"> {parse(product.description)}</div>
+                  <div
+                    className="ck ck-content ck-editor__editable ck-rounded-corners ck-editor__editable_inline ck-blurred max-h-[500px]"
+                    dangerouslySetInnerHTML={{ __html: product.description }}
+                  />
                 </Tab.Panel>
 
                 <Tab.Panel className={classNames('bg-white rounded-xl p-3', 'bg-opacity-100')}>
@@ -410,7 +420,7 @@ const SingleProduct: NextPage<Props> = (props) => {
                           </tbody>
                         </table>
                       </div>
-                      <div className="rounded-lg shadow-product w-[240px] h-[240px]">
+                      <div className="rounded-lg shadow-product w-[400px] h-[400px]">
                         <img
                           className="w-full h-full rounded-lg"
                           src={product.productSizeInfo?.imagesSrc?.imageUrl}
@@ -468,6 +478,11 @@ const SingleProduct: NextPage<Props> = (props) => {
                 <Tab.Panel>در اینجا پرسش و پاسخ قرار میگیرد</Tab.Panel>
               </Tab.Panels>
             </Tab.Group>
+          </div>
+          <div className="relative w-full flex pt-28">
+            <div className="bg-[#dee2e6] w-full h-[410px] xs:h-[330px] sm:h-[360px] relative">
+              <SmilarProductsSlider products={smilarProducts.products} isFetching={false} />
+            </div>
           </div>
           <div className="relative w-full flex pt-28">
             <div className="bg-[#dee2e6] w-full h-[410px] xs:h-[330px] sm:h-[360px] relative">
