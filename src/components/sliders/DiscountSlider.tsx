@@ -209,7 +209,7 @@ import 'owl.carousel/dist/assets/owl.carousel.css'
 import 'owl.carousel/dist/assets/owl.theme.default.css'
 interface Props {
   currentCategory?: ICategory
-  products : IProduct[]
+  products: IProduct[]
   isFetching: boolean
 }
 const OwlCarousel = dynamic(() => import('react-owl-carousel'), {
@@ -218,7 +218,7 @@ const OwlCarousel = dynamic(() => import('react-owl-carousel'), {
 
 const DiscountSlider: React.FC<Props> = (props) => {
   // ? Props
-  const { currentCategory,isFetching,products } = props
+  const { currentCategory, isFetching, products } = props
   const { generalSetting } = useAppSelector((state) => state.design)
   const carouselOptions = {
     margin: 10,
@@ -263,10 +263,19 @@ const DiscountSlider: React.FC<Props> = (props) => {
           {...carouselOptions}
           dir="ltr"
         >
-            {products?.map((product) => {
-            const stockItemWithDiscount = product.stockItems.find((stockItem) => stockItem.discount! > 0)
-            const stockItemWithOutDiscount = product.stockItems.find((stockItem) => stockItem.discount === 0)
-
+          {products?.map((product) => {
+            const filteredItems = product.stockItems.filter((item) => {
+              if (item.discount === 0 && item.price > 0 && item.quantity === 0) {
+                return true
+              } else if (item.discount > 0 && item.price > 0 && item.quantity === 0) {
+                return true
+              } else if (item.discount === 0 && item.price > 0 && item.quantity > 0) {
+                return true
+              } else if (item.discount > 0 && item.price > 0 && item.quantity > 0) {
+                return true
+              }
+              return false
+            })
             return (
               <div
                 key={product.id}
@@ -288,22 +297,19 @@ const DiscountSlider: React.FC<Props> = (props) => {
                       </h2>
                       <div className="mt-1.5 flex justify-center gap-x-2 px-2 relative">
                         <div className="">
-                          {stockItemWithOutDiscount === undefined && (
+                          {filteredItems[0].discount > 0 && (
                             <ProductDiscountTag
-                              price={stockItemWithDiscount?.price ?? 0}
-                              discount={stockItemWithDiscount?.discount ?? 0}
+                              price={filteredItems[0].price}
+                              discount={filteredItems[0].discount}
                               isSlider
                             />
                           )}
                         </div>
                         <ProductPriceDisplay
                           inStock={product.inStock}
-                          discount={stockItemWithDiscount?.discount || 0}
-                          price={
-                            stockItemWithDiscount?.discount === undefined
-                              ? stockItemWithOutDiscount?.price!
-                              : stockItemWithDiscount?.price ?? 0
-                          }
+                          discount={filteredItems[0].discount}
+                          price={filteredItems[0].price}
+                          isSlider
                         />
                       </div>
                     </div>
@@ -321,7 +327,7 @@ const DiscountSlider: React.FC<Props> = (props) => {
           {...carouselOptions}
           dir="ltr"
         >
-       {products?.map((product) => {
+          {products?.map((product) => {
             const stockItemWithDiscount = product.stockItems.find((stockItem) => stockItem.discount! > 0)
             const stockItemWithOutDiscount = product.stockItems.find((stockItem) => stockItem.discount === 0)
 
@@ -376,8 +382,7 @@ const DiscountSlider: React.FC<Props> = (props) => {
               <img className="w-[120px] xs2:w-[180px] static-img" src="/images/Offer.webp" alt="offer" />
             </div>
             <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">
-            تخفیف های امروز رو از دست نده
-
+              تخفیف های امروز رو از دست نده
             </p>
             <div className="w-full sm:flex justify-center hidden">
               <Link href={`/products?sortBy=Discount&discount=true`}>

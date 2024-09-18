@@ -23,7 +23,7 @@ const FooterBanner: React.FC<Props> = (props) => {
   )
 
   return (
-    <section className="bg-white dark:bg-gray-800 h-full">
+    <section className="bg-white dark:bg-gray-800 h-full py-4 pt-16">
       {data
         .filter((item) => item.isActive)
         .map((item, index) => (

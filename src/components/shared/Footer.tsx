@@ -45,10 +45,6 @@ const Footer = () => {
     isLoading: isLoadingColumnFooter,
     isError: isErrorColumnFooter,
   } = useGetColumnFootersQuery()
-  useEffect(() => {
-    if (articlesData) {
-    }
-  }, [articlesData])
 
   const articleTitleMap = useMemo<Record<string, string>>(() => {
     if (!articlesData?.data?.data) return {} as Record<string, string>
@@ -75,7 +71,7 @@ const Footer = () => {
   }
 
   return (
-    <footer className="w-full bg-gray-100 text-gray-800 py-8 mt-20">
+    <footer className="w-full bg-gray-100 text-gray-800 py-8">
       <div className="mx-auto flex flex-col px-8">
         <div className="flex flex-col  justify-between items-center lg:items-center">
           <div className=" text-center mx-20 mb-8 lg:mb-0">
@@ -174,9 +170,9 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className="flex justify-between w-full">
+          <div className="flex justify-between w-full relative">
             <div className="w-1/2">
-              <Link className="w-[38%] flex justify-center items-start" passHref href="/">
+              <Link className="absolute w-[30%] flex justify-start items-start" passHref href="/">
                 <img
                   width={200}
                   src={(logoImages?.orgImage && logoImages?.orgImage.imageUrl) || ''}
@@ -184,20 +180,21 @@ const Footer = () => {
                 />
               </Link>
               <div
-                className="ck ck-content ck-editor__editable ck-rounded-corners ck-editor__editable_inline ck-blurred w-[46%] mt-8 "
+                className="ck ck-content ck-editor__editable ck-rounded-corners ck-editor__editable_inline ck-blurred w-[46%] mt-20 "
                 dangerouslySetInnerHTML={{ __html: supportData?.data?.address || '' }}
               />
             </div>
             {/*column footers*/}
-            <div className="flex justify-between w-full">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 w-full">
               {columnFootersData?.data?.map((columnFooterItem) => (
-                <div key={columnFooterItem.id} className="mb-8 lg:mb-0 text-center lg:text-start">
-                  <h3 className="text-lg font-bold">{columnFooterItem.name}</h3>
-                  <div className="flex flex-col">
+                <div key={columnFooterItem.id} className="mb-8 lg:mb-0">
+                  <h3 className="text-lg font-bold text-start">{columnFooterItem.name}</h3>
+                  <div className="flex flex-col gap-4 mt-4">
                     {columnFooterItem.footerArticleColumns.map((footerArticleColumn) => (
                       <Link
                         href={`/articles/${getArticleSlugById(footerArticleColumn.articleId)}`}
                         key={footerArticleColumn.id}
+                        className='text-start w-1/2 line-clamp-1 overflow-hidden text-ellipsis'
                       >
                         {getArticleTitleById(footerArticleColumn.articleId)}
                       </Link>

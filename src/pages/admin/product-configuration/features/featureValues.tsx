@@ -174,7 +174,7 @@ const FeatureValues: NextPage = () => {
       <DashboardLayout>
         <TabDashboardLayout>
           <Head>
-            <title>پیکربندی | مقدار های ویژگی محصولات</title>
+            <title>مقدار های ویژگی محصولات</title>
           </Head>
 
           <div id="_adminFeatureValues">

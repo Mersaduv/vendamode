@@ -232,7 +232,7 @@ const profileData: ProfilePath[] = [
     subItem: [
       {
         id: 8,
-        name: 'پیکربندی محصول',
+        name: 'پیکربندی محصولات',
         Icon: TbPointFilled,
         path: '/admin/product-configuration/categories',
       },

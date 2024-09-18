@@ -59,7 +59,7 @@ const Edit: NextPage<Props> = () => {
 
       <main>
         <Head>
-          <title>مدیریت | ویرایش مقاله</title>
+          <title> ویرایش مقاله</title>
         </Head>
         <DashboardLayout>
           {isLoadingGetSelectedArticle ? (

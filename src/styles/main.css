@@ -42,6 +42,16 @@
       box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;
     }
 
+    .grab-scroll {
+      cursor: grab;
+      overflow-x: auto;
+    }
+    
+    .grab-scroll:active {
+      cursor: grabbing;
+    }
+    
+
   }
   @media (max-width: 640px) {
     .h-slider{
@@ -51,6 +61,7 @@
   .margin-brandSlider {
     margin-top: 55px !important;
   }
+
   .rmdp-input {
     border: 1px solid #c0c4d6 !important;
     border-radius: 5px 0 0 5px !important;
@@ -517,12 +528,21 @@ color: red;
 
 
       .swiper-pagination-fraction, .swiper-pagination-custom, .swiper-horizontal > .swiper-pagination-bullets, .swiper-pagination-bullets.swiper-pagination-horizontal {
-        bottom: var(--swiper-pagination-bottom, 8px);
+        bottom: var(--swiper-pagination-bottom, 0px);
         top:580px !important;
         left: 0;
         width: 100%;
         position: sticky !important;
     }
+
+    .swiper-pagination {
+      position: absolute;
+      text-align: center;
+      transition: 300ms opacity;
+      transform: translate3d(0, 0, 0);
+      z-index: 10;
+      margin-top: 18px !important;
+  }
 
     .section-swiper { 
        position: relative !important;
@@ -725,4 +745,17 @@ color: red;
       scrollbar-width: thin; /* none | auto  */
       scrollbar-color: #b7bdc2 transparent;
     }
+}
+/* becarful bro  */
+.custom-z {
+  z-index: 6;
+}
+.custom-z2 {
+  z-index: 7;
+}
+.custom-z3 {
+  z-index:9;
+}
+.custom-z4 {
+  z-index:9;
 }

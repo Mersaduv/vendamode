@@ -17,7 +17,7 @@ import SimilarProductsSlider from '@/components/sliders/SimilarProductsSlider'
 import { ReviewArticleList, ReviewsList } from '@/components/review'
 interface Props {
   article: IArticle
-  products: IProduct[]
+  products?: IProduct[]
 }
 
 const classNames = (...classes: string[]) => {
@@ -26,12 +26,17 @@ const classNames = (...classes: string[]) => {
 
 export const getServerSideProps: GetServerSideProps<Props, { slug: string }> = async ({ params }) => {
   const { data: article } = await getArticleBySlug(params?.slug ?? '')
+  console.log(article, 'articlearticlearticle')
 
   if (!article) return { notFound: true }
 
-  const articleCategoryID = article.categoryId
-  const { data } = await getProductByCategory(articleCategoryID)
-  const similarProduct = data ?? []
+  // const similarProduct = data ?? []
+  let similarProduct: IProduct[] = []
+  if (article.categoryId) {
+    const articleCategoryID = article.categoryId ?? ''
+    const { data } = await getProductByCategory(articleCategoryID)
+    similarProduct = data ?? []
+  }
   return {
     props: {
       article: JSON.parse(JSON.stringify(article)),
@@ -62,8 +67,10 @@ const SingleArticle: NextPage<Props> = (props) => {
     categoryId: article.categoryId ?? 'default',
   })
 
+  console.log(articlesDataByCategory, 'articlesDataByCategory')
+
   const { data: productData } = useGetProductsQuery(
-    { pageSize: 5 },
+    { pageSize: 5, inStock: '1' },
     {
       selectFromResult: ({ data }) => ({
         data: data?.data?.pagination.data,
@@ -94,7 +101,7 @@ const SingleArticle: NextPage<Props> = (props) => {
       />
       <ClientLayout>
         <>
-          <main className="mx-auto space-y-4 py-4 lg:max-w-[1550px] lg:mt-20 sm:mt-8 md:mt-16  mt-10 border-b-2 pb-16">
+          <main className="mx-auto space-y-4 py-4 lg:max-w-[1550px] lg:mt-20 sm:mt-8 md:mt-16  mt-10 pb-16">
             <div className="flex flex-col justify-around sm:flex-row relative">
               <div className="mdx:pr-4">
                 <h2 className="text-gray-600 text-2xl">{article.title}</h2>
@@ -113,115 +120,90 @@ const SingleArticle: NextPage<Props> = (props) => {
                 />
               </div>
               {/* sticky content */}
-              <div className="flex- flex-col pl-4">
-                <aside className="left-0 top-0 sm:w-[284px] h-[450px] border rounded-lg p-3 shadow-item  px-4 mb-8">
-                  <h3 className="my-2 mb-5 text-gray-600 text-center">پیشنهاد لحظه ای</h3>
-                  <Swiper
-                    pagination={{ clickable: true }}
-                    autoplay={{
-                      delay: 2500,
-                      disableOnInteraction: false,
-                    }}
-                    navigation={true}
-                    modules={[Navigation, Autoplay]}
-                    className="articlePageSwiper overflow-hidden"
-                  >
-                    {productData &&
-                      productData.map((product, index) => {
-                        const filteredItems = product.stockItems.filter((item) => {
-                          if (item.discount === 0 && item.price > 0 && item.quantity === 0) {
-                            return true
-                          } else if (item.discount > 0 && item.price > 0 && item.quantity === 0) {
-                            return true
-                          } else if (item.discount === 0 && item.price > 0 && item.quantity > 0) {
-                            return true
-                          } else if (item.discount > 0 && item.price > 0 && item.quantity > 0) {
-                            return true
-                          }
-                          return false
-                        })
+              {article.categoryId ? (
+                <div className="flex- flex-col pl-4">
+                  {productData && productData.length > 0 && (
+                    <aside className="left-0 top-0 sm:w-[284px] h-[450px] border rounded-lg p-3 shadow-item  px-4 mb-8">
+                      <h3 className="my-2 mb-5 text-gray-600 text-center">پیشنهاد لحظه ای</h3>
+                      <Swiper
+                        pagination={{ clickable: true }}
+                        autoplay={{
+                          delay: 2500,
+                          disableOnInteraction: false,
+                        }}
+                        navigation={true}
+                        modules={[Navigation, Autoplay]}
+                        className="articlePageSwiper overflow-hidden"
+                      >
+                        {productData &&
+                          productData.map((product, index) => {
+                            const filteredItems = product.stockItems.filter((item) => {
+                              if (item.discount === 0 && item.price > 0 && item.quantity === 0) {
+                                return true
+                              } else if (item.discount > 0 && item.price > 0 && item.quantity === 0) {
+                                return true
+                              } else if (item.discount === 0 && item.price > 0 && item.quantity > 0) {
+                                return true
+                              } else if (item.discount > 0 && item.price > 0 && item.quantity > 0) {
+                                return true
+                              }
+                              return false
+                            })
 
-                        const getStockStatus = (stockItems: GetStockItems[]) => {
-                          if (stockItems.every((item) => item.quantity === 0)) {
-                            return 'ناموجود'
-                          }
-                          return 'موجود'
-                        }
-                        return (
-                          <SwiperSlide className="" key={index}>
-                            <a href={`/products/${product.slug}`} target="_blank" className="">
-                              <div className="w-full flex justify-center">
-                                <SliderImage index={index} item={product} />
-                              </div>
-                              <h2 className="text-gray-500 text-sm text-right mt-6 line-clamp-2 overflow-hidden text-ellipsis h-[40px]">
-                                {product.title}
-                              </h2>
-                              <div className="mt-1.5 flex justify-center gap-x-2 px-2 relative ">
-                                <div className="">
-                                  {filteredItems.length > 0 ? (
-                                    <>
-                                      {filteredItems[0].discount > 0 && (
-                                        <ProductDiscountTag
-                                          price={filteredItems[0].price}
-                                          discount={filteredItems[0].discount}
-                                          isSlider
-                                        />
+                            const getStockStatus = (stockItems: GetStockItems[]) => {
+                              if (stockItems.every((item) => item.quantity === 0)) {
+                                return 'ناموجود'
+                              }
+                              return 'موجود'
+                            }
+                            return (
+                              <SwiperSlide className="" key={index}>
+                                <a href={`/products/${product.slug}`} target="_blank" className="">
+                                  <div className="w-full flex justify-center">
+                                    <SliderImage index={index} item={product} />
+                                  </div>
+                                  <h2 className="text-gray-500 text-sm text-right mt-6 line-clamp-2 overflow-hidden text-ellipsis h-[40px]">
+                                    {product.title}
+                                  </h2>
+                                  <div className="mt-1.5 flex justify-center gap-x-2 px-2 relative ">
+                                    <div className="">
+                                      {filteredItems.length > 0 ? (
+                                        <>
+                                          {filteredItems[0].discount > 0 && (
+                                            <ProductDiscountTag
+                                              price={filteredItems[0].price}
+                                              discount={filteredItems[0].discount}
+                                              isSlider
+                                            />
+                                          )}
+
+                                          <ProductPriceDisplay
+                                            inStock={product.inStock}
+                                            discount={filteredItems[0].discount}
+                                            price={filteredItems[0].price}
+                                          />
+                                        </>
+                                      ) : (
+                                        <div className="text-gray-400 font-semibold mb-1">ناموجود</div>
                                       )}
+                                    </div>
+                                  </div>
+                                </a>
+                              </SwiperSlide>
+                            )
+                          })}
+                      </Swiper>
+                    </aside>
+                  )}
 
-                                      <ProductPriceDisplay
-                                        inStock={product.inStock}
-                                        discount={filteredItems[0].discount}
-                                        price={filteredItems[0].price}
-                                      />
-                                    </>
-                                  ) : (
-                                    <div className="text-gray-400 font-semibold mb-1">ناموجود</div>
-                                  )}
-                                </div>
-                              </div>
-                            </a>
-                          </SwiperSlide>
-                        )
-                      })}
-                  </Swiper>
-                </aside>
-                <aside className=" left-0 top-[900px] sm:w-[284px] h-auto border rounded-lg p-3 shadow-item px-4">
-                  <h3 className="my-2 mb-5 text-gray-600 text-center">مطالب جدید</h3>
                   {latestArticlesData &&
                     latestArticlesData.data &&
                     latestArticlesData.data.data &&
                     latestArticlesData.data.data.filter((item) => item.id !== article.id).length > 0 && (
-                      <section className="flex flex-wrap gap-4">
-                        {latestArticlesData.data.data.map((item) => (
-                          <a target="_blank" href={`/articles/${item.slug}`} className="blank w-full">
-                            <article className={`flex w-full rounded-lg shadow-item hover:shadow-article p-1.5`}>
-                              <img
-                                className="mx-auto relative rounded-lg w-[60px] h-[60px] ml-1.5"
-                                src={item.image.imageUrl}
-                                alt={item.title}
-                              />
-                              <div className="flex-1 flex items-center justify-start">
-                                <h3 className="text-right text-gray-500 line-clamp-2 overflow-hidden text-ellipsis">
-                                  {item.title}
-                                </h3>
-                              </div>
-                            </article>
-                          </a>
-                        ))}
-                      </section>
-                    )}
-                </aside>
-
-                {articlesDataByCategory &&
-                  articlesDataByCategory.data &&
-                  articlesDataByCategory.data.data &&
-                  articlesDataByCategory.data.data.filter((item) => item.id !== article.id).length > 0 && (
-                    <aside className=" left-0 top-[900px] sm:w-[284px] h-auto border rounded-lg p-3 mt-8 shadow-item px-4">
-                      <h3 className="my-2 mb-5 text-gray-600 text-center">مطالب مرتبط</h3>
-                      <section className="flex flex-wrap gap-4">
-                        {articlesDataByCategory.data.data
-                          .filter((item) => item.id !== article.id)
-                          .map((item) => (
+                      <aside className=" left-0 top-[900px] sm:w-[284px] h-auto border rounded-lg p-3 shadow-item px-4">
+                        <h3 className="my-2 mb-5 text-gray-600 text-center">مطالب جدید</h3>
+                        <section className="flex flex-wrap gap-4">
+                          {latestArticlesData.data.data.map((item) => (
                             <a target="_blank" href={`/articles/${item.slug}`} className="blank w-full">
                               <article className={`flex w-full rounded-lg shadow-item hover:shadow-article p-1.5`}>
                                 <img
@@ -237,15 +219,55 @@ const SingleArticle: NextPage<Props> = (props) => {
                               </article>
                             </a>
                           ))}
-                      </section>
-                    </aside>
-                  )}
-              </div>
+                        </section>
+                      </aside>
+                    )}
+
+                  {articlesDataByCategory &&
+                    articlesDataByCategory.data &&
+                    articlesDataByCategory.data.data &&
+                    articlesDataByCategory.data.data.filter((item) => item.id !== article.id).length > 0 && (
+                      <aside className=" left-0 top-[900px] sm:w-[284px] h-auto border rounded-lg p-3 mt-8 shadow-item px-4">
+                        <h3 className="my-2 mb-5 text-gray-600 text-center">مطالب مرتبط</h3>
+                        <section className="flex flex-wrap gap-4">
+                          {articlesDataByCategory.data.data
+                            .filter((item) => item.id !== article.id)
+                            .map((item) => (
+                              <a target="_blank" href={`/articles/${item.slug}`} className="blank w-full">
+                                <article className={`flex w-full rounded-lg shadow-item hover:shadow-article p-1.5`}>
+                                  <img
+                                    className="mx-auto relative rounded-lg w-[60px] h-[60px] ml-1.5"
+                                    src={item.image.imageUrl}
+                                    alt={item.title}
+                                  />
+                                  <div className="flex-1 flex items-center justify-start">
+                                    <h3 className="text-right text-gray-500 line-clamp-2 overflow-hidden text-ellipsis">
+                                      {item.title}
+                                    </h3>
+                                  </div>
+                                </article>
+                              </a>
+                            ))}
+                        </section>
+                      </aside>
+                    )}
+                </div>
+              ) : null}
             </div>
           </main>
-          <ReviewArticleList numReviews={article.numReviews ?? 0} article={article} />
+          {article.categoryId && (
+            <div className="flex justify-center xs:justify-start sm:flex-nowrap flex-wrap gap-3 rounded-md bg-[#f7f5f8] border p-4 max-w-[1550px] mx-auto">
+              <div className="w-40 rounded flex  items-center justify-center whitespace-nowrap py-2.5 text-sm sm:text-base  font-light text-white bg-[#3F3A42] shadow">
+                دیدگاه کاربران
+                <span className={`text-white mr-0.5`}>({digitsEnToFa(`${article.numReviews}`)} نظر)</span>
+              </div>
+            </div>
+          )}
+
+          {article.categoryId && <ReviewArticleList numReviews={article.numReviews ?? 0} article={article} />}
+
           {/* //  Similar slider */}
-          {products && products.length > 0 && (
+          {article.categoryId && products && products.length > 0 && (
             <div className="relative pt-28 sm:pt-0">
               <div className="w-full block  sm:hidden text-center px-3 line-clamp-2 overflow-hidden text-ellipsis  whitespace-nowrap -mt-20 text-lg text-gray-400 ">
                 محصولات مرتبط
@@ -284,7 +306,7 @@ const SingleArticle: NextPage<Props> = (props) => {
 
           {/* last seen slider */}
           {lastSeen.length > 0 && (
-            <div className="pt-10 sm:pt-0 relative">
+            <div className="pt-10 sm:pt-0 relative mb-4">
               <div className="w-full block text-center px-3 line-clamp-2 overflow-hidden text-ellipsis  sm:hidden whitespace-nowrap -mt-20 text-lg text-gray-400 ">
                 بازدید های اخیر شما
               </div>
@@ -316,7 +338,6 @@ const SingleArticle: NextPage<Props> = (props) => {
                   <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
                 </Link>
               </div>
-              <hr className="pb-10 mx-8 border-t-2 mt-20" />
             </div>
           )}
         </>

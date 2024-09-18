@@ -17,7 +17,7 @@ const BrandCombobox: React.FC<Props> = ({ brands, onBrandSelect, selectedBrand, 
   const [query, setQuery] = useState('')
 
   const filteredCategories =
-    query === '' ? brands : brands.filter((brand) => brand.name.toLowerCase().includes(query.toLowerCase()))
+    query === '' ? brands : brands.filter((brand) => brand.nameFa.toLowerCase().includes(query.toLowerCase()))
 
   const handleSelect = (brand: IBrand) => {
     setSelectedBrand(brand)
@@ -33,7 +33,7 @@ const BrandCombobox: React.FC<Props> = ({ brands, onBrandSelect, selectedBrand, 
           </Combobox.Button>
           <Combobox.Input
             className="w-full rounded-md border border-gray-300 py-1.5 pr-8 pl-3 text-gray-900"
-            displayValue={(brand: IBrand) => brand?.name}
+            displayValue={(brand: IBrand) => brand?.nameFa}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="انتخاب کنید"
           />
@@ -54,7 +54,7 @@ const BrandCombobox: React.FC<Props> = ({ brands, onBrandSelect, selectedBrand, 
               >
                 {({ selected, active }) => (
                   <>
-                    <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>{brand.name}</span>
+                    <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>{brand.nameFa}</span>
                     {selected ? (
                       <span
                         className={`absolute inset-y-0 left-0 flex items-center pl-3 ${

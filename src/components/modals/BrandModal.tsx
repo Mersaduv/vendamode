@@ -287,10 +287,6 @@ const BrandModal: React.FC<Props> = (props) => {
                         id={`nameEnInput-${mode}`}
                         placeholder="نام انگلیسی"
                         {...register('nameEn')}
-                        ref={(e) => {
-                          register('nameEn').ref(e)
-                          inputRef.current = e
-                        }}
                       />
                       <label
                         htmlFor={`nameEnInput-${mode}`}

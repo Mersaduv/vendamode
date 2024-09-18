@@ -73,7 +73,7 @@ const Edit: NextPage<Props> = () => {
 
       <main>
         <Head>
-          <title>{'مدیریت' + ' | ' + 'ویرایش محصول'}</title>
+          <title>{'ویرایش محصول'}</title>
         </Head>
 
         <DashboardLayout>

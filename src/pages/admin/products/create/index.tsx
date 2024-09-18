@@ -43,7 +43,7 @@ const Create: NextPage<Props> = () => {
 
       <main>
         <Head>
-          <title>مدیریت | محصول</title>
+          <title>محصول جدید</title>
         </Head>
         <DashboardLayout>
           <section className="bg-[#f5f8fa] w-full">

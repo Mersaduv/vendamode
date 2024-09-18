@@ -344,9 +344,8 @@ const Footer: NextPage = () => {
       setServiceItems(serviceItems)
       setSocialMediaItems(socialMediaItems)
       if (columnFootersData?.data) {
-        setColumnFooters(columnFootersData.data)
+        setColumnFooters(columnFootersData?.data)
       }
-
       methods.reset({
         sloganFooter: sloganFooterData?.data || {},
         support: supportData?.data || {},
@@ -419,16 +418,16 @@ const Footer: NextPage = () => {
     isUpsertErrorColumnFooter,
   ])
 
-  useEffect(() => {
-    if (columnFooters.length === 0) {
-      setColumnFooters([
-        { index: 1, id: '', name: '', footerArticleColumns: [] },
-        { index: 2, id: '', name: '', footerArticleColumns: [] },
-        { index: 3, id: '', name: '', footerArticleColumns: [] },
-        { index: 4, id: '', name: '', footerArticleColumns: [] },
-      ])
-    }
-  }, [columnFooters])
+  // useEffect(() => {
+  //   if (columnFooters.length === 0) {
+  //     setColumnFooters([
+  //       { index: 1, id: '', name: '', footerArticleColumns: [] },
+  //       { index: 2, id: '', name: '', footerArticleColumns: [] },
+  //       { index: 3, id: '', name: '', footerArticleColumns: [] },
+  //       { index: 4, id: '', name: '', footerArticleColumns: [] },
+  //     ])
+  //   }
+  // }, [columnFooters])
 
   const handleAddDesignItem = (type: string) => {
     let newItem: IDesignItemForm
@@ -496,7 +495,7 @@ const Footer: NextPage = () => {
       <DashboardLayout>
         <DesignTabDashboardLayout>
           <Head>
-            <title>مدیریت | دیزاین</title>
+            <title>نمای سایت | فوتر</title>
           </Head>
           <FormProvider {...methods}>
             <form className="space-y-5 mb-2 mx-3" onSubmit={methods.handleSubmit(onSubmit)}>
@@ -521,6 +520,7 @@ const Footer: NextPage = () => {
               <AdditionalForm
                 columnFooters={columnFooters}
                 setColumnFooter={setColumnFooters}
+                setDeletedColumnFooter={setDeletedColumnFooter}
                 setDeletedFooterArticle={setDeletedFooterArticle}
               />
 

@@ -21,13 +21,16 @@ const OwlCarousel = dynamic(() => import('react-owl-carousel'), {
 })
 
 const ReadableArticlePlace: React.FC<Props> = (props) => {
-  const { currentCategory,articleData,isFetching } = props
+  const { currentCategory, articleData, isFetching } = props
   const { generalSetting } = useAppSelector((state) => state.design)
 
   const carouselOptions = {
     margin: 10,
     nav: true,
-    startPosition: articleData && articleData.data && articleData.data?.data ? articleData.data.data.length - 1 : 0,
+    startPosition:
+      articleData && articleData.data && articleData.data?.data
+        ? articleData.data.data.filter((x) => x.isActive).length - 1
+        : 0,
     responsive: {
       0: {
         items: 2,
@@ -61,30 +64,41 @@ const ReadableArticlePlace: React.FC<Props> = (props) => {
           {...carouselOptions}
           dir="ltr"
         >
-          {articleData?.data?.data?.map((article) => {
-            return (
-              <div
-                key={article.id}
-                className="w-[150px] sm:w-[280px] z-50  rounded-lg mb-2 bg-white"
-              >
-                <a target="_blank" href={`/articles/${article.slug}`} className="blank w-full ">
-                  <div className="slide-content  py-6">
-                    <img
-                      src={article.image.imageUrl}
-                      alt={article.title}
-                      className="rounded-lg transition duration-300 ease-in-out transform hover:scale-110"
-                    />
-                    <p className="text-center text-gray-500 line-clamp-1 overflow-hidden text-ellipsis mt-4">
-                      {article.title}
-                    </p>
+          {articleData?.data?.data &&
+            [...articleData?.data?.data]
+              .sort((a, b) => {
+                const dateA = a.lastUpdated ? new Date(a.lastUpdated).getTime() : 0
+                const dateB = b.lastUpdated ? new Date(b.lastUpdated).getTime() : 0
+                return dateA - dateB
+              })
+              ?.filter((x) => x.isActive)
+              .map((article) => {
+                return (
+                  <div
+                    key={article.id}
+                    title={article.title}
+                    className="w-[150px] sm:w-[280px] z-50  rounded-lg mb-2 bg-white"
+                  >
+                    <a target="_blank" href={`/articles/${article.slug}`} className="blank w-full ">
+                      <div className="slide-content  py-6">
+                        <img
+                          src={article.image.imageUrl}
+                          alt={article.title}
+                          className="rounded-lg transition duration-300 ease-in-out transform hover:scale-110"
+                        />
+                        <p
+                          dir="rtl"
+                          className="text-center text-gray-500 line-clamp-1 overflow-hidden text-ellipsis mt-4"
+                        >
+                          {article.title}
+                        </p>
+                      </div>
+                    </a>
                   </div>
-                </a>
-              </div>
-            )
-          })}
+                )
+              })}
         </OwlCarousel>
       </div>
-
     </>
   )
 }

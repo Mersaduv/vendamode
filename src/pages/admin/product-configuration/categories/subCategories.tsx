@@ -337,7 +337,7 @@ const ParentSubCategoriesTree: NextPage = () => {
       <DashboardLayout>
         <TabDashboardLayout>
           <Head>
-            <title>مدیریت | زیر دسته محصولات</title>
+            <title> زیر دسته محصولات</title>
           </Head>
           <div>
             <div className="flex gap-y-4 px-6 pt-5 sm:flex-row flex-col items-center justify-between">

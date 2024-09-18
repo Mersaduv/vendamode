@@ -5,7 +5,7 @@ import {
   useUpdateFeatureValueMutation,
   useUpdateSizeMutation,
 } from '@/services'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { HandleResponse } from '../shared'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -22,6 +22,7 @@ interface Props {
 
 const SizeModal: React.FC<Props> = (props) => {
   const { isShow, onClose, refetch, title, size } = props
+  const inputRef = useRef<HTMLInputElement | null>(null)
   const [
     createSize,
     {
@@ -63,7 +64,13 @@ const SizeModal: React.FC<Props> = (props) => {
       })
     }
   }, [size, reset])
-
+  useEffect(() => {
+    if (isShow && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current?.focus()
+      }, 100)
+    }
+  }, [isShow])
   const onConfirm: SubmitHandler<{ id?: string; name: string; description?: string }> = (data) => {
     if (data.id != undefined) {
       updateSize({
@@ -124,9 +131,8 @@ const SizeModal: React.FC<Props> = (props) => {
               {title === 'ویرایش' ? (
                 'ویرایش'
               ) : (
-                <div className='flex'>
-                  {title} {" "}
-                   مقدار {" "} برای {" "}<div className="text-sky-500 mx-2">سایزبندی</div>{' '}
+                <div className="flex">
+                  {title} مقدار برای <div className="text-sky-500 mx-2">سایزبندی</div>{' '}
                 </div>
               )}{' '}
               <div className="text-sky-500">{size?.name}</div>
@@ -142,6 +148,10 @@ const SizeModal: React.FC<Props> = (props) => {
                     id="floatingInput"
                     placeholder="نام"
                     {...register('name')}
+                    ref={(e) => {
+                      register('name').ref(e)
+                      inputRef.current = e
+                    }}
                   />
                   <label
                     htmlFor="floatingInput"
@@ -176,9 +186,7 @@ const SizeModal: React.FC<Props> = (props) => {
                 </div>
                 <Button
                   type="submit"
-                  className={`bg-sky-500 px-5 py-2.5 hover:bg-sky-600 ${
-                    !isValid ? 'bg-gray-300' : ''
-                  } `}
+                  className={`bg-sky-500 px-5 py-2.5 hover:bg-sky-600 ${!isValid ? 'bg-gray-300' : ''} `}
                   isLoading={isLoadingCreate || isLoadingUpdate}
                 >
                   {title === 'افزودن' ? 'انتشار ' : 'بروزرسانی'}

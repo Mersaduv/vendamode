@@ -35,7 +35,7 @@ const CategoryList: React.FC<Props> = (props) => {
     storeCategoriesData?.data?.length > 0
   ) {
     return (
-      <section className="px-3  sm:mx-8 margin-brandSlider">
+      <section className="px-3   sm:mx-8 margin-categorySlider">
         <h4 className="w-full text-center text-gray-400 font-normal text-lg pb-4">
           {childCategories.title}{' '}
           <span className="w-full text-center text-gray-400 font-normal text-lg pb-4" style={{}}>
@@ -54,7 +54,9 @@ const CategoryList: React.FC<Props> = (props) => {
                   blurDataURL={item.imagesSrc?.placeholder}
                   imageStyles="object-contain"
                 />
-                <span className="text-lg text-black">{item.name}</span>
+                <p dir="rtl" className="text-center text-gray-500 line-clamp-1 overflow-hidden text-ellipsis mt-4">
+                  {item.name}
+                </p>
               </Link>
             </div>
           ))}

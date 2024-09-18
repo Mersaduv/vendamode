@@ -595,11 +595,6 @@ if (!isCalendarOpen) {
       setSelectedCategories({ categorySelected: singleCategoryData.data || ({} as ICategory) })
       setChildCategories(singleCategoryData.data?.parentCategoriesTree || [])
       setSelectedMainCategory(mainCategory![0])
-      // console.log(
-      //   childCategories,
-      //   'cccccccccccccccccccccccccccccccccccccccccccccccc',
-      //   singleCategoryData.data?.categories
-      // )
     }
   }, [singleCategoryData])
 
@@ -1848,45 +1843,50 @@ const Table: React.FC<PropTable> = (props) => {
     }
   }, [rowsData])
   //............................................................................................................................
+  
   useEffect(() => {
     const convertImagesToFiles = async () => {
       if (stockItems.length > 1) {
-        const updatedStockItems = [...stockItems] // Create a shallow copy
-
+        // ایجاد یک نسخه کپی از stockItems برای جلوگیری از حلقه بی‌نهایت
+        const updatedStockItems = [...stockItems]
+  
         const filePromises = stockItems.map(async (item, index) => {
           if (item.imagesSrc && item.imagesSrc.length > 0) {
             const files = await Promise.all(
               item.imagesSrc.map(async (image: { imageUrl: string }) => {
                 const file = await fetchImageAsFile(image.imageUrl)
+                
+                // به روزرسانی مستقیم کپی stockItems
                 updatedStockItems[index] = { ...item, imageStock: file }
-                return { file, index: index }
+  
+                return { file, index }
               })
             )
-
+  
             return files.length > 0 ? files[0] : null
           } else {
             if (item.imageStock && item.imageStock.name) {
-              const file = { file: item.imageStock, index: index }
+              const file = { file: item.imageStock, index }
+              console.log(file, "const file = { file: item.imageStock, index: index }")
               return file
             } else {
               return null
             }
           }
         })
-
+  
         const selectedFilesWithIds = await Promise.all(filePromises)
-
-        // Check if stockItems actually changed before setting state
-        if (JSON.stringify(updatedStockItems) !== JSON.stringify(stockItems)) {
-          setStockItems(updatedStockItems)
-        }
-
+        console.log(selectedFilesWithIds, "selectedFilesWithIds")
+  
+        // اینجا setStockItems یکبار و در پایان فراخوانی می‌شود
+        setStockItems(updatedStockItems)
         setSelectedStockFiles(selectedFilesWithIds)
       }
     }
-
+  
     convertImagesToFiles()
-  }, [stockItems])
+  }, [stockItems.length])
+  
 
   ///................
 

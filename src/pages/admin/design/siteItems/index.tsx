@@ -1,4 +1,5 @@
 import { GeneralSettingForm, LogoImagesForm } from '@/components/ads'
+import { RedirectForm } from '@/components/designs'
 import { DashboardLayout } from '@/components/Layouts'
 import DesignTabDashboardLayout from '@/components/Layouts/DesignTabDashboardLayout'
 import { Button } from '@/components/ui'
@@ -6,11 +7,13 @@ import { useAppDispatch } from '@/hooks'
 import {
   useGetGeneralSettingQuery,
   useGetLogoImagesQuery,
+  useGetRedirectsQuery,
   useUpsertGeneralSettingMutation,
   useUpsertLogoImagesMutation,
+  useUpsertRedirectsMutation,
 } from '@/services'
 import { showAlert } from '@/store'
-import { IGeneralSettingForm, ILogosForm } from '@/types'
+import { IGeneralSettingForm, ILogosForm, IRedirect } from '@/types'
 import { NextPage } from 'next'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
@@ -33,6 +36,7 @@ const fetchImageAsFile = async (url: string): Promise<File> => {
 interface FormData {
   generalSetting: IGeneralSettingForm
   logoImages: ILogosForm
+  redirects: IRedirect
 }
 const SiteItems: NextPage = () => {
   // asset
@@ -47,6 +51,7 @@ const SiteItems: NextPage = () => {
         googleTags: '',
       },
       logoImages: {},
+      redirects: {},
     },
   })
 
@@ -56,7 +61,7 @@ const SiteItems: NextPage = () => {
     isLoading: isLoadingGeneralSetting,
     isError: isErrorGeneralSetting,
   } = useGetGeneralSettingQuery()
-
+  const { data: redirectData, isLoading: isLoadingRedirect, isError: isErrorRedirect } = useGetRedirectsQuery()
   const { data: logoImagesData, isLoading: isLoadingLogoImages, isError: isErrorLogoImages } = useGetLogoImagesQuery()
 
   // ? State
@@ -64,6 +69,16 @@ const SiteItems: NextPage = () => {
   const [selectedFaviconFile, setFaviconFile] = useState<any[]>([])
 
   // ? Upsert
+  const [
+    upsertRedirect,
+    {
+      isLoading: isUpsertLoadingRedirect,
+      isSuccess: isUpsertSuccessRedirect,
+      isError: isUpsertErrorRedirect,
+      error: upsertRedirectError,
+    },
+  ] = useUpsertRedirectsMutation()
+
   const [
     upsertGeneralSetting,
     {
@@ -116,6 +131,18 @@ const SiteItems: NextPage = () => {
     })()
     promises.push(upsertLogoImagesPromise)
 
+    // redirects
+    if (data.redirects) {
+      const upsertRedirectPromise = (async () => {
+        const upsertData: IRedirect = {
+          id: data.redirects.id || undefined,
+          articleId: data.redirects.articleId,
+        }
+        await upsertRedirect(upsertData)
+      })()
+      promises.push(upsertRedirectPromise)
+    }
+
     await Promise.all(promises)
   }
 
@@ -154,11 +181,12 @@ const SiteItems: NextPage = () => {
             }
           : {},
         logoImages: logoImages.length > 0 ? logoImages[0] : {},
+        redirects: redirectData?.data || {},
       })
     }
 
     loadAllData()
-  }, [generalSettingData, logoImagesData, methods])
+  }, [generalSettingData, logoImagesData, redirectData, methods])
 
   // handle success alert
   useEffect(() => {
@@ -174,11 +202,22 @@ const SiteItems: NextPage = () => {
       errors.push('به‌روزرسانی تصویر های لوگو')
     }
 
+    if (isUpsertErrorRedirect) {
+      errors.push('به‌روزرسانی ریدایرکت')
+    }
+
     if (errors.length > 0) {
       alertMessage += ` (خطا در: ${errors.join(', ')})`
     }
 
-    if (isUpsertSuccessGeneralSetting || isUpsertSuccessLogoImages || isUpsertErrorGeneralSetting || isUpsertErrorLogoImages) {
+    if (
+      isUpsertSuccessGeneralSetting ||
+      isUpsertSuccessLogoImages ||
+      isUpsertSuccessRedirect ||
+      isUpsertErrorGeneralSetting ||
+      isUpsertErrorLogoImages ||
+      isUpsertErrorRedirect
+    ) {
       dispatch(
         showAlert({
           status: errors.length > 0 ? 'warning' : 'success',
@@ -186,14 +225,21 @@ const SiteItems: NextPage = () => {
         })
       )
     }
-  }, [isUpsertSuccessGeneralSetting, isUpsertSuccessLogoImages, isUpsertSuccessGeneralSetting, isUpsertErrorLogoImages])
-  const isFormSubmitting = isUpsertLoadingGeneralSetting || isUpsertLoadingLogoImagesSetting
+  }, [
+    isUpsertSuccessGeneralSetting,
+    isUpsertSuccessLogoImages,
+    isUpsertSuccessRedirect,
+    isUpsertSuccessGeneralSetting,
+    isUpsertErrorLogoImages,
+    isUpsertErrorRedirect,
+  ])
+  const isFormSubmitting = isUpsertLoadingGeneralSetting || isUpsertLoadingLogoImagesSetting || isUpsertLoadingRedirect
   return (
     <>
       <DashboardLayout>
         <DesignTabDashboardLayout>
           <Head>
-            <title>مدیریت | دیزاین</title>
+            <title>نمای سایت | تنظیمات عمومی</title>
           </Head>
           <FormProvider {...methods}>
             <form className="space-y-5 mb-2 mx-3" onSubmit={methods.handleSubmit(onSubmit)}>
@@ -207,6 +253,7 @@ const SiteItems: NextPage = () => {
                   setMainSelectedFiles={setMainSelectedFiles}
                 />
               </div>
+              <RedirectForm />
               <div className="w-full flex justify-end mt-6">
                 <Button
                   isLoading={isFormSubmitting}

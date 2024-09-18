@@ -32,7 +32,7 @@ const MainSlider: React.FC<Props> = (props) => {
   )
 
   // ? Render(s)
-  if (data?.filter((item) => item.isActive).length === 0) return <div className="w-full mt-24 "></div>
+  if (data?.filter((item) => item.isActive).length === 0) return <div className="w-full mt-14 "></div>
 
   return (
     <section className={`section-swiper ${isActive ? '' : ''} relative`}>
@@ -69,7 +69,7 @@ const MainSlider: React.FC<Props> = (props) => {
             </SwiperSlide>
           ))}
       </Swiper>
-      <hr className="pb-8 mx-8 border-t-2" />
+      <hr className="pb-8 mx-8 mt-5 border-t-2" />
     </section>
   )
 }

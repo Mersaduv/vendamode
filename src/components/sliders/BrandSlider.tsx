@@ -28,7 +28,22 @@ const BrandSlider: React.FC<Props> = (props) => {
       : 0,
       responsive: {
         0: {
-          items: 2,
+          items: 3,
+        },
+        640: {
+          items: 3,
+        },
+        768: {
+          items: 3,
+        },
+        950: {
+          items: 3,
+        },
+        1200: {
+          items: 4,
+        },
+        1500: {
+          items: 5,
         },
     
       },
@@ -63,7 +78,7 @@ const BrandSlider: React.FC<Props> = (props) => {
                 <div
                   onClick={() => handleChangeRoute(brand.id)}
                   key={brand.id}
-                  className="w-[150px] cursor-pointer z-50  rounded-lg mb-2 bg-white"
+                  className="w-[90px] sx:w-[120px]  sm:w-[150px] cursor-pointer z-50  rounded-lg mb-2 bg-white"
                   title={brand.nameFa}
                 >
                   <div className="slide-content  py-6">

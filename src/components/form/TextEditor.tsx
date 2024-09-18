@@ -1041,36 +1041,28 @@ const Editor: React.FC<EditorProps> = ({ value, onChange, placeholder , isSuppor
     editor.plugins.get('FileRepository').createUploadAdapter = (loader: any) => {
       return {
         upload: async () => {
-          const file = await loader.file
-          const formData = new FormData()
-          formData.append('Thumbnail', file)
-          formData.append('Name', 'توضیحات')
-
-          try {
-            const response = await axios.post('https://localhost:7004/api/upload-media', formData, {
-              headers: {
-                'Content-Type': 'multipart/form-data',
-              },
-            })
-
-            const data = response.data
-            console.log(data, 'data')
-
-            return {
-              default: data.data,
-            }
-          } catch (error) {
-            console.error('Error uploading file:', error)
-            throw new Error('File upload failed')
-          }
+          const file = await loader.file;
+          
+          // از FileReader برای تبدیل فایل به URL داده‌ای استفاده کنید
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              resolve({ default: reader.result });
+            };
+            reader.onerror = (error) => {
+              reject('Error reading file: ' + error);
+            };
+            reader.readAsDataURL(file); // فایل را به data URL تبدیل می‌کند
+          });
         },
-
+  
         abort: () => {
-          console.log('Upload aborted')
+          console.log('Upload aborted');
         },
-      }
-    }
-  }
+      };
+    };
+  };
+  
 
   return (
     <div>

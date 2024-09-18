@@ -384,7 +384,7 @@ const Articles: NextPage = () => {
       />
       <main>
         <Head>
-          <title>مدیریت | مقالات</title>
+          <title> همه مقالات</title>
         </Head>
         <DashboardLayout>
           <section className="w-full mt-7 flex flex-col">

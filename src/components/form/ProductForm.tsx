@@ -1355,9 +1355,13 @@ const Table: React.FC<PropTable> = (props) => {
   const handleImageSelect = (file: File, index: number) => {
     if (currentRowIndex !== null) {
       const updatedSelectedStockFiles = [...selectedStockFiles]
+      console.log(updatedSelectedStockFiles, 'const updatedSelectedStockFiles = [...selectedStockFiles]')
 
       updatedSelectedStockFiles[currentRowIndex] = { file, index }
-      console.log(updatedSelectedStockFiles, 'updatedSelectedStockFiles')
+      console.log(
+        updatedSelectedStockFiles[currentRowIndex],
+        'updatedSelectedStockFiles[currentRowIndex] = { file, index }'
+      )
 
       setSelectedStockFiles(updatedSelectedStockFiles)
 
@@ -1920,8 +1924,6 @@ const DialogSetStockItemImage = (props: PropSetStockImage) => {
   const [selectItem, setSelectItem] = useState<File>()
 
   const handleSelect = () => {
-    console.log(index, 'DialogSetStockItemImage')
-
     if (selectItem != undefined) {
       setSelectedStockFiles(selectItem, index)
     }

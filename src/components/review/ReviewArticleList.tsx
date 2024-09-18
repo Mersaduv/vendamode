@@ -35,7 +35,7 @@ const ReviewArticleList: React.FC<Props> = (props) => {
   // ? Render(s)
   return (
     <>
-      <section className="space-y-4 p-3 l xl:max-w-7xl" id="_articleReviews">
+      <section className="space-y-4 p-3 max-w-[1550px] mx-auto" id="_articleReviews">
         <div className=" ">
           <div className="mb-4">
             <ReviewArticleModal articleTitle={article.title} articleID={article.id} articleImg={[article.image]} />
