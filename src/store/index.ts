@@ -12,6 +12,7 @@ import updateReducer from '../store/slices/productUpdate.slice'
 import headerTextReducer from '../store/slices/headerText.slice'
 import stateStringReducer from '../store/slices/stateString.slice'
 import designReducer from '../store/slices/design.slice'
+import objectValueReducer from '../store/slices/objectValue.slice'
 import apiSlice from '@/services/baseApi'
 
 // Actions
@@ -23,6 +24,7 @@ export * from '../store/slices/productUpdate.slice'
 export * from '../store/slices/headerText.slice'
 export * from '../store/slices/stateString.slice'
 export * from '../store/slices/design.slice'
+export * from '../store/slices/objectValue.slice'
 
 export const store = configureStore({
   reducer: {
@@ -36,6 +38,7 @@ export const store = configureStore({
     headerTextState: headerTextReducer,
     stateString: stateStringReducer,
     design: designReducer,
+    objectValue: objectValueReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
   middleware: (gDM) => gDM().concat(apiSlice.middleware),

@@ -37,7 +37,7 @@ const ProductScaleModal: React.FC<Props> = (props) => {
                     میباشد
                   </span>
                 </div>
-                <Button className="bg-white mt-1.5 text-gray-800 font-semibold border rounded">سایز</Button>
+                <Button className="bg-white mt-1.5 text-gray-800 font-semibold border rounded">اندازه</Button>
                 <table className="table-auto mt-4 border-collapse w-full">
                   <thead className="bg-[#8fdcff]">
                     <tr>

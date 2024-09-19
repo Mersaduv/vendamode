@@ -59,12 +59,14 @@ const SingleArticle: NextPage<Props> = (props) => {
     ...query,
     sort: '1',
     pageSize: 5,
+    isActive: true,
     isCategory: true 
   })
 
   const { data: articlesDataByCategory, ...articlesByCategoryQueryProps } = useGetArticlesQuery({
     ...query,
     pageSize: 5,
+    isActive: true,
     categoryId: article.categoryId ?? 'default',
   })
 
@@ -200,11 +202,11 @@ const SingleArticle: NextPage<Props> = (props) => {
                   {latestArticlesData &&
                     latestArticlesData.data &&
                     latestArticlesData.data.data &&
-                    latestArticlesData.data.data.filter((item) => item.id !== article.id).length > 0 && (
+                    latestArticlesData.data.data.length > 0 && (
                       <aside className=" left-0 top-[900px] sm:w-[284px] h-auto border rounded-lg p-3 shadow-item px-4">
                         <h3 className="my-2 mb-5 text-gray-600 text-center">مطالب جدید</h3>
                         <section className="flex flex-wrap gap-4">
-                          {latestArticlesData.data.data.filter((item) => item.id !== article.id).map((item) => (
+                          {latestArticlesData.data.data.map((item) => (
                             <a target="_blank" href={`/articles/${item.slug}`} className="blank w-full">
                               <article className={`flex w-full rounded-lg shadow-item hover:shadow-article p-1.5`}>
                                 <img

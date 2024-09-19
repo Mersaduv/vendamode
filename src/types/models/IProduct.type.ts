@@ -6,6 +6,7 @@ import { ICategory } from './ICategory.type'
 export interface IProduct {
   id: string
   title: string
+  stockTag?: string
   mainImageSrc: {
     id: string
     imageUrl: string
