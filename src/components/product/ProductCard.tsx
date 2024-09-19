@@ -98,20 +98,20 @@ const ProductCard: React.FC<Props> = (props) => {
     if (item.discount === 0 && item.price > 0 && item.quantity === 0) {
       return true
     } else if (item.discount > 0 && item.price > 0 && item.quantity === 0) {
-      return true 
+      return true
     } else if (item.discount === 0 && item.price > 0 && item.quantity > 0) {
-      return true 
+      return true
     } else if (item.discount > 0 && item.price > 0 && item.quantity > 0) {
-      return true 
+      return true
     }
     return false
   })
 
   const getStockStatus = (stockItems: GetStockItems[]) => {
-    if (stockItems.every((item) => item.quantity === 0)) {
-      return 'ناموجود'
+    if (stockItems.every((item) => item.quantity !== 0)) {
+      return true
     }
-    return 'موجود'
+    return false
   }
 
   // ? Render(s)
@@ -127,14 +127,16 @@ const ProductCard: React.FC<Props> = (props) => {
             alt={product.title}
             imageStyles="rounded-t-lg  object-cover"
           /> */}
-          <img className='rounded-t-lg  object-cover'  src={product.mainImageSrc.imageUrl} alt={product.title}/>
+          <img className="rounded-t-lg  object-cover" src={product.mainImageSrc.imageUrl} alt={product.title} />
           <div className="flex flex-col justify-between py-3 h-[150px] w-full">
             <h2 dir="rtl" className="text-right line-clamp-2 overflow-hidden text-ellipsis px-2 text-sm">
               {product.title}
             </h2>
             <div className="mt-1.5 flex justify-center gap-x-2 px-2 relative ">
               <div className="">
-                {filteredItems.length > 0 ? (
+                {!getStockStatus(product.stockItems) ? (
+                  <div className="text-gray-400 font-semibold mb-1">ناموجود</div>
+                ) : filteredItems.length > 0 ? (
                   <>
                     {filteredItems[0].discount > 0 && (
                       <ProductDiscountTag

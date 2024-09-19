@@ -12,9 +12,10 @@ import { digitsEnToFa } from '@persian-tools/persian-tools'
 import 'ckeditor5/ckeditor5.css'
 import { ProductDiscountTag, ProductPriceDisplay } from '@/components/product'
 import Link from 'next/link'
-import { LastSeenSlider, NewSlider, SmilarProductsSlider } from '@/components/sliders'
+import { LastSeenSlider, NewSlider, RecentVisitedSlider, SmilarProductsSlider } from '@/components/sliders'
 import SimilarProductsSlider from '@/components/sliders/SimilarProductsSlider'
 import { ReviewArticleList, ReviewsList } from '@/components/review'
+import { useEffect, useState } from 'react'
 interface Props {
   article: IArticle
   products?: IProduct[]
@@ -55,12 +56,27 @@ const SingleArticle: NextPage<Props> = (props) => {
 
   const { generalSetting } = useAppSelector((state) => state.design)
   const { lastSeen } = useAppSelector((state) => state.lastSeen)
+
+  // ? States
+  const [lastSeenData, setLastSeenData] = useState<IProduct[]>([])
+  const { products: productDataLastSeen, isFetching: isFetchingLastSeen } = useGetProductsQuery(
+    {
+      pageSize: 9999, //
+      isActive: true,
+    },
+    {
+      selectFromResult: ({ data, isFetching }) => ({
+        products: data?.data?.pagination.data,
+        isFetching,
+      }),
+    }
+  )
   const { data: latestArticlesData, ...latestArticlesQueryProps } = useGetArticlesQuery({
     ...query,
     sort: '1',
     pageSize: 5,
     isActive: true,
-    isCategory: true 
+    isCategory: true,
   })
 
   const { data: articlesDataByCategory, ...articlesByCategoryQueryProps } = useGetArticlesQuery({
@@ -80,7 +96,24 @@ const SingleArticle: NextPage<Props> = (props) => {
       }),
     }
   )
+  useEffect(() => {
+    if (productDataLastSeen) {
+      const updatedLastSeenData = productDataLastSeen.map((item) => {
+        const lastSeenItem = lastSeen.find((itemLastSeen) => itemLastSeen.productID === item.id)
 
+        if (lastSeenItem) {
+          return {
+            ...item,
+            created: lastSeenItem.lastTime, // جایگزینی created با lastTime
+          }
+        }
+
+        return item
+      })
+
+      setLastSeenData(updatedLastSeenData)
+    }
+  }, [productDataLastSeen, lastSeen])
   // ? Local Component
   const SliderImage = ({ item, index }: { item: IProduct; index: number }) => (
     <ResponsiveImage
@@ -272,6 +305,7 @@ const SingleArticle: NextPage<Props> = (props) => {
           {/* //  Similar slider */}
           {article.categoryId && products && products.length > 0 && (
             <div className="relative pt-28 sm:pt-0">
+              <hr className="pb-10 mx-8 border-t-2 mt-20" />
               <div className="w-full block  sm:hidden text-center px-3 line-clamp-2 overflow-hidden text-ellipsis  whitespace-nowrap -mt-20 text-lg text-gray-400 ">
                 محصولات مرتبط
               </div>
@@ -308,8 +342,8 @@ const SingleArticle: NextPage<Props> = (props) => {
           )}
 
           {/* last seen slider */}
-          {lastSeen.length > 0 && (
-            <div className="pt-10 sm:pt-0 relative mb-4">
+          {lastSeenData.length > 0 && (
+            <div className="pt-10 sm:pt-0 relative">
               <div className="w-full block text-center px-3 line-clamp-2 overflow-hidden text-ellipsis  sm:hidden whitespace-nowrap -mt-20 text-lg text-gray-400 ">
                 بازدید های اخیر شما
               </div>
@@ -333,7 +367,7 @@ const SingleArticle: NextPage<Props> = (props) => {
                   </div>
                 </div>
                 <div className="w-[100%] sm:w-[62%] md:w-[80%] -mt-20">
-                  <LastSeenSlider products={lastSeen} />
+                  <RecentVisitedSlider products={lastSeenData} isFetching={isFetchingLastSeen} />
                 </div>
               </div>
               <div className="w-full  sm:hidden justify-center flex absolute bottom-[150px]">
@@ -341,6 +375,7 @@ const SingleArticle: NextPage<Props> = (props) => {
                   <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
                 </Link>
               </div>
+              <hr className="pb-10 mx-8 border-t-2 mt-20" />
             </div>
           )}
         </>

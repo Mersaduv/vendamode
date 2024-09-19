@@ -81,9 +81,11 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
   // ? queries
   const { products: newProductsData, isFetching: isFetchingNew } = useGetProductsQuery(
     {
-      sortBy: 'Created',
+      sortBy: 'LastUpdated',
+      sort: "desc",
       inStock: '1',
       pageSize: 30,
+      isActive: true,
     },
     {
       selectFromResult: ({ data, isFetching }) => ({
@@ -98,6 +100,10 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
       inStock: '1',
       pageSize: 15,
       discount: true,
+      isActive: true,
+      // sortBy: 'LastUpdated',
+      // sort: "desc",
+      // inStock: '1',
     },
     {
       selectFromResult: ({ data, isFetching }) => ({
@@ -112,6 +118,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
       bestSelling: true,
       inStock: '1',
       pageSize: 30,
+      isActive: true,
     },
     {
       selectFromResult: ({ data, isFetching }) => ({
@@ -146,8 +153,10 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
   } = useGetArticlesQuery({
     page: 1,
     pageSize: 99999,
-    isCategory: true 
+    isCategory: true,
+    isActive: true,
   })
+  console.log(newProductsData, 'newProductsData')
 
   // ? Render(s)
   return (
@@ -162,40 +171,43 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
           <MainSlider data={sliders} />
 
           {/* //  newest slider */}
-          {newProductsData && newProductsData.length > 0 && (
-            <div className="relative pt-28 sm:pt-0">
-              <div className="w-full block  sm:hidden text-center px-3 line-clamp-2 overflow-hidden text-ellipsis  whitespace-nowrap -mt-20 text-lg text-gray-400 ">
-                جدید ترین های {generalSetting?.title}
-              </div>
-              <div className="flex w-full bg-slate-300 relative h-[340px] sm:h-[275px] mt-28">
-                <div className="hidden w-[38%] sm:block md:w-[20%]">
-                  <div className="hidden sm:block h-[72px]">
-                    <div className=" line-clamp-2 overflow-hidden text-ellipsis text-center -mt-20 text-lg text-gray-400  px-3 pt-4 w-full">
-                      جدید ترین های {generalSetting?.title}
+          {newProductsData &&
+            newProductsData.filter((item) => item.stockItems.every((item) => item.quantity !== 0)).length > 0 && (
+              <div className="relative pt-28 sm:pt-0">
+                <div className="w-full block  sm:hidden text-center px-3 line-clamp-2 overflow-hidden text-ellipsis  whitespace-nowrap -mt-20 text-lg text-gray-400 ">
+                  جدید ترین های {generalSetting?.title}
+                </div>
+                <div className="flex w-full bg-slate-300 relative h-[340px] sm:h-[275px] mt-28">
+                  <div className="hidden w-[38%] sm:block md:w-[20%]">
+                    <div className="hidden sm:block h-[72px]">
+                      <div className=" line-clamp-2 overflow-hidden text-ellipsis text-center -mt-20 text-lg text-gray-400  px-3 pt-4 w-full">
+                        جدید ترین های {generalSetting?.title}
+                      </div>
+                    </div>
+                    <div className="mt-10 flex justify-center">
+                      <img className="w-[220px]" src="/images/NEW.webp" alt="offer" />
+                    </div>
+                    <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">به روز باش</p>
+                    <div className="w-full  sm:flex justify-center hidden">
+                      <Link href={`/products?sortBy=LastUpdated&sort=desc&inStock=1`}>
+                        <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">
+                          نمایش همه
+                        </Button>
+                      </Link>
                     </div>
                   </div>
-                  <div className="mt-10 flex justify-center">
-                    <img className="w-[220px]" src="/images/NEW.webp" alt="offer" />
-                  </div>
-                  <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">به روز باش</p>
-                  <div className="w-full  sm:flex justify-center hidden">
-                    <Link href={`/products?sortBy=Created`}>
-                      <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
-                    </Link>
+                  <div className="w-[100%] sm:w-[62%] md:w-[80%] -mt-20 ">
+                    <NewSlider isFetching={isFetchingNew} products={newProductsData} />
                   </div>
                 </div>
-                <div className="w-[100%] sm:w-[62%] md:w-[80%] -mt-20 ">
-                  <NewSlider isFetching={isFetchingNew} products={newProductsData} />
+                <div className="w-full  sm:hidden justify-center flex absolute bottom-[105px]">
+                  <Link href={`/products?sortBy=LastUpdated&sort=desc&inStock=1`}>
+                    <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
+                  </Link>
                 </div>
+                <hr className="pb-20 mx-8 border-t-2 mt-20" />
               </div>
-              <div className="w-full  sm:hidden justify-center flex absolute bottom-[105px]">
-                <Link href={`/products?sortBy=Created`}>
-                  <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
-                </Link>
-              </div>
-              <hr className="pb-20 mx-8 border-t-2 mt-20" />
-            </div>
-          )}
+            )}
 
           <CategoryList childCategories={childCategories} name={generalSetting?.title ?? ''} homePage />
 
@@ -265,15 +277,13 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
           {bestSellingProductsData && bestSellingProductsData.length > 0 && (
             <div className="pt-28 sm:pt-0 relative">
               <div className="w-full block text-center px-3 line-clamp-2 overflow-hidden text-ellipsis  sm:hidden whitespace-nowrap -mt-20 text-lg text-gray-400 ">
-                پرفروش های
-                {generalSetting?.title}
+                پرفروش های  {generalSetting?.title}
               </div>
               <div className="flex w-full bg-slate-300 relative h-[340px] sm:h-[275px] mt-16">
                 <div className="hidden w-[38%] sm:block md:w-[20%]">
                   <div className="hidden sm:block h-[72px]">
                     <div className=" line-clamp-2 overflow-hidden text-ellipsis text-center -mt-20 text-lg text-gray-400  px-3 w-full">
-                      پرفروش های
-                      {generalSetting?.title}
+                      پرفروش های {generalSetting?.title}
                     </div>
                   </div>
                   <div className="mt-10 flex justify-center">
@@ -309,8 +319,15 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
               <div className="sm:margin-brandSlider pt-4">
                 <h1 className="w-full text-center text-gray-400 font-normal text-lg">خواندنی ها</h1>
                 <ReadableArticlePlace isFetching={isFetchingArticle} articleData={articleData} />
-                <div className="text-center mt-[200px] sxl:mt-0">
-                  <Link href={`/articles`} className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">
+                <div
+                  className={`text-center ${
+                    articleData.data.data.length > 3 ? ' mt-[180px]' : 'sm:mt-[20px] -mt-[30px]'
+                  }`}
+                >
+                  <Link
+                    href={`/articles`}
+                    className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white  margin-force"
+                  >
                     نمایش همه
                   </Link>
                 </div>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { useAppDispatch, useAppSelector, useDisclosure, useDisclosureWithData } from '@/hooks'
@@ -21,7 +21,7 @@ import { AddToCartButton } from '@/components/cart'
 
 import type { GetServerSideProps, NextPage } from 'next'
 import type { EntityImage, IObjectValue, IProduct, IProductSizeInfo } from '@/types'
-import { getProductByCategory, getProductBySlug } from '@/services'
+import { getProductByCategory, getProductBySlug, useGetProductsQuery } from '@/services'
 import { Button } from '@/components/ui'
 import { ProductScaleModal } from '@/components/modals'
 import { BsHeart } from 'react-icons/bs'
@@ -31,6 +31,7 @@ import { FaStar } from 'react-icons/fa'
 import { RiMenu5Fill } from 'react-icons/ri'
 import { digitsEnToFa } from '@persian-tools/persian-tools'
 import { MetaTags } from '@/components/shared'
+import Link from 'next/link'
 
 interface Props {
   product: IProduct
@@ -73,9 +74,44 @@ const SingleProduct: NextPage<Props> = (props) => {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const { lastSeen } = useAppSelector((state) => state.lastSeen)
+
+  // ? States
+  const [lastSeenData, setLastSeenData] = useState<IProduct[]>([])
   const { generalSetting } = useAppSelector((state) => state.design)
   const { featureObjectValues } = useAppSelector((state) => state.objectValue)
 
+  // ? Queries
+  const { products: productDataLastSeen, isFetching: isFetchingLastSeen } = useGetProductsQuery(
+    {
+      pageSize: 9999, //
+      isActive: true,
+    },
+    {
+      selectFromResult: ({ data, isFetching }) => ({
+        products: data?.data?.pagination.data,
+        isFetching,
+      }),
+    }
+  )
+ 
+  useEffect(() => {
+    if (productDataLastSeen) {
+      const updatedLastSeenData = productDataLastSeen.map((item) => {
+        const lastSeenItem = lastSeen.find((itemLastSeen) => itemLastSeen.productID === item.id)
+
+        if (lastSeenItem) {
+          return {
+            ...item,
+            created: lastSeenItem.lastTime, // جایگزینی created با lastTime
+          }
+        }
+
+        return item
+      })
+
+      setLastSeenData(updatedLastSeenData)
+    }
+  }, [productDataLastSeen, lastSeen])
   // ? initial color or size
   // useEffect(() => {
   //   if (product?.productSizeInfo?.columns != undefined) {
@@ -100,7 +136,7 @@ const SingleProduct: NextPage<Props> = (props) => {
     if (product?.productFeatureInfo?.featureValueInfos?.length! > 0) {
       product?.productFeatureInfo?.featureValueInfos?.forEach((feature) => {
         if (feature?.value?.length! > 0) {
-          const val = feature.value[0] // اولین مقدار موجود برای هر ویژگی
+          const val = feature.value[0] // اولین مقدار موجود برای
           dispatch(
             setTempObjectValue2({
               id: feature.id,
@@ -129,12 +165,7 @@ const SingleProduct: NextPage<Props> = (props) => {
     dispatch(
       addToLastSeen({
         productID: product.id,
-        image: product.mainImageSrc,
-        title: product.title,
-        slug: product.slug,
-        discount: product.stockItems[0].discount ?? 0,
-        price: product.stockItems[0].price ?? 0,
-        inStock: product.inStock,
+        lastTime: new Date().toISOString(),
       })
     )
   }, [product.id])
@@ -241,7 +272,10 @@ const SingleProduct: NextPage<Props> = (props) => {
                       <ProductSizeSelector sizes={product.productSizeInfo?.columns ?? []} />
                     </div>
                   </div>
-                  <Button onClick={modalHandlers.open} className="p-2 text-xs rounded whitespace-nowrap absolute  left-0">
+                  <Button
+                    onClick={modalHandlers.open}
+                    className="p-2 text-xs rounded whitespace-nowrap absolute  left-0"
+                  >
                     راهنمایی سایز
                   </Button>
                 </div>
@@ -250,7 +284,7 @@ const SingleProduct: NextPage<Props> = (props) => {
               {product.productFeatureInfo?.colorDTOs?.length! > 0 && (
                 <div className="border-b-2 pt-1 items-center  flex sm:h-[52px] ">
                   <div className="flex flex-col  sm:flex-row gap-2 sm:gap-0   w-full">
-                    <div  className="flex w-1/3">
+                    <div className="flex w-1/3">
                       <div className="text-gray-400 text-sm md:text-base whitespace-nowrap">رنگ :</div>
                       <div className="mr-1 whitespace-nowrap  text-sm  md:text-base">{tempColor?.name}</div>
                     </div>
@@ -523,17 +557,93 @@ const SingleProduct: NextPage<Props> = (props) => {
               </Tab.Panels>
             </Tab.Group>
           </div>
-          <div className="relative w-full flex pt-28">
+
+          {/* <div className="relative w-full flex pt-28">
             <div className="bg-[#dee2e6] w-full h-[410px] xs:h-[330px] sm:h-[360px] relative">
               <SmilarProductsSlider products={smilarProducts.products} isFetching={false} />
             </div>
-          </div>
-          <div className="relative w-full flex pt-28">
+          </div> */}
+          {/* <div className="relative w-full flex pt-28">
             <div className="bg-[#dee2e6] w-full h-[410px] xs:h-[330px] sm:h-[360px] relative">
               <RecentVisitedSlider lastSeenProduct={{ products: lastSeen, title: 'بازدید های اخیر' }} />
             </div>
-          </div>
+          </div> */}
         </main>
+        {/* //  smilarProducts slider */}
+        {smilarProducts &&
+          smilarProducts.products.filter((item) => item.stockItems.every((item) => item.quantity !== 0)).length > 0 && (
+            <div className="relative pt-28 sm:pt-0">
+              <hr className="pb-10 mx-8 border-t-2 mt-20" />
+              <div className="w-full block  sm:hidden text-center px-3 line-clamp-2 overflow-hidden text-ellipsis  whitespace-nowrap -mt-20 text-lg text-gray-400 ">
+                محصولات مشابه
+              </div>
+              <div className="flex w-full bg-slate-300 relative h-[340px] sm:h-[275px] mt-28">
+                <div className="hidden w-[38%] sm:block md:w-[20%]">
+                  <div className="hidden sm:block h-[72px]">
+                    <div className=" line-clamp-2 overflow-hidden text-ellipsis text-center -mt-20 text-lg text-gray-400  px-3 pt-4 w-full">
+                      محصولات مشابه
+                    </div>
+                  </div>
+                  <div className="mt-10 flex justify-center">
+                    <img className="w-[220px]" src="/images/Similar.webp" alt="offer" />
+                  </div>
+                  <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">
+                    محصولات مشابه را اینجا ببین
+                  </p>
+                  <div className="w-full  sm:flex justify-center hidden">
+                    <Link href={`/products?sortBy=LastUpdated&sort=desc&inStock=1`}>
+                      <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
+                    </Link>
+                  </div>
+                </div>
+                <div className="w-[100%] sm:w-[62%] md:w-[80%] -mt-20 ">
+                  <SmilarProductsSlider products={smilarProducts.products} isFetching={false} />
+                </div>
+              </div>
+              <div className="w-full  sm:hidden justify-center flex absolute bottom-[105px]">
+                <Link href={`/products?sortBy=LastUpdated&sort=desc&inStock=1`}>
+                  <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
+                </Link>
+              </div>
+              <hr className="pb-20 mx-8 border-t-2 mt-20" />
+            </div>
+          )}
+        {/* last seen slider */}
+        {lastSeenData.length > 0 && (
+          <div className="pt-10 sm:pt-0 relative pb-10">
+            <div className="w-full block text-center px-3 line-clamp-2 overflow-hidden text-ellipsis  sm:hidden whitespace-nowrap -mt-20 text-lg text-gray-400 ">
+              بازدید های اخیر شما
+            </div>
+            <div className="flex w-full bg-slate-300 relative  h-[340px] sm:h-[275px] mt-28">
+              <div className="hidden w-[38%] sm:block md:w-[20%]">
+                <div className="hidden sm:block">
+                  <div className=" line-clamp-2 overflow-hidden text-ellipsis text-center -mt-20 text-lg text-gray-400  px-3 w-full">
+                    بازدید های اخیر شما
+                  </div>
+                </div>
+                <div className="mt-20 flex justify-center">
+                  <img className="w-[220px]" src="/images/Recent Visited.webp" alt="offer" />
+                </div>
+                <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">
+                  بازدید های اخیر رو اینجا ببین
+                </p>
+                <div className="w-full  sm:flex justify-center hidden">
+                  <Link href={`/products`}>
+                    <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
+                  </Link>
+                </div>
+              </div>
+              <div className="w-[100%] sm:w-[62%] md:w-[80%] -mt-20">
+                <RecentVisitedSlider products={lastSeenData} isFetching={isFetchingLastSeen} />
+              </div>
+            </div>
+            <div className="w-full  sm:hidden justify-center flex absolute bottom-[150px]">
+              <Link href={`/products`}>
+                <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>
+              </Link>
+            </div>
+          </div>
+        )}
       </ClientLayout>
     </>
   )

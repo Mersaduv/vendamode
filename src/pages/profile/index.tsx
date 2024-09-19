@@ -63,7 +63,7 @@ const ProfilePage: NextPage = () => {
         keywords={generalSetting?.googleTags || ' اینترنتی, فروشگاه'}
       />
       <Header />
-      <div className={`lg:container lg:flex lg:max-w-7xl lg:gap-x-4 ${isActive ? '' : ''}`}>
+      <div className={`lg:container lg:flex  lg:gap-x-4 ${isActive ? '' : ''}`}>
         <ProfileLayout>
           <PageContainer title=" ">
             <div className="flex w-full mt-4">
