@@ -27,7 +27,7 @@ const ProductSizeSelector: React.FC<Props> = (props) => {
           type="button"
           key={item.id}
           onClick={() => dispatch(setTempSize(item))}
-          className={`border cursor-pointer  font-semibold flex pt-0.5 items-center justify-center rounded-md text-gray-500 border-gray-400 w-8 h-7  ${
+          className={`border cursor-pointer   font-semibold flex pt-0.5 items-center justify-center rounded-md text-gray-500 border-gray-400 w-8 h-7  ${
             tempSize?.id === item.id ? 'bg-[#686868] text-white' : ''
           }`}
         >

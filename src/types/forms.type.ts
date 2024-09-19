@@ -49,6 +49,7 @@ export interface IBrandForm {
 export interface IProductForm {
   Id: string
   Title: string
+  stockTag?: string
   IsActive: boolean
   MainThumbnail: File | null
   Thumbnail?: File[] | null

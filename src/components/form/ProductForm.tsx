@@ -298,6 +298,7 @@ const ProductForm: React.FC<Props> = (props) => {
     const formData = new FormData()
 
     formData.append('Title', data.Title)
+    formData.append('StockTag', data.stockTag ?? '')
     formData.append('IsActive', data.IsActive.toString())
     if (data.MainThumbnail) {
       formData.append('MainThumbnail', data.MainThumbnail)
@@ -1023,7 +1024,7 @@ const ProductForm: React.FC<Props> = (props) => {
                     <h3 className="border-b p-6 text-gray-600">اندازه ها</h3>
                     <div className="flex justify-center  text-xs mx-auto mt-6 items-start mdx:flex-row gap-x-6 pb-4 px-7">
                       {/* table  */}
-                      برای وارد کردن اندازه ها, مقدار سایز بندی را وارد کنید
+                      برای وارد کردن اندازه ها, مقدار سایز بندی در ویژگی محصول را وارد کنید
                       {/* image  */}
                     </div>
                   </div>
@@ -1101,7 +1102,27 @@ const ProductForm: React.FC<Props> = (props) => {
               {/* is show Product features, quantity, price , discount */}
               <div className="flex flex-1">
                 <div className="bg-white w-full rounded-md shadow-item mb-2">
-                  <h3 className="border-b p-6 text-gray-600">تعداد و قیمت محصول</h3>
+                  <div className="flex items-center border-b p-2 pr-6">
+                    <h3 className=" text-gray-600 w-full">تعداد و قیمت محصول</h3>
+                    <div className="relative w-full">
+                      <input
+                        dir="rtl"
+                        type="text"
+                        className="peer m-0 block rounded-lg h-[42px] w-full border border-solid border-gray-200 bg-transparent bg-clip-padding pr-4 pl-3 py-4 text-xl font-normal leading-tight text-neutral-700 transition duration-200 ease-linear placeholder:text-transparent focus:border-primary focus:pb-[0.625rem] focus:pt-[1.625rem] focus:text-neutral-700 focus:outline-none peer-focus:text-primary dark:border-neutral-400 dark:text-white dark:autofill:shadow-autofill dark:focus:border-primary dark:peer-focus:text-primary [&:not(:placeholder-shown)]:pb-[0.625rem] [&:not(:placeholder-shown)]:pt-[1.625rem]"
+                        id="floatingInput"
+                        placeholder="موقعیت کالا در انبار"
+                        {...register('stockTag')}
+                        // onChange={(e) => handleInputChange(idx, 'stockTag', digitsFaToEn(e.target.value))}
+                        // value={digitsEnToFa(addCommas(stockItems[idx]?.stockTag || ''))}
+                      />
+                      <label
+                        htmlFor="floatingInput"
+                        className="pointer-events-none absolute right-0 top-0 origin-[0_0] border border-solid border-transparent pr-2.5 pb-4 pt-2.5 text-neutral-500 transition-[opacity,_transform] duration-200 ease-linear peer-focus:-translate-y-2 peer-focus:translate-x-[0.15rem] peer-focus:scale-[0.85] peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:translate-x-[0.15rem] peer-[:not(:placeholder-shown)]:scale-[0.85] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary"
+                      >
+                        موقعیت کالا در انبار
+                      </label>
+                    </div>
+                  </div>
                   <Table
                     features={stateFeature}
                     sizeList={stateSizeFeature}

@@ -27,16 +27,24 @@ const Articles: NextPage = () => {
   const { generalSetting } = useAppSelector((state) => state.design)
   // ? Querirs
   //*    Get Products Data
-  const { data: articleData, ...articlesQueryProps } = useGetArticlesQuery({ ...query, isCategory: true })
-  const { data: latestArticlesData, ...latestArticlesQueryProps } = useGetArticlesQuery(
-    { ...query, sort: '1', isCategory: true ,
-      pageSize: 5, } 
-  )
+  const { data: articleData, ...articlesQueryProps } = useGetArticlesQuery({
+    ...query,
+    isCategory: true,
+    isActive: true,
+  })
+  const { data: latestArticlesData, ...latestArticlesQueryProps } = useGetArticlesQuery({
+    ...query,
+    sort: '1',
+    isCategory: true,
+    isActive: true,
+    pageSize: 5,
+  })
 
   const { products: productData, isFetching: isFetchingNew } = useGetProductsQuery(
     {
       inStock: '1',
       pageSize: 30,
+      isActive: true,
     },
     {
       selectFromResult: ({ data, isFetching }) => ({
@@ -127,7 +135,6 @@ const Articles: NextPage = () => {
                         }
                         return false
                       })
-                      console.log(filteredItems, 'filteredItemsfilteredItemsfilteredItems')
 
                       return (
                         <SwiperSlide key={index}>
@@ -148,7 +155,6 @@ const Articles: NextPage = () => {
                                 inStock={product.inStock}
                                 discount={filteredItems[0].discount}
                                 price={filteredItems[0].price}
-                                
                               />
                             </div>
                           </a>
@@ -157,12 +163,13 @@ const Articles: NextPage = () => {
                     })}
                 </Swiper>
               </aside>
-              <aside className="left-0 top-0 w-[274px] h-auto border rounded-lg p-3 shadow-item  px-4">
-                <h3 className="my-2 mb-5 text-gray-600 text-center">مطالب جدید</h3>
-                {latestArticlesData &&
-                  latestArticlesData.data &&
-                  latestArticlesData.data.data &&
-                  latestArticlesData.data.data.length > 0 && (
+
+              {latestArticlesData &&
+                latestArticlesData.data &&
+                latestArticlesData.data.data &&
+                latestArticlesData.data.data.length > 0 && (
+                  <aside className="left-0 top-0 w-[274px] h-auto border rounded-lg p-3 shadow-item  px-4">
+                    <h3 className="my-2 mb-5 text-gray-600 text-center">مطالب جدید</h3>
                     <section className="flex flex-wrap gap-4">
                       {latestArticlesData.data.data.map((item) => (
                         <a target="_blank" href={`/articles/${item.slug}`} className="blank w-full">
@@ -181,8 +188,8 @@ const Articles: NextPage = () => {
                         </a>
                       ))}
                     </section>
-                  )}
-              </aside>
+                  </aside>
+                )}
             </div>
           </div>
         </main>

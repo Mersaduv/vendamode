@@ -4,7 +4,7 @@ import Head from 'next/head'
 import { useAppDispatch, useAppSelector, useDisclosure, useDisclosureWithData } from '@/hooks'
 import { Tab } from '@headlessui/react'
 import { Fragment } from 'react'
-import { setTempColor, setTempSize, addToLastSeen, setTempObjectValue } from '@/store'
+import { setTempColor, setTempSize, addToLastSeen, setTempObjectValue, setTempObjectValue2 } from '@/store'
 import parse from 'html-react-parser'
 
 import { ClientLayout } from '@/components/Layouts'
@@ -74,6 +74,8 @@ const SingleProduct: NextPage<Props> = (props) => {
   const router = useRouter()
   const { lastSeen } = useAppSelector((state) => state.lastSeen)
   const { generalSetting } = useAppSelector((state) => state.design)
+  const { featureObjectValues } = useAppSelector((state) => state.objectValue)
+
   // ? initial color or size
   // useEffect(() => {
   //   if (product?.productSizeInfo?.columns != undefined) {
@@ -96,16 +98,30 @@ const SingleProduct: NextPage<Props> = (props) => {
       dispatch(setTempSize(product?.productSizeInfo?.columns![0]!))
     }
     if (product?.productFeatureInfo?.featureValueInfos?.length! > 0) {
-      var val = product?.productFeatureInfo?.featureValueInfos![0]!.value![0]!
-      dispatch(
-        setTempObjectValue({
-          id: product?.productFeatureInfo?.featureValueInfos![0]!.id,
-          title: product?.productFeatureInfo?.featureValueInfos![0]!.title,
-          value: [val],
-        } as IObjectValue)
-      )
+      product?.productFeatureInfo?.featureValueInfos?.forEach((feature) => {
+        if (feature?.value?.length! > 0) {
+          const val = feature.value[0] // اولین مقدار موجود برای هر ویژگی
+          dispatch(
+            setTempObjectValue2({
+              id: feature.id,
+              title: feature.title,
+              value: [val],
+            } as IObjectValue)
+          )
+        }
+      })
     }
-  }, [router.query.id])
+    // if (product?.productFeatureInfo?.featureValueInfos?.length! > 0) {
+    //   var val = product?.productFeatureInfo?.featureValueInfos![0]!.value![0]!
+    //   dispatch(
+    //     setTempObjectValue({
+    //       id: product?.productFeatureInfo?.featureValueInfos![0]!.id,
+    //       title: product?.productFeatureInfo?.featureValueInfos![0]!.title,
+    //       value: [val],
+    //     } as IObjectValue)
+    //   )
+    // }
+  }, [product?.productFeatureInfo, router.query.id])
 
   const { tempSize, tempColor, tempObjectValue } = useAppSelector((state) => state.cart)
   // ? Add To LastSeen
@@ -215,9 +231,9 @@ const SingleProduct: NextPage<Props> = (props) => {
               )}
 
               {product.productSizeInfo?.columns?.length! > 0 && (
-                <div className="border-b-2 py-2 flex items-center justify-between sm:h-[52px]">
-                  <div className="flex justify-between flex-col gap-2 sm:gap-0 sm:flex-row w-[44%]">
-                    <div className="flex">
+                <div className="border-b-2 py-2 flex items-center justify-between sm:h-[52px] relative">
+                  <div className="flex flex-col  sm:flex-row gap-2 sm:gap-0   w-full">
+                    <div className="flex w-1/3">
                       <div className="text-gray-400 text-sm md:text-base whitespace-nowrap">سایزبندی :</div>
                       <div className="mr-1  text-sm  md:text-base">{tempSize?.name}</div>
                     </div>
@@ -225,16 +241,16 @@ const SingleProduct: NextPage<Props> = (props) => {
                       <ProductSizeSelector sizes={product.productSizeInfo?.columns ?? []} />
                     </div>
                   </div>
-                  <Button onClick={modalHandlers.open} className="p-2 text-xs rounded">
+                  <Button onClick={modalHandlers.open} className="p-2 text-xs rounded whitespace-nowrap absolute  left-0">
                     راهنمایی سایز
                   </Button>
                 </div>
               )}
 
               {product.productFeatureInfo?.colorDTOs?.length! > 0 && (
-                <div className="border-b-2 pt-1 items-center flex sm:h-[52px]">
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 justify-between w-[44%]">
-                    <div className="flex">
+                <div className="border-b-2 pt-1 items-center  flex sm:h-[52px] ">
+                  <div className="flex flex-col  sm:flex-row gap-2 sm:gap-0   w-full">
+                    <div  className="flex w-1/3">
                       <div className="text-gray-400 text-sm md:text-base whitespace-nowrap">رنگ :</div>
                       <div className="mr-1 whitespace-nowrap  text-sm  md:text-base">{tempColor?.name}</div>
                     </div>
@@ -244,7 +260,8 @@ const SingleProduct: NextPage<Props> = (props) => {
                   </div>
                 </div>
               )}
-              {product.productFeatureInfo?.featureValueInfos?.length! > 0 && (
+
+              {/* {product.productFeatureInfo?.featureValueInfos?.length! > 0 && (
                 <div className="border-b-2 pt-1 items-center flex sm:h-[52px]">
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 justify-between w-[44%]">
                     <div className="flex">
@@ -260,7 +277,34 @@ const SingleProduct: NextPage<Props> = (props) => {
                     </div>
                   </div>
                 </div>
-              )}
+              )} */}
+              {product.productFeatureInfo?.featureValueInfos?.map((feature) => {
+                const selectedValue = featureObjectValues[feature.id] // Get the selected value for this feature
+
+                return (
+                  <div key={feature.id} className="border-b-2 pt-1 items-center  flex sm:h-[52px] ">
+                    <div className="flex flex-col  sm:flex-row gap-2 sm:gap-0   w-full">
+                      <div className="flex w-1/3">
+                        <div className="text-gray-400 text-sm md:text-base whitespace-nowrap ">
+                          {selectedValue?.title} :
+                        </div>
+                        <div className="mr-1 whitespace-nowrap text-sm md:text-base">
+                          {selectedValue?.value ? selectedValue.value[0].name : null}
+                        </div>
+                      </div>
+                      {feature.value && (
+                        <div className="mr-1 mb-2 sm:mb-0">
+                          <ProductObjectValueSelector
+                            feature={feature}
+                            objectValues={feature.value.map((item) => ({ id: item.id, title: item.name }))}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+
               <div className="z-[99]">
                 {product.inStock > 0 ? (
                   <AddToCartButton product={product} />
@@ -392,7 +436,7 @@ const SingleProduct: NextPage<Props> = (props) => {
                             میباشد
                           </span>
                         </div>
-                        <Button className="bg-white mt-1.5 text-gray-800 font-semibold border rounded">سایز</Button>
+                        <Button className="bg-white mt-1.5 text-gray-800 font-semibold border rounded">اندازه</Button>
                         <table className="table-auto mt-4 border-collapse w-full">
                           <thead className="bg-[#8fdcff]">
                             <tr>

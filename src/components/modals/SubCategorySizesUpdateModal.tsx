@@ -99,12 +99,15 @@ const SubCategorySizesUpdateModal: React.FC<Props> = (props) => {
         if (imageFile) {
           setSelectedFile([imageFile])
         }
+        console.log(productSizeCategoryData , "productSizeCategoryData");
+        
         const productSizeValues = productSizeCategoryData.data.productSizeValues || []
         const tagsData = productSizeValues.map((value) => ({
           id: value.id,
           name: value.name,
         }))
         setTags(tagsData)
+        setSelectSizeType(productSizeCategoryData.data.sizeType)
         reset({
           id: productSizeCategoryData.data.id,
           sizeType: productSizeCategoryData.data.sizeType,
@@ -309,6 +312,7 @@ const SubCategorySizesUpdateModal: React.FC<Props> = (props) => {
                     className="w-full rounded-lg text-sm focus:outline-none appearance-none border-none"
                     name="انتخاب"
                     id=""
+                    value={selectSizeType}
                     onChange={handleSizeTypeChange}
                   >
                     <option value={'0'}>سانتیمتر</option>
