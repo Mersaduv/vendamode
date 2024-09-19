@@ -191,7 +191,7 @@ export default function Navbar() {
         <BiCategory className="icon text-gray-500 opacity-65" />
         دسته‌بندی کالاها
       </button>
-      <div className={`fixed left-0 z-20 h-screen w-full bg-gray-400/50 ${hover ? 'block' : 'hidden'}`} />
+      <div className={`fixed left-0 z-20 h-screen w-full  ${hover ? 'block' : 'hidden'}`} />
 
       <div
         className="absolute top-8 z-40 hidden w-full rounded-md border border-gray-100 bg-white shadow-lg group-hover:block"

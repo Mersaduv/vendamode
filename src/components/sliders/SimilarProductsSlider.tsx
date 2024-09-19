@@ -4,7 +4,7 @@ import { useGetProductsQuery } from '@/services'
 import { ProductDiscountTag, ProductPriceDisplay } from '@/components/product'
 import { Button, ResponsiveImage } from '@/components/ui'
 
-import type { ICategory, IProduct } from '@/types'
+import type { GetStockItems, ICategory, IProduct } from '@/types'
 import { useAppSelector } from '@/hooks'
 import dynamic from 'next/dynamic'
 import 'owl.carousel/dist/assets/owl.carousel.css'
@@ -25,7 +25,9 @@ const SimilarProductsSlider: React.FC<Props> = (props) => {
   const carouselOptions = {
     margin: 10,
     nav: true,
-    startPosition: products ? products.length - 1 : 0,
+    startPosition: products
+      ? products.filter((item) => item.stockItems.every((item) => item.quantity !== 0)).length - 1
+      : 0,
     responsive: {
       0: {
         items: 2,
@@ -66,62 +68,97 @@ const SimilarProductsSlider: React.FC<Props> = (props) => {
           {...carouselOptions}
           dir="ltr"
         >
-          {products && products.map((product) => {
-            const filteredItems = product.stockItems.filter((item) => {
-              if (item.discount === 0 && item.price > 0 && item.quantity === 0) {
-                return true
-              } else if (item.discount > 0 && item.price > 0 && item.quantity === 0) {
-                return true
-              } else if (item.discount === 0 && item.price > 0 && item.quantity > 0) {
-                return true
-              } else if (item.discount > 0 && item.price > 0 && item.quantity > 0) {
-                return true
-              }
-              return false
+          {[...products]
+            .sort((a, b) => {
+              const dateA = a.lastUpdated ? new Date(a.lastUpdated).getTime() : 0
+              const dateB = b.lastUpdated ? new Date(b.lastUpdated).getTime() : 0
+              return dateA - dateB
             })
-            return (
-              <div
-                key={product.id}
-                className="w-[150px] sm:w-[200px] z-50 shadow-item2 rounded-lg mb-3 bg-white h-[328px]"
-              >
-                <div className="h-slider">
-                  <Link href={`/products/${product.slug}`}>
-                    <ResponsiveImage
-                      dimensions="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] lg:w-[200px] lg:h-[200px]"
-                      className="mx-auto relative"
-                      src={product.mainImageSrc.imageUrl}
-                      blurDataURL={product.mainImageSrc.placeholder}
-                      alt={product.title}
-                      imageStyles="object-center rounded-t-lg"
-                    />
-                    <div className="flex flex-col justify-between gap-y-1 py-3 h-[130px] ">
-                      <h2 dir="rtl" className="text-right line-clamp-2 overflow-hidden text-ellipsis px-2 text-sm">
-                        {product.title}
-                      </h2>
-                      <div className="mt-1.5 flex justify-center gap-x-2 px-2 relative">
-                        <div className="">
-                          {filteredItems[0] && filteredItems[0].discount > 0 && (
+            .filter((item) => item.stockItems.every((item) => item.quantity !== 0))
+            .map((product) => {
+              const filteredItems = product.stockItems.filter((item) => {
+                if (item.discount === 0 && item.price > 0 && item.quantity === 0) {
+                  return true
+                } else if (item.discount > 0 && item.price > 0 && item.quantity === 0) {
+                  return true
+                } else if (item.discount === 0 && item.price > 0 && item.quantity > 0) {
+                  return true
+                } else if (item.discount > 0 && item.price > 0 && item.quantity > 0) {
+                  return true
+                }
+                return false
+              })
+
+              const getStockStatus = (stockItems: GetStockItems[]) => {
+                if (stockItems.every((item) => item.quantity !== 0)) {
+                  return true
+                }
+                return false
+              }
+
+              return (
+                <div
+                  key={product.id}
+                  className="w-[150px] sm:w-[200px] z-50 shadow-item2 rounded-lg mb-3 bg-white h-[328px]"
+                >
+                  <div className="h-slider">
+                    <Link href={`/products/${product.slug}`}>
+                      <ResponsiveImage
+                        dimensions="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] lg:w-[200px] lg:h-[200px]"
+                        className="mx-auto relative"
+                        src={product.mainImageSrc.imageUrl}
+                        blurDataURL={product.mainImageSrc.placeholder}
+                        alt={product.title}
+                        imageStyles="object-center rounded-t-lg"
+                      />
+                      <div className="flex flex-col justify-between gap-y-1 py-3 h-[130px] ">
+                        <h2 dir="rtl" className="text-right line-clamp-2 overflow-hidden text-ellipsis px-2 text-sm">
+                          {product.title}
+                        </h2>
+                        <div className="mt-1.5 flex justify-center gap-x-2 px-2 relative">
+                          {!getStockStatus(product.stockItems) ? (
+                            <div className="text-gray-400 font-semibold mb-1">ناموجود</div>
+                          ) : filteredItems.length > 0 ? (
+                            <>
+                              {filteredItems[0].discount > 0 && (
+                                <ProductDiscountTag
+                                  price={filteredItems[0].price}
+                                  discount={filteredItems[0].discount}
+                                  isSlider
+                                />
+                              )}
+
+                              <ProductPriceDisplay
+                                inStock={product.inStock}
+                                discount={filteredItems[0].discount}
+                                price={filteredItems[0].price}
+                              />
+                            </>
+                          ) : (
+                            <div className="text-gray-400 font-semibold mb-1">ناموجود</div>
+                          )}
+                          {/* <div className="">
+                          {filteredItems[0].discount > 0 && (
                             <ProductDiscountTag
-                              price={filteredItems[0] &&filteredItems[0].price}
-                              discount={filteredItems[0] &&filteredItems[0].discount}
+                              price={filteredItems[0].price}
+                              discount={filteredItems[0].discount}
                               isSlider
                             />
                           )}
                         </div>
                         <ProductPriceDisplay
                           inStock={product.inStock}
-                          discount={filteredItems[0] &&filteredItems[0].discount}
-                          price={filteredItems[0] && filteredItems[0].price}
+                          discount={filteredItems[0].discount}
+                          price={filteredItems[0].price}
                           isSlider
-                        />
-                        s
+                        /> */}
+                        </div>
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
         </OwlCarousel>
       </div>
 
@@ -131,63 +168,68 @@ const SimilarProductsSlider: React.FC<Props> = (props) => {
           {...carouselOptions}
           dir="ltr"
         >
-          {products?.map((product) => {
-            const stockItemWithDiscount = product.stockItems.find((stockItem) => stockItem.discount! > 0)
-            const stockItemWithOutDiscount = product.stockItems.find((stockItem) => stockItem.discount === 0)
+          {[...products]
+            .sort((a, b) => {
+              const dateA = a.lastUpdated ? new Date(a.lastUpdated).getTime() : 0
+              const dateB = b.lastUpdated ? new Date(b.lastUpdated).getTime() : 0
+              return dateA - dateB
+            })
+            .filter((item) => item.stockItems.every((item) => item.quantity !== 0))
+            .map((product) => {
+              const stockItemWithDiscount = product.stockItems.find((stockItem) => stockItem.discount! > 0)
+              const stockItemWithOutDiscount = product.stockItems.find((stockItem) => stockItem.discount === 0)
 
-            return (
-              <div
-                key={product.id}
-                className="w-[150px] sm:w-[200px] z-50 shadow-item2 rounded-lg mb-3 bg-white h-[300px]"
-              >
-                <div className="h-slider">
-                  <Link href={`/products/${product.slug}`}>
-                    <ResponsiveImage
-                      dimensions="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] lg:w-[200px] lg:h-[200px]"
-                      className="mx-auto relative"
-                      src={product.mainImageSrc.imageUrl}
-                      blurDataURL={product.mainImageSrc.placeholder}
-                      alt={product.title}
-                      imageStyles="object-center rounded-t-lg"
-                    />
-                    <div className="flex flex-col justify-between py-3 h-[150px] ">
-                      <h2 dir="rtl" className="text-right line-clamp-2 overflow-hidden text-ellipsis px-2 text-sm">
-                        {product.title}
-                      </h2>
-                      <div className="mt-1.5 flex justify-center gap-x-2 px-2 relative">
-                        <div className="">
-                          {stockItemWithOutDiscount === undefined && (
-                            <ProductDiscountTag
-                              price={stockItemWithDiscount?.price ?? 0}
-                              discount={stockItemWithDiscount?.discount ?? 0}
-                              isSlider
-                            />
-                          )}
+              return (
+                <div
+                  key={product.id}
+                  className="w-[150px] sm:w-[200px] z-50 shadow-item2 rounded-lg mb-3 bg-white h-[300px]"
+                >
+                  <div className="h-slider">
+                    <Link href={`/products/${product.slug}`}>
+                      <ResponsiveImage
+                        dimensions="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] lg:w-[200px] lg:h-[200px]"
+                        className="mx-auto relative"
+                        src={product.mainImageSrc.imageUrl}
+                        blurDataURL={product.mainImageSrc.placeholder}
+                        alt={product.title}
+                        imageStyles="object-center rounded-t-lg"
+                      />
+                      <div className="flex flex-col justify-between py-3 h-[150px] ">
+                        <h2 dir="rtl" className="text-right line-clamp-2 overflow-hidden text-ellipsis px-2 text-sm">
+                          {product.title}
+                        </h2>
+                        <div className="mt-1.5 flex justify-center gap-x-2 px-2 relative">
+                          <div className="">
+                            {stockItemWithOutDiscount === undefined && (
+                              <ProductDiscountTag
+                                price={stockItemWithDiscount?.price ?? 0}
+                                discount={stockItemWithDiscount?.discount ?? 0}
+                                isSlider
+                              />
+                            )}
+                          </div>
+                          <ProductPriceDisplay
+                            inStock={product.inStock}
+                            discount={stockItemWithDiscount?.discount || 0}
+                            price={
+                              stockItemWithDiscount?.discount === undefined
+                                ? stockItemWithOutDiscount?.price!
+                                : stockItemWithDiscount?.price ?? 0
+                            }
+                          />
                         </div>
-                        <ProductPriceDisplay
-                          inStock={product.inStock}
-                          discount={stockItemWithDiscount?.discount || 0}
-                          price={
-                            stockItemWithDiscount?.discount === undefined
-                              ? stockItemWithOutDiscount?.price!
-                              : stockItemWithDiscount?.price ?? 0
-                          }
-                        />
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
 
           <div>
             <div className="mt-10 flex justify-center">
               <img className="w-[120px] xs2:w-[180px] static-img" src="/images/Similar.webp" alt="offer" />
             </div>
-            <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">
-              محصولات مرتبط رو اینجا ببین
-            </p>
+            <p className="text-gray-500 font-normal text-md w-full text-center my-4 mb-5">به روز باش </p>
             <div className="w-full sm:flex justify-center hidden">
               {/* <Link href={`/products?sortBy=Created`}>
                 <Button className="bg-red-500 hover:bg-red-400 rounded-lg py-2 px-8 text-white">نمایش همه</Button>

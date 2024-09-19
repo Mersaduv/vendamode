@@ -28,6 +28,12 @@ const ProductFilterControls: React.FC<Props> = (props) => {
   const discountQuery = !!query?.discount || false
   const minPriceQuery = query.price && +query.price.toString().split('-')[0]
   const maxPriceQuery = query.price && +query.price.toString().split('-')[1]
+  let brandIds: string[] = []
+  if (typeof query.brands === 'string') {
+    brandIds = query.brands.split(',')
+  } else if (Array.isArray(query.brands)) {
+    brandIds = query.brands
+  }
   const pageQuery = Number(query?.page)
   const [isOpenPrice, setIsOpenPrice] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
@@ -35,6 +41,7 @@ const ProductFilterControls: React.FC<Props> = (props) => {
   const changeRoute = useChangeRoute()
 
   // ? State
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   const [price, setPrice] = useState({
     minPrice: mainMinPrice,
     maxPrice: mainMaxPrice,
@@ -59,7 +66,7 @@ const ProductFilterControls: React.FC<Props> = (props) => {
 
   const handlefilter = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, type, checked, value } = e.target
-    var numValue  =Number(digitsFaToEn(value))
+    var numValue = Number(digitsFaToEn(value))
     if (type === 'checkbox') handleChangeRoute({ [name]: checked })
     if (type === 'text') setPrice((prev) => ({ ...prev, [name]: +numValue }))
   }
@@ -100,9 +107,9 @@ const ProductFilterControls: React.FC<Props> = (props) => {
   const { data } = useGetBrandsQuery({
     page: 1,
     pageSize: 15,
+    isActive: true,
   })
 
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([])
 
   useEffect(() => {
     if (data?.data?.data) {
@@ -116,6 +123,13 @@ const ProductFilterControls: React.FC<Props> = (props) => {
       setFilteredBrands(filtered)
     }
   }, [searchTerm, data])
+
+  useEffect(() => {
+    // If brandIds has changed, update selectedBrands
+    if (brandIds.length > 0 && selectedBrands.length === 0) {
+      setSelectedBrands(brandIds);
+    }
+  }, [brandIds, selectedBrands.length]);
 
   const handleBrandChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target
@@ -131,16 +145,15 @@ const ProductFilterControls: React.FC<Props> = (props) => {
     setSearchTerm(e.target.value)
   }
 
-  useEffect(() => {
-    if (selectedBrands.length > 0) {
-      handleChangeRoute({
-        brands: selectedBrands.length ? selectedBrands.join(',') : '',
-      });
-    } else {
-      // push('/products'); // Resets the URL
-    }
-  }, [selectedBrands]);
-  
+  // useEffect(() => {
+  //   if (selectedBrands.length > 0) {
+  //     handleChangeRoute({
+  //       brands: selectedBrands.length ? selectedBrands.join(',') : '',
+  //     })
+  //   } else {
+  //     // push('/products'); // Resets the URL
+  //   }
+  // }, [selectedBrands])
 
   // ? Render(s)
   return (

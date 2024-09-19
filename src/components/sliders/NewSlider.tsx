@@ -4,7 +4,7 @@ import { useGetProductsQuery } from '@/services'
 import { ProductDiscountTag, ProductPriceDisplay } from '@/components/product'
 import { Button, ResponsiveImage } from '@/components/ui'
 
-import type { ICategory, IProduct } from '@/types'
+import type { GetStockItems, ICategory, IProduct } from '@/types'
 import { useAppSelector } from '@/hooks'
 import dynamic from 'next/dynamic'
 import 'owl.carousel/dist/assets/owl.carousel.css'
@@ -25,7 +25,7 @@ const NewSlider: React.FC<Props> = (props) => {
   const carouselOptions = {
     margin: 10,
     nav: true,
-    startPosition: products ? products.length - 1 : 0,
+    startPosition: products ? products.filter(item=> item.stockItems.every((item) => item.quantity !== 0)).length - 1 : 0,
     responsive: {
       0: {
         items: 2,
@@ -66,7 +66,7 @@ const NewSlider: React.FC<Props> = (props) => {
           {...carouselOptions}
           dir="ltr"
         >
-          {products?.map((product) => {
+          {products?.filter(item=> item.stockItems.every((item) => item.quantity !== 0)).map((product) => {
             const filteredItems = product.stockItems.filter((item) => {
               if (item.discount === 0 && item.price > 0 && item.quantity === 0) {
                 return true
@@ -79,6 +79,14 @@ const NewSlider: React.FC<Props> = (props) => {
               }
               return false
             })
+
+            const getStockStatus = (stockItems: GetStockItems[]) => {
+              if (stockItems.every((item) => item.quantity !== 0)) {
+                return true
+              }
+              return false
+            }
+
             return (
               <div
                 key={product.id}
@@ -99,9 +107,34 @@ const NewSlider: React.FC<Props> = (props) => {
                         {product.title}
                       </h2>
                       <div className="mt-1.5 flex justify-center gap-x-2 px-2 relative">
-                        <div className="">
+                        {!getStockStatus(product.stockItems) ? (
+                          <div className="text-gray-400 font-semibold mb-1">ناموجود</div>
+                        ) : filteredItems.length > 0 ? (
+                          <>
+                            {filteredItems[0].discount > 0 && (
+                              <ProductDiscountTag
+                                price={filteredItems[0].price}
+                                discount={filteredItems[0].discount}
+                                isSlider
+                              />
+                            )}
+
+                            <ProductPriceDisplay
+                              inStock={product.inStock}
+                              discount={filteredItems[0].discount}
+                              price={filteredItems[0].price}
+                            />
+                          </>
+                        ) : (
+                          <div className="text-gray-400 font-semibold mb-1">ناموجود</div>
+                        )}
+                        {/* <div className="">
                           {filteredItems[0].discount > 0 && (
-                            <ProductDiscountTag price={filteredItems[0].price} discount={filteredItems[0].discount} isSlider/>
+                            <ProductDiscountTag
+                              price={filteredItems[0].price}
+                              discount={filteredItems[0].discount}
+                              isSlider
+                            />
                           )}
                         </div>
                         <ProductPriceDisplay
@@ -109,7 +142,7 @@ const NewSlider: React.FC<Props> = (props) => {
                           discount={filteredItems[0].discount}
                           price={filteredItems[0].price}
                           isSlider
-                        />
+                        /> */}
                       </div>
                     </div>
                   </Link>
